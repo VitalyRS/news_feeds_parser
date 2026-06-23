@@ -10,8 +10,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Простой статус-проверка для Koyeb health checks
+# Простой статус-проверка для Koyeb health checks (поддержка GET и HEAD)
 @app.get("/")
+@app.head("/")
 def read_root():
     return {
         "status": "ok",
