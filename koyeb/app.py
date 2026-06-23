@@ -20,8 +20,9 @@ def read_root():
         "database_mode": "PostgreSQL" if os.environ.get("DATABASE_URL") else "SQLite (local)"
     }
 
-# Эндпоинт для запуска сбора новостей
+# Эндпоинт для запуска сбора новостей (поддержка GET и HEAD)
 @app.get("/collect")
+@app.head("/collect")
 def collect_news(background_tasks: BackgroundTasks):
     background_tasks.add_task(run_collector)
     return JSONResponse(
