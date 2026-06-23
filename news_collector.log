@@ -1,0 +1,548 @@
+2026-06-22 22:40:55,243 [INFO] 🚀 Запуск news_collector.py — 2026-06-22 22:40:55
+2026-06-22 22:40:55,276 [INFO] ✅ БД инициализирована: /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/baza.db
+2026-06-22 22:40:55,276 [INFO] ============================================================
+2026-06-22 22:40:55,276 [INFO] 📡 ФАЗА 1: Парсинг RSS/Atom лент
+2026-06-22 22:40:55,277 [INFO] ============================================================
+2026-06-22 22:40:55,278 [INFO] 🚫 Исключаемые домены (dead_feeds): 27 шт.
+2026-06-22 22:40:55,278 [INFO] ⏭️  Пропуск (dead feed): https://www.elmundo.es/rss/
+2026-06-22 22:40:55,278 [INFO] 🌐 RSS: https://www.elespanol.com/rss
+2026-06-22 22:40:55,535 [INFO] 🌐 RSS: https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada
+2026-06-22 22:40:56,215 [INFO] 🌐 RSS: https://as.com/rss-de-ascom-n/
+2026-06-22 22:40:57,020 [WARNING] ⚠️  Невалидный фид: https://as.com/rss-de-ascom-n/
+2026-06-22 22:40:57,020 [INFO] 🌐 RSS: https://www.abc.es/rss/2.0/ultima-hora/
+2026-06-22 22:40:57,218 [INFO] 🌐 RSS: https://www.20minutos.es/rss/
+2026-06-22 22:40:58,064 [INFO] 🌐 RSS: https://rss.elconfidencial.com/espana/
+2026-06-22 22:40:58,270 [INFO] 🌐 RSS: https://www.huffingtonpost.es/feeds/index.xml
+2026-06-22 22:40:58,498 [INFO] 🌐 RSS: https://www.elperiodico.com/es/rss/rss_portada.xml
+2026-06-22 22:40:58,594 [INFO] 🌐 RSS: https://okdiario.com/feed
+2026-06-22 22:40:59,066 [INFO] 🌐 RSS: https://e00-marca.uecdn.es/rss/portada.xml
+2026-06-22 22:40:59,696 [INFO] 🌐 RSS: https://www.mundodeportivo.com/rss
+2026-06-22 22:41:00,905 [WARNING] ⚠️  Невалидный фид: https://www.mundodeportivo.com/rss
+2026-06-22 22:41:00,906 [INFO] 🌐 RSS: https://www.sport.es/es/rss/
+2026-06-22 22:41:01,381 [WARNING] ⚠️  Невалидный фид: https://www.sport.es/es/rss/
+2026-06-22 22:41:01,382 [INFO] ⏭️  Пропуск (dead feed): https://www.larazon.es/rss/
+2026-06-22 22:41:01,382 [INFO] 🌐 RSS: https://www.eldiario.es/rss
+2026-06-22 22:41:02,645 [INFO] 🌐 RSS: https://www.lavozdegalicia.es/index.xml
+2026-06-22 22:41:03,067 [INFO] ⏭️  Пропуск (dead feed): https://www.eleconomista.es/rss/rss-seleccion-ee.php
+2026-06-22 22:41:03,067 [INFO] ⏭️  Пропуск (dead feed): https://www.rtve.es/noticias/rss/noticias.xml
+2026-06-22 22:41:03,067 [INFO] 🌐 RSS: https://www.lavanguardia.com/rss/home
+2026-06-22 22:41:03,984 [INFO] 🌐 RSS: https://www.elindependiente.com/feed/
+2026-06-22 22:41:04,472 [INFO] ⏭️  Пропуск (dead feed): https://www.eldebate.com/rss/
+2026-06-22 22:41:04,472 [INFO] ⏭️  Пропуск (dead feed): https://www.elplural.com/rss/
+2026-06-22 22:41:04,472 [INFO] ⏭️  Пропуск (dead feed): http://www.publico.es/estaticos/rss/espana
+2026-06-22 22:41:04,473 [INFO] ⏭️  Пропуск (dead feed): https://www.vozpopuli.com/rss/
+2026-06-22 22:41:04,473 [INFO] ⏭️  Пропуск (dead feed): https://www.infolibre.es/uploads/rss/contenidos.xml
+2026-06-22 22:41:04,473 [INFO] 🌐 RSS: https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital
+2026-06-22 22:41:04,595 [ERROR] 🌍 Сетевая ошибка https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital: 403 Client Error: Forbidden for url: https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital
+2026-06-22 22:41:04,596 [INFO] 🌐 RSS: https://www.elcomercio.es/rss/2.0/portada/
+2026-06-22 22:41:04,750 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodenavarra.es/rss/
+2026-06-22 22:41:04,750 [INFO] 🌐 RSS: https://www.diariosur.es/rss/2.0/portada/
+2026-06-22 22:41:04,907 [INFO] 🌐 RSS: https://www.ideal.es/rss/2.0/portada/
+2026-06-22 22:41:05,062 [INFO] ⏭️  Пропуск (dead feed): http://www.heraldo.es/index.php/mod.portadas/mem.rss
+2026-06-22 22:41:05,063 [INFO] 🌐 RSS: https://www.elcorreo.com/rss/2.0/portada/
+2026-06-22 22:41:05,224 [INFO] 🌐 RSS: https://www.diariodeleon.es/rss/home.xml
+2026-06-22 22:41:05,596 [INFO] 🌐 RSS: https://www.canarias7.es/rss/2.0/portada/
+2026-06-22 22:41:05,720 [INFO] 🌐 RSS: http://www.diariodeburgos.es/RSS/DBPortada.xml
+2026-06-22 22:41:05,932 [INFO] 🌐 RSS: https://www.diariovasco.com/rss/2.0/portada/
+2026-06-22 22:41:06,087 [INFO] 🌐 RSS: https://www.elnortedecastilla.es/rss/2.0/portada/
+2026-06-22 22:41:06,222 [INFO] 🌐 RSS: https://www.diariosur.es/rss/2.0/portada/
+2026-06-22 22:41:06,364 [INFO] ⏭️  Пропуск (dead feed): https://www.expansion.com/rss/portada
+2026-06-22 22:41:06,364 [INFO] ⏭️  Пропуск (dead feed): https://cincodias.elpais.com/rss/
+2026-06-22 22:41:06,364 [INFO] ⏭️  Пропуск (dead feed): https://cadenaser.com/feed/
+2026-06-22 22:41:06,364 [INFO] ⏭️  Пропуск (dead feed): https://www.cope.es/rss/portada
+2026-06-22 22:41:06,364 [INFO] ⏭️  Пропуск (dead feed): https://www.antena3.com/rss.xml
+2026-06-22 22:41:06,365 [INFO] ⏭️  Пропуск (dead feed): https://www.telecinco.es/rss.xml
+2026-06-22 22:41:06,365 [INFO] ⏭️  Пропуск (dead feed): https://www.lne.es/
+2026-06-22 22:41:06,365 [INFO] ⏭️  Пропуск (dead feed): https://www.diariocordoba.com/
+2026-06-22 22:41:06,365 [INFO] ⏭️  Пропуск (dead feed): https://www.farodevigo.es/
+2026-06-22 22:41:06,365 [INFO] ⏭️  Пропуск (dead feed): https://www.elperiodicodearagon.com/
+2026-06-22 22:41:06,365 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodemallorca.es/
+2026-06-22 22:41:06,366 [INFO] ⏭️  Пропуск (dead feed): https://www.levante-emv.com/
+2026-06-22 22:41:06,366 [INFO] ⏭️  Пропуск (dead feed): https://www.laopiniondemurcia.es/
+2026-06-22 22:41:06,366 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodeibiza.es/
+2026-06-22 22:41:06,366 [INFO] ⏭️  Пропуск (dead feed): https://www.eldia.es/
+2026-06-22 22:41:06,366 [INFO] ⏭️  Пропуск (dead feed): https://www.laprovincia.es/
+2026-06-22 22:41:06,395 [INFO] 📡 RSS итог: новых=1762, дублей=72, пропущено=27
+2026-06-22 22:41:06,401 [INFO] ============================================================
+2026-06-22 22:41:06,402 [INFO] 🕷️  ФАЗА 2: Скрапинг сайтов напрямую (dead_feeds.txt)
+2026-06-22 22:41:06,404 [INFO] ============================================================
+2026-06-22 22:41:06,404 [INFO] 📋 Загружено 27 сайтов из /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/dead_feeds.txt
+2026-06-22 22:41:06,407 [INFO] 🔄 Скрапинг: https://www.elmundo.es/
+2026-06-22 22:41:06,409 [INFO] 🔄 Скрапинг: https://www.larazon.es/
+2026-06-22 22:41:06,410 [INFO] 🔄 Скрапинг: https://www.eleconomista.es/
+2026-06-22 22:41:06,420 [INFO] 🔄 Скрапинг: https://www.rtve.es/noticias/
+2026-06-22 22:41:06,434 [INFO] 🔄 Скрапинг: https://www.eldebate.com/
+2026-06-22 22:41:06,612 [WARNING] ⚠️  https://www.eleconomista.es/ вернул 403 — сайт блокирует парсеры.
+2026-06-22 22:41:06,614 [INFO] 🔄 Скрапинг: https://www.elplural.com/
+2026-06-22 22:41:06,622 [INFO] ✅ https://www.eleconomista.es/ → найдено: 0, новых: 0
+2026-06-22 22:41:07,783 [INFO] 🔄 Скрапинг: http://www.publico.es/
+2026-06-22 22:41:08,070 [INFO] 🔄 Скрапинг: https://www.vozpopuli.com/
+2026-06-22 22:41:08,199 [INFO] 🔄 Скрапинг: https://www.infolibre.es/
+2026-06-22 22:41:08,296 [INFO] ✅ https://www.rtve.es/noticias/ → найдено: 50, новых: 50
+2026-06-22 22:41:08,331 [INFO] ✅ https://www.elplural.com/ → найдено: 7, новых: 7
+2026-06-22 22:41:08,404 [INFO] ✅ https://www.elmundo.es/ → найдено: 50, новых: 50
+2026-06-22 22:41:09,388 [INFO] 🔄 Скрапинг: https://www.diariodenavarra.es/
+2026-06-22 22:41:09,610 [INFO] ✅ https://www.vozpopuli.com/ → найдено: 50, новых: 50
+2026-06-22 22:41:09,729 [INFO] 🔄 Скрапинг: http://www.heraldo.es/
+2026-06-22 22:41:09,817 [INFO] 🔄 Скрапинг: https://www.expansion.com/
+2026-06-22 22:41:09,817 [INFO] 🔄 Скрапинг: https://cincodias.elpais.com/
+2026-06-22 22:41:09,952 [INFO] ✅ https://www.larazon.es/ → найдено: 50, новых: 50
+2026-06-22 22:41:10,105 [INFO] ✅ http://www.publico.es/ → найдено: 50, новых: 50
+2026-06-22 22:41:10,142 [INFO] ✅ https://www.infolibre.es/ → найдено: 50, новых: 50
+2026-06-22 22:41:11,531 [INFO] 🔄 Скрапинг: https://cadenaser.com/
+2026-06-22 22:41:11,588 [INFO] 🔄 Скрапинг: https://www.cope.es/
+2026-06-22 22:41:11,721 [INFO] 🔄 Скрапинг: https://www.antena3.com/
+2026-06-22 22:41:11,756 [INFO] ✅ https://www.diariodenavarra.es/ → найдено: 50, новых: 50
+2026-06-22 22:41:11,802 [INFO] 🔄 Скрапинг: https://www.telecinco.es/
+2026-06-22 22:41:11,833 [INFO] ✅ https://cincodias.elpais.com/ → найдено: 12, новых: 7
+2026-06-22 22:41:11,861 [INFO] ✅ https://www.eldebate.com/ → найдено: 50, новых: 50
+2026-06-22 22:41:11,902 [INFO] ✅ https://www.expansion.com/ → найдено: 50, новых: 50
+2026-06-22 22:41:12,017 [WARNING] ⚠️  https://www.telecinco.es/ вернул 403 — сайт блокирует парсеры.
+2026-06-22 22:41:12,029 [INFO] 🔄 Скрапинг: https://www.lne.es/
+2026-06-22 22:41:12,037 [INFO] ✅ https://www.telecinco.es/ → найдено: 0, новых: 0
+2026-06-22 22:41:12,183 [INFO] 🔄 Скрапинг: https://www.diariocordoba.com/
+2026-06-22 22:41:12,289 [INFO] ✅ http://www.heraldo.es/ → найдено: 50, новых: 50
+2026-06-22 22:41:13,237 [INFO] 🔄 Скрапинг: https://www.farodevigo.es/
+2026-06-22 22:41:13,320 [INFO] ✅ https://cadenaser.com/ → найдено: 50, новых: 50
+2026-06-22 22:41:13,699 [INFO] 🔄 Скрапинг: https://www.elperiodicodearagon.com/
+2026-06-22 22:41:13,874 [INFO] ✅ https://www.antena3.com/ → найдено: 50, новых: 50
+2026-06-22 22:41:14,962 [INFO] 🔄 Скрапинг: https://www.diariodemallorca.es/
+2026-06-22 22:41:14,968 [INFO] 🔄 Скрапинг: https://www.levante-emv.com/
+2026-06-22 22:41:15,149 [INFO] ✅ https://www.diariocordoba.com/ → найдено: 50, новых: 50
+2026-06-22 22:41:15,274 [INFO] ✅ https://www.lne.es/ → найдено: 50, новых: 49
+2026-06-22 22:41:15,319 [INFO] 🔄 Скрапинг: https://www.laopiniondemurcia.es/
+2026-06-22 22:41:15,406 [INFO] ✅ https://www.cope.es/ → найдено: 50, новых: 50
+2026-06-22 22:41:15,435 [INFO] 🔄 Скрапинг: https://www.diariodeibiza.es/
+2026-06-22 22:41:15,522 [INFO] ✅ https://www.farodevigo.es/ → найдено: 50, новых: 49
+2026-06-22 22:41:16,499 [INFO] 🔄 Скрапинг: https://www.eldia.es/
+2026-06-22 22:41:16,817 [INFO] 🔄 Скрапинг: https://www.laprovincia.es/
+2026-06-22 22:41:16,870 [INFO] ✅ https://www.elperiodicodearagon.com/ → найдено: 50, новых: 48
+2026-06-22 22:41:17,160 [INFO] ✅ https://www.levante-emv.com/ → найдено: 50, новых: 49
+2026-06-22 22:41:17,648 [INFO] ✅ https://www.diariodemallorca.es/ → найдено: 50, новых: 49
+2026-06-22 22:41:17,708 [INFO] ✅ https://www.diariodeibiza.es/ → найдено: 50, новых: 48
+2026-06-22 22:41:18,392 [INFO] ✅ https://www.laopiniondemurcia.es/ → найдено: 50, новых: 48
+2026-06-22 22:41:18,433 [INFO] ✅ https://www.eldia.es/ → найдено: 50, новых: 49
+2026-06-22 22:41:18,456 [INFO] ✅ https://www.laprovincia.es/ → найдено: 50, новых: 45
+2026-06-22 22:41:18,457 [INFO] 🕷️  Скрапинг итог: найдено=1169, новых=1148, ошибок=0
+2026-06-22 22:41:18,459 [INFO] 
+2026-06-22 22:41:18,460 [INFO] ============================================================
+2026-06-22 22:41:18,460 [INFO] 📊 ИТОГО:
+2026-06-22 22:41:18,460 [INFO]    Было в БД:            0
+2026-06-22 22:41:18,460 [INFO]    Новых из RSS:         1762
+2026-06-22 22:41:18,460 [INFO]    RSS-фидов пропущено:  27 (dead feeds)
+2026-06-22 22:41:18,460 [INFO]    Новых из скрапинга:   1148
+2026-06-22 22:41:18,461 [INFO]    Всего в БД сейчас:    2910
+2026-06-22 22:41:18,461 [INFO]    Время:                23.2 сек
+2026-06-22 22:41:18,461 [INFO]    БД:                   /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/baza.db
+2026-06-22 22:41:18,461 [INFO] ============================================================
+2026-06-22 22:41:25,166 [INFO] 🚀 Запуск news_collector.py — 2026-06-22 22:41:25
+2026-06-22 22:41:25,167 [INFO] ✅ БД инициализирована: /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/baza.db
+2026-06-22 22:41:25,167 [INFO] ============================================================
+2026-06-22 22:41:25,168 [INFO] 📡 ФАЗА 1: Парсинг RSS/Atom лент
+2026-06-22 22:41:25,168 [INFO] ============================================================
+2026-06-22 22:41:25,169 [INFO] 🚫 Исключаемые домены (dead_feeds): 27 шт.
+2026-06-22 22:41:25,169 [INFO] ⏭️  Пропуск (dead feed): https://www.elmundo.es/rss/
+2026-06-22 22:41:25,170 [INFO] 🌐 RSS: https://www.elespanol.com/rss
+2026-06-22 22:41:25,406 [INFO] 🌐 RSS: https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada
+2026-06-22 22:41:26,118 [INFO] 🌐 RSS: https://as.com/rss-de-ascom-n/
+2026-06-22 22:41:26,944 [WARNING] ⚠️  Невалидный фид: https://as.com/rss-de-ascom-n/
+2026-06-22 22:41:26,944 [INFO] 🌐 RSS: https://www.abc.es/rss/2.0/ultima-hora/
+2026-06-22 22:41:27,129 [INFO] 🌐 RSS: https://www.20minutos.es/rss/
+2026-06-22 22:41:28,103 [INFO] 🌐 RSS: https://rss.elconfidencial.com/espana/
+2026-06-22 22:41:28,347 [INFO] 🌐 RSS: https://www.huffingtonpost.es/feeds/index.xml
+2026-06-22 22:41:28,567 [INFO] 🌐 RSS: https://www.elperiodico.com/es/rss/rss_portada.xml
+2026-06-22 22:41:28,661 [INFO] 🌐 RSS: https://okdiario.com/feed
+2026-06-22 22:41:29,120 [INFO] 🌐 RSS: https://e00-marca.uecdn.es/rss/portada.xml
+2026-06-22 22:41:29,416 [INFO] 🌐 RSS: https://www.mundodeportivo.com/rss
+2026-06-22 22:41:29,533 [WARNING] ⚠️  Невалидный фид: https://www.mundodeportivo.com/rss
+2026-06-22 22:41:29,533 [INFO] 🌐 RSS: https://www.sport.es/es/rss/
+2026-06-22 22:41:29,861 [WARNING] ⚠️  Невалидный фид: https://www.sport.es/es/rss/
+2026-06-22 22:41:29,861 [INFO] ⏭️  Пропуск (dead feed): https://www.larazon.es/rss/
+2026-06-22 22:41:29,861 [INFO] 🌐 RSS: https://www.eldiario.es/rss
+2026-06-22 22:41:30,899 [INFO] 🌐 RSS: https://www.lavozdegalicia.es/index.xml
+2026-06-22 22:41:31,304 [INFO] ⏭️  Пропуск (dead feed): https://www.eleconomista.es/rss/rss-seleccion-ee.php
+2026-06-22 22:41:31,304 [INFO] ⏭️  Пропуск (dead feed): https://www.rtve.es/noticias/rss/noticias.xml
+2026-06-22 22:41:31,304 [INFO] 🌐 RSS: https://www.lavanguardia.com/rss/home
+2026-06-22 22:41:31,756 [INFO] 🌐 RSS: https://www.elindependiente.com/feed/
+2026-06-22 22:41:32,596 [INFO] ⏭️  Пропуск (dead feed): https://www.eldebate.com/rss/
+2026-06-22 22:41:32,597 [INFO] ⏭️  Пропуск (dead feed): https://www.elplural.com/rss/
+2026-06-22 22:41:32,597 [INFO] ⏭️  Пропуск (dead feed): http://www.publico.es/estaticos/rss/espana
+2026-06-22 22:41:32,597 [INFO] ⏭️  Пропуск (dead feed): https://www.vozpopuli.com/rss/
+2026-06-22 22:41:32,597 [INFO] ⏭️  Пропуск (dead feed): https://www.infolibre.es/uploads/rss/contenidos.xml
+2026-06-22 22:41:32,597 [INFO] 🌐 RSS: https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital
+2026-06-22 22:41:32,683 [ERROR] 🌍 Сетевая ошибка https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital: 403 Client Error: Forbidden for url: https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital
+2026-06-22 22:41:32,684 [INFO] 🌐 RSS: https://www.elcomercio.es/rss/2.0/portada/
+2026-06-22 22:41:32,816 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodenavarra.es/rss/
+2026-06-22 22:41:32,816 [INFO] 🌐 RSS: https://www.diariosur.es/rss/2.0/portada/
+2026-06-22 22:41:32,955 [INFO] 🌐 RSS: https://www.ideal.es/rss/2.0/portada/
+2026-06-22 22:41:33,070 [INFO] ⏭️  Пропуск (dead feed): http://www.heraldo.es/index.php/mod.portadas/mem.rss
+2026-06-22 22:41:33,071 [INFO] 🌐 RSS: https://www.elcorreo.com/rss/2.0/portada/
+2026-06-22 22:41:33,217 [INFO] 🌐 RSS: https://www.diariodeleon.es/rss/home.xml
+2026-06-22 22:41:33,585 [INFO] 🌐 RSS: https://www.canarias7.es/rss/2.0/portada/
+2026-06-22 22:41:33,720 [INFO] 🌐 RSS: http://www.diariodeburgos.es/RSS/DBPortada.xml
+2026-06-22 22:41:33,942 [INFO] 🌐 RSS: https://www.diariovasco.com/rss/2.0/portada/
+2026-06-22 22:41:34,079 [INFO] 🌐 RSS: https://www.elnortedecastilla.es/rss/2.0/portada/
+2026-06-22 22:41:34,245 [INFO] 🌐 RSS: https://www.diariosur.es/rss/2.0/portada/
+2026-06-22 22:41:34,373 [INFO] ⏭️  Пропуск (dead feed): https://www.expansion.com/rss/portada
+2026-06-22 22:41:34,373 [INFO] ⏭️  Пропуск (dead feed): https://cincodias.elpais.com/rss/
+2026-06-22 22:41:34,373 [INFO] ⏭️  Пропуск (dead feed): https://cadenaser.com/feed/
+2026-06-22 22:41:34,373 [INFO] ⏭️  Пропуск (dead feed): https://www.cope.es/rss/portada
+2026-06-22 22:41:34,374 [INFO] ⏭️  Пропуск (dead feed): https://www.antena3.com/rss.xml
+2026-06-22 22:41:34,374 [INFO] ⏭️  Пропуск (dead feed): https://www.telecinco.es/rss.xml
+2026-06-22 22:41:34,374 [INFO] ⏭️  Пропуск (dead feed): https://www.lne.es/
+2026-06-22 22:41:34,374 [INFO] ⏭️  Пропуск (dead feed): https://www.diariocordoba.com/
+2026-06-22 22:41:34,374 [INFO] ⏭️  Пропуск (dead feed): https://www.farodevigo.es/
+2026-06-22 22:41:34,375 [INFO] ⏭️  Пропуск (dead feed): https://www.elperiodicodearagon.com/
+2026-06-22 22:41:34,375 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodemallorca.es/
+2026-06-22 22:41:34,375 [INFO] ⏭️  Пропуск (dead feed): https://www.levante-emv.com/
+2026-06-22 22:41:34,375 [INFO] ⏭️  Пропуск (dead feed): https://www.laopiniondemurcia.es/
+2026-06-22 22:41:34,376 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodeibiza.es/
+2026-06-22 22:41:34,376 [INFO] ⏭️  Пропуск (dead feed): https://www.eldia.es/
+2026-06-22 22:41:34,376 [INFO] ⏭️  Пропуск (dead feed): https://www.laprovincia.es/
+2026-06-22 22:41:34,386 [INFO] 📡 RSS итог: новых=0, дублей=1834, пропущено=27
+2026-06-22 22:41:34,389 [INFO] ============================================================
+2026-06-22 22:41:34,389 [INFO] 🕷️  ФАЗА 2: Скрапинг сайтов напрямую (dead_feeds.txt)
+2026-06-22 22:41:34,389 [INFO] ============================================================
+2026-06-22 22:41:34,389 [INFO] 📋 Загружено 27 сайтов из /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/dead_feeds.txt
+2026-06-22 22:41:34,392 [INFO] 🔄 Скрапинг: https://www.elmundo.es/
+2026-06-22 22:41:34,392 [INFO] 🔄 Скрапинг: https://www.larazon.es/
+2026-06-22 22:41:34,394 [INFO] 🔄 Скрапинг: https://www.eleconomista.es/
+2026-06-22 22:41:34,395 [INFO] 🔄 Скрапинг: https://www.rtve.es/noticias/
+2026-06-22 22:41:34,396 [INFO] 🔄 Скрапинг: https://www.eldebate.com/
+2026-06-22 22:41:34,514 [WARNING] ⚠️  https://www.eleconomista.es/ вернул 403 — сайт блокирует парсеры.
+2026-06-22 22:41:34,515 [INFO] 🔄 Скрапинг: https://www.elplural.com/
+2026-06-22 22:41:34,516 [INFO] ✅ https://www.eleconomista.es/ → найдено: 0, новых: 0
+2026-06-22 22:41:35,621 [INFO] 🔄 Скрапинг: http://www.publico.es/
+2026-06-22 22:41:35,838 [INFO] ✅ https://www.elmundo.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:35,905 [INFO] 🔄 Скрапинг: https://www.vozpopuli.com/
+2026-06-22 22:41:35,913 [INFO] 🔄 Скрапинг: https://www.infolibre.es/
+2026-06-22 22:41:36,011 [INFO] ✅ https://www.rtve.es/noticias/ → найдено: 50, новых: 0
+2026-06-22 22:41:36,069 [INFO] ✅ https://www.elplural.com/ → найдено: 7, новых: 0
+2026-06-22 22:41:36,827 [INFO] 🔄 Скрапинг: https://www.diariodenavarra.es/
+2026-06-22 22:41:36,932 [INFO] 🔄 Скрапинг: http://www.heraldo.es/
+2026-06-22 22:41:36,972 [INFO] ✅ https://www.infolibre.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:37,062 [INFO] 🔄 Скрапинг: https://www.expansion.com/
+2026-06-22 22:41:37,081 [INFO] ✅ http://www.publico.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:37,102 [INFO] 🔄 Скрапинг: https://cincodias.elpais.com/
+2026-06-22 22:41:37,193 [INFO] ✅ https://www.eldebate.com/ → найдено: 50, новых: 0
+2026-06-22 22:41:37,234 [INFO] ✅ https://www.vozpopuli.com/ → найдено: 50, новых: 0
+2026-06-22 22:41:38,048 [INFO] 🔄 Скрапинг: https://cadenaser.com/
+2026-06-22 22:41:38,285 [INFO] ✅ https://cincodias.elpais.com/ → найдено: 12, новых: 0
+2026-06-22 22:41:38,341 [INFO] 🔄 Скрапинг: https://www.cope.es/
+2026-06-22 22:41:38,453 [INFO] 🔄 Скрапинг: https://www.antena3.com/
+2026-06-22 22:41:38,458 [INFO] 🔄 Скрапинг: https://www.telecinco.es/
+2026-06-22 22:41:38,558 [INFO] 🔄 Скрапинг: https://www.lne.es/
+2026-06-22 22:41:38,566 [INFO] ✅ https://www.diariodenavarra.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:38,572 [INFO] ✅ https://www.expansion.com/ → найдено: 50, новых: 0
+2026-06-22 22:41:38,577 [INFO] ✅ https://www.larazon.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:38,584 [INFO] ✅ http://www.heraldo.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:38,657 [WARNING] ⚠️  https://www.telecinco.es/ вернул 403 — сайт блокирует парсеры.
+2026-06-22 22:41:38,658 [INFO] 🔄 Скрапинг: https://www.diariocordoba.com/
+2026-06-22 22:41:38,666 [INFO] ✅ https://www.telecinco.es/ → найдено: 0, новых: 0
+2026-06-22 22:41:39,093 [INFO] 🔄 Скрапинг: https://www.farodevigo.es/
+2026-06-22 22:41:39,473 [INFO] ✅ https://cadenaser.com/ → найдено: 50, новых: 0
+2026-06-22 22:41:40,274 [INFO] 🔄 Скрапинг: https://www.elperiodicodearagon.com/
+2026-06-22 22:41:40,356 [INFO] 🔄 Скрапинг: https://www.diariodemallorca.es/
+2026-06-22 22:41:40,595 [INFO] 🔄 Скрапинг: https://www.levante-emv.com/
+2026-06-22 22:41:40,635 [INFO] ✅ https://www.antena3.com/ → найдено: 50, новых: 0
+2026-06-22 22:41:40,717 [INFO] ✅ https://www.cope.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:40,890 [INFO] ✅ https://www.diariocordoba.com/ → найдено: 50, новых: 0
+2026-06-22 22:41:40,932 [INFO] 🔄 Скрапинг: https://www.laopiniondemurcia.es/
+2026-06-22 22:41:41,033 [INFO] 🔄 Скрапинг: https://www.diariodeibiza.es/
+2026-06-22 22:41:41,117 [INFO] ✅ https://www.farodevigo.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:41,364 [INFO] ✅ https://www.lne.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:41,987 [INFO] 🔄 Скрапинг: https://www.eldia.es/
+2026-06-22 22:41:42,560 [INFO] 🔄 Скрапинг: https://www.laprovincia.es/
+2026-06-22 22:41:42,849 [INFO] ✅ https://www.elperiodicodearagon.com/ → найдено: 50, новых: 0
+2026-06-22 22:41:42,854 [INFO] ✅ https://www.diariodemallorca.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:42,866 [INFO] ✅ https://www.laopiniondemurcia.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:42,896 [INFO] ✅ https://www.levante-emv.com/ → найдено: 50, новых: 0
+2026-06-22 22:41:42,925 [INFO] ✅ https://www.diariodeibiza.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:43,481 [INFO] ✅ https://www.eldia.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:43,489 [INFO] ✅ https://www.laprovincia.es/ → найдено: 50, новых: 0
+2026-06-22 22:41:43,490 [INFO] 🕷️  Скрапинг итог: найдено=1169, новых=0, ошибок=0
+2026-06-22 22:41:43,492 [INFO] 
+2026-06-22 22:41:43,493 [INFO] ============================================================
+2026-06-22 22:41:43,494 [INFO] 📊 ИТОГО:
+2026-06-22 22:41:43,494 [INFO]    Было в БД:            2910
+2026-06-22 22:41:43,494 [INFO]    Новых из RSS:         0
+2026-06-22 22:41:43,495 [INFO]    RSS-фидов пропущено:  27 (dead feeds)
+2026-06-22 22:41:43,495 [INFO]    Новых из скрапинга:   0
+2026-06-22 22:41:43,496 [INFO]    Всего в БД сейчас:    2910
+2026-06-22 22:41:43,496 [INFO]    Время:                18.3 сек
+2026-06-22 22:41:43,496 [INFO]    БД:                   /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/baza.db
+2026-06-22 22:41:43,496 [INFO] ============================================================
+2026-06-22 23:33:28,892 [INFO] 🚀 Запуск news_collector.py — 2026-06-22 23:33:28
+2026-06-22 23:33:28,893 [INFO] ✅ БД инициализирована: /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/baza.db
+2026-06-22 23:33:28,893 [INFO] ============================================================
+2026-06-22 23:33:28,893 [INFO] 📡 ФАЗА 1: Парсинг RSS/Atom лент
+2026-06-22 23:33:28,893 [INFO] ============================================================
+2026-06-22 23:33:28,894 [INFO] 🚫 Исключаемые домены (dead_feeds): 27 шт.
+2026-06-22 23:33:28,894 [INFO] ⏭️  Пропуск (dead feed): https://www.elmundo.es/rss/
+2026-06-22 23:33:28,895 [INFO] 🌐 RSS: https://www.elespanol.com/rss
+2026-06-22 23:33:29,107 [INFO] 🌐 RSS: https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada
+2026-06-22 23:33:29,664 [INFO] 🌐 RSS: https://as.com/rss-de-ascom-n/
+2026-06-22 23:33:30,251 [WARNING] ⚠️  Невалидный фид: https://as.com/rss-de-ascom-n/
+2026-06-22 23:33:30,252 [INFO] 🌐 RSS: https://www.abc.es/rss/2.0/ultima-hora/
+2026-06-22 23:33:35,713 [INFO] 🌐 RSS: https://www.20minutos.es/rss/
+2026-06-22 23:33:36,365 [INFO] 🌐 RSS: https://rss.elconfidencial.com/espana/
+2026-06-22 23:33:36,523 [INFO] 🌐 RSS: https://www.huffingtonpost.es/feeds/index.xml
+2026-06-22 23:33:36,779 [INFO] 🌐 RSS: https://www.elperiodico.com/es/rss/rss_portada.xml
+2026-06-22 23:33:36,883 [INFO] 🌐 RSS: https://okdiario.com/feed
+2026-06-22 23:33:37,192 [INFO] 🌐 RSS: https://e00-marca.uecdn.es/rss/portada.xml
+2026-06-22 23:33:37,492 [INFO] 🌐 RSS: https://www.mundodeportivo.com/rss
+2026-06-22 23:33:38,135 [WARNING] ⚠️  Невалидный фид: https://www.mundodeportivo.com/rss
+2026-06-22 23:33:38,135 [INFO] 🌐 RSS: https://www.sport.es/es/rss/
+2026-06-22 23:33:38,485 [WARNING] ⚠️  Невалидный фид: https://www.sport.es/es/rss/
+2026-06-22 23:33:38,485 [INFO] ⏭️  Пропуск (dead feed): https://www.larazon.es/rss/
+2026-06-22 23:33:38,485 [INFO] 🌐 RSS: https://www.eldiario.es/rss
+2026-06-22 23:33:39,272 [INFO] 🌐 RSS: https://www.lavozdegalicia.es/index.xml
+2026-06-22 23:33:39,614 [INFO] ⏭️  Пропуск (dead feed): https://www.eleconomista.es/rss/rss-seleccion-ee.php
+2026-06-22 23:33:39,615 [INFO] ⏭️  Пропуск (dead feed): https://www.rtve.es/noticias/rss/noticias.xml
+2026-06-22 23:33:39,615 [INFO] 🌐 RSS: https://www.lavanguardia.com/rss/home
+2026-06-22 23:33:40,324 [INFO] 🌐 RSS: https://www.elindependiente.com/feed/
+2026-06-22 23:33:40,775 [INFO] ⏭️  Пропуск (dead feed): https://www.eldebate.com/rss/
+2026-06-22 23:33:40,776 [INFO] ⏭️  Пропуск (dead feed): https://www.elplural.com/rss/
+2026-06-22 23:33:40,776 [INFO] ⏭️  Пропуск (dead feed): http://www.publico.es/estaticos/rss/espana
+2026-06-22 23:33:40,776 [INFO] ⏭️  Пропуск (dead feed): https://www.vozpopuli.com/rss/
+2026-06-22 23:33:40,776 [INFO] ⏭️  Пропуск (dead feed): https://www.infolibre.es/uploads/rss/contenidos.xml
+2026-06-22 23:33:40,777 [INFO] 🌐 RSS: https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital
+2026-06-22 23:33:40,865 [ERROR] 🌍 Сетевая ошибка https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital: 403 Client Error: Forbidden for url: https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital
+2026-06-22 23:33:40,865 [INFO] 🌐 RSS: https://www.elcomercio.es/rss/2.0/portada/
+2026-06-22 23:33:40,989 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodenavarra.es/rss/
+2026-06-22 23:33:40,989 [INFO] 🌐 RSS: https://www.diariosur.es/rss/2.0/portada/
+2026-06-22 23:33:41,108 [INFO] 🌐 RSS: https://www.ideal.es/rss/2.0/portada/
+2026-06-22 23:33:41,223 [INFO] ⏭️  Пропуск (dead feed): http://www.heraldo.es/index.php/mod.portadas/mem.rss
+2026-06-22 23:33:41,223 [INFO] 🌐 RSS: https://www.elcorreo.com/rss/2.0/portada/
+2026-06-22 23:33:41,328 [INFO] 🌐 RSS: https://www.diariodeleon.es/rss/home.xml
+2026-06-22 23:33:41,700 [INFO] 🌐 RSS: https://www.canarias7.es/rss/2.0/portada/
+2026-06-22 23:33:41,824 [INFO] 🌐 RSS: http://www.diariodeburgos.es/RSS/DBPortada.xml
+2026-06-22 23:33:42,057 [INFO] 🌐 RSS: https://www.diariovasco.com/rss/2.0/portada/
+2026-06-22 23:33:42,212 [INFO] 🌐 RSS: https://www.elnortedecastilla.es/rss/2.0/portada/
+2026-06-22 23:33:42,374 [INFO] 🌐 RSS: https://www.diariosur.es/rss/2.0/portada/
+2026-06-22 23:33:42,468 [INFO] ⏭️  Пропуск (dead feed): https://www.expansion.com/rss/portada
+2026-06-22 23:33:42,468 [INFO] ⏭️  Пропуск (dead feed): https://cincodias.elpais.com/rss/
+2026-06-22 23:33:42,468 [INFO] ⏭️  Пропуск (dead feed): https://cadenaser.com/feed/
+2026-06-22 23:33:42,468 [INFO] ⏭️  Пропуск (dead feed): https://www.cope.es/rss/portada
+2026-06-22 23:33:42,468 [INFO] ⏭️  Пропуск (dead feed): https://www.antena3.com/rss.xml
+2026-06-22 23:33:42,468 [INFO] ⏭️  Пропуск (dead feed): https://www.telecinco.es/rss.xml
+2026-06-22 23:33:42,469 [INFO] ⏭️  Пропуск (dead feed): https://www.lne.es/
+2026-06-22 23:33:42,469 [INFO] ⏭️  Пропуск (dead feed): https://www.diariocordoba.com/
+2026-06-22 23:33:42,469 [INFO] ⏭️  Пропуск (dead feed): https://www.farodevigo.es/
+2026-06-22 23:33:42,469 [INFO] ⏭️  Пропуск (dead feed): https://www.elperiodicodearagon.com/
+2026-06-22 23:33:42,469 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodemallorca.es/
+2026-06-22 23:33:42,469 [INFO] ⏭️  Пропуск (dead feed): https://www.levante-emv.com/
+2026-06-22 23:33:42,469 [INFO] ⏭️  Пропуск (dead feed): https://www.laopiniondemurcia.es/
+2026-06-22 23:33:42,470 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodeibiza.es/
+2026-06-22 23:33:42,470 [INFO] ⏭️  Пропуск (dead feed): https://www.eldia.es/
+2026-06-22 23:33:42,470 [INFO] ⏭️  Пропуск (dead feed): https://www.laprovincia.es/
+2026-06-22 23:33:42,481 [INFO] 📡 RSS итог: новых=56, дублей=1770, пропущено=27
+2026-06-22 23:33:42,482 [INFO] ============================================================
+2026-06-22 23:33:42,482 [INFO] 🕷️  ФАЗА 2: Скрапинг сайтов напрямую (dead_feeds.txt)
+2026-06-22 23:33:42,482 [INFO] ============================================================
+2026-06-22 23:33:42,482 [INFO] 📋 Загружено 27 сайтов из /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/dead_feeds.txt
+2026-06-22 23:33:42,483 [INFO] 🔄 Скрапинг: https://www.elmundo.es/
+2026-06-22 23:33:42,483 [INFO] 🔄 Скрапинг: https://www.larazon.es/
+2026-06-22 23:33:42,486 [INFO] 🔄 Скрапинг: https://www.eldebate.com/
+2026-06-22 23:33:42,485 [INFO] 🔄 Скрапинг: https://www.eleconomista.es/
+2026-06-22 23:33:42,486 [INFO] 🔄 Скрапинг: https://www.rtve.es/noticias/
+2026-06-22 23:33:42,648 [WARNING] ⚠️  https://www.eleconomista.es/ вернул 403 — сайт блокирует парсеры.
+2026-06-22 23:33:42,654 [INFO] 🔄 Скрапинг: https://www.elplural.com/
+2026-06-22 23:33:42,667 [INFO] ✅ https://www.eleconomista.es/ → найдено: 0, новых: 0
+2026-06-22 23:33:43,056 [INFO] 🔄 Скрапинг: http://www.publico.es/
+2026-06-22 23:33:43,190 [INFO] 🔄 Скрапинг: https://www.vozpopuli.com/
+2026-06-22 23:33:43,757 [INFO] 🔄 Скрапинг: https://www.infolibre.es/
+2026-06-22 23:33:43,805 [INFO] 🔄 Скрапинг: https://www.diariodenavarra.es/
+2026-06-22 23:33:43,923 [INFO] 🔄 Скрапинг: http://www.heraldo.es/
+2026-06-22 23:33:43,951 [INFO] ✅ https://www.elmundo.es/ → найдено: 50, новых: 3
+2026-06-22 23:33:44,064 [INFO] ✅ https://www.rtve.es/noticias/ → найдено: 50, новых: 1
+2026-06-22 23:33:44,098 [INFO] ✅ https://www.elplural.com/ → найдено: 7, новых: 0
+2026-06-22 23:33:44,151 [INFO] ✅ https://www.vozpopuli.com/ → найдено: 50, новых: 0
+2026-06-22 23:33:44,166 [INFO] ✅ https://www.eldebate.com/ → найдено: 50, новых: 2
+2026-06-22 23:33:44,529 [INFO] 🔄 Скрапинг: https://www.expansion.com/
+2026-06-22 23:33:44,619 [INFO] 🔄 Скрапинг: https://cincodias.elpais.com/
+2026-06-22 23:33:44,923 [INFO] 🔄 Скрапинг: https://cadenaser.com/
+2026-06-22 23:33:45,024 [INFO] 🔄 Скрапинг: https://www.cope.es/
+2026-06-22 23:33:45,107 [INFO] 🔄 Скрапинг: https://www.antena3.com/
+2026-06-22 23:33:45,118 [INFO] ✅ http://www.publico.es/ → найдено: 50, новых: 0
+2026-06-22 23:33:45,318 [INFO] 🔄 Скрапинг: https://www.telecinco.es/
+2026-06-22 23:33:45,398 [INFO] 🔄 Скрапинг: https://www.lne.es/
+2026-06-22 23:33:45,417 [INFO] ✅ https://www.infolibre.es/ → найдено: 50, новых: 0
+2026-06-22 23:33:45,479 [WARNING] ⚠️  https://www.telecinco.es/ вернул 403 — сайт блокирует парсеры.
+2026-06-22 23:33:45,485 [INFO] 🔄 Скрапинг: https://www.diariocordoba.com/
+2026-06-22 23:33:45,544 [INFO] 🔄 Скрапинг: https://www.farodevigo.es/
+2026-06-22 23:33:45,701 [INFO] ✅ https://www.larazon.es/ → найдено: 50, новых: 1
+2026-06-22 23:33:46,098 [INFO] ✅ https://www.diariodenavarra.es/ → найдено: 50, новых: 0
+2026-06-22 23:33:46,383 [INFO] 🔄 Скрапинг: https://www.elperiodicodearagon.com/
+2026-06-22 23:33:46,529 [INFO] 🔄 Скрапинг: https://www.diariodemallorca.es/
+2026-06-22 23:33:46,558 [INFO] ✅ http://www.heraldo.es/ → найдено: 50, новых: 0
+2026-06-22 23:33:46,567 [INFO] 🔄 Скрапинг: https://www.levante-emv.com/
+2026-06-22 23:33:46,591 [INFO] ✅ https://cincodias.elpais.com/ → найдено: 12, новых: 0
+2026-06-22 23:33:46,774 [INFO] 🔄 Скрапинг: https://www.laopiniondemurcia.es/
+2026-06-22 23:33:46,781 [INFO] ✅ https://www.expansion.com/ → найдено: 50, новых: 0
+2026-06-22 23:33:46,782 [INFO] ✅ https://www.telecinco.es/ → найдено: 0, новых: 0
+2026-06-22 23:33:46,790 [INFO] ✅ https://cadenaser.com/ → найдено: 50, новых: 6
+2026-06-22 23:33:46,805 [INFO] ✅ https://www.cope.es/ → найдено: 50, новых: 5
+2026-06-22 23:33:47,481 [INFO] 🔄 Скрапинг: https://www.diariodeibiza.es/
+2026-06-22 23:33:47,505 [INFO] 🔄 Скрапинг: https://www.eldia.es/
+2026-06-22 23:33:47,536 [INFO] 🔄 Скрапинг: https://www.laprovincia.es/
+2026-06-22 23:33:47,928 [INFO] ✅ https://www.lne.es/ → найдено: 50, новых: 2
+2026-06-22 23:33:47,933 [INFO] ✅ https://www.farodevigo.es/ → найдено: 50, новых: 0
+2026-06-22 23:33:47,947 [INFO] ✅ https://www.diariocordoba.com/ → найдено: 50, новых: 0
+2026-06-22 23:33:48,563 [INFO] ✅ https://www.diariodemallorca.es/ → найдено: 50, новых: 0
+2026-06-22 23:33:48,568 [INFO] ✅ https://www.levante-emv.com/ → найдено: 50, новых: 2
+2026-06-22 23:33:48,573 [INFO] ✅ https://www.elperiodicodearagon.com/ → найдено: 50, новых: 0
+2026-06-22 23:33:48,581 [INFO] ✅ https://www.antena3.com/ → найдено: 50, новых: 0
+2026-06-22 23:33:48,586 [INFO] ✅ https://www.laopiniondemurcia.es/ → найдено: 50, новых: 0
+2026-06-22 23:33:48,591 [INFO] ✅ https://www.diariodeibiza.es/ → найдено: 50, новых: 0
+2026-06-22 23:33:48,595 [INFO] ✅ https://www.eldia.es/ → найдено: 50, новых: 0
+2026-06-22 23:33:48,602 [INFO] ✅ https://www.laprovincia.es/ → найдено: 50, новых: 4
+2026-06-22 23:33:48,603 [INFO] 🕷️  Скрапинг итог: найдено=1169, новых=26, ошибок=0
+2026-06-22 23:33:48,604 [INFO] 
+2026-06-22 23:33:48,604 [INFO] ============================================================
+2026-06-22 23:33:48,604 [INFO] 📊 ИТОГО:
+2026-06-22 23:33:48,604 [INFO]    Было в БД:            2910
+2026-06-22 23:33:48,604 [INFO]    Новых из RSS:         56
+2026-06-22 23:33:48,604 [INFO]    RSS-фидов пропущено:  27 (dead feeds)
+2026-06-22 23:33:48,605 [INFO]    Новых из скрапинга:   26
+2026-06-22 23:33:48,605 [INFO]    Всего в БД сейчас:    2992
+2026-06-22 23:33:48,605 [INFO]    Время:                19.7 сек
+2026-06-22 23:33:48,605 [INFO]    БД:                   /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/baza.db
+2026-06-22 23:33:48,605 [INFO] ============================================================
+2026-06-23 18:07:45,285 [INFO] 🚀 Запуск news_collector.py — 2026-06-23 18:07:45
+2026-06-23 18:07:45,289 [INFO] ✅ БД инициализирована: /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/baza.db
+2026-06-23 18:07:45,293 [INFO] ============================================================
+2026-06-23 18:07:45,293 [INFO] 📡 ФАЗА 1: Парсинг RSS/Atom лент
+2026-06-23 18:07:45,293 [INFO] ============================================================
+2026-06-23 18:07:45,294 [INFO] 🚫 Исключаемые домены (dead_feeds): 27 шт.
+2026-06-23 18:07:45,294 [INFO] ⏭️  Пропуск (dead feed): https://www.elmundo.es/rss/
+2026-06-23 18:07:45,294 [INFO] 🌐 RSS: https://www.elespanol.com/rss
+2026-06-23 18:07:45,544 [INFO] 🌐 RSS: https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada
+2026-06-23 18:07:46,069 [INFO] 🌐 RSS: https://as.com/rss-de-ascom-n/
+2026-06-23 18:07:46,797 [WARNING] ⚠️  Невалидный фид: https://as.com/rss-de-ascom-n/
+2026-06-23 18:07:46,797 [INFO] 🌐 RSS: https://www.abc.es/rss/2.0/ultima-hora/
+2026-06-23 18:07:46,950 [INFO] 🌐 RSS: https://www.20minutos.es/rss/
+2026-06-23 18:07:47,672 [INFO] 🌐 RSS: https://rss.elconfidencial.com/espana/
+2026-06-23 18:07:47,872 [INFO] 🌐 RSS: https://www.huffingtonpost.es/feeds/index.xml
+2026-06-23 18:07:48,182 [INFO] 🌐 RSS: https://www.elperiodico.com/es/rss/rss_portada.xml
+2026-06-23 18:07:48,277 [INFO] 🌐 RSS: https://okdiario.com/feed
+2026-06-23 18:07:48,694 [INFO] 🌐 RSS: https://e00-marca.uecdn.es/rss/portada.xml
+2026-06-23 18:07:49,010 [INFO] 🌐 RSS: https://www.mundodeportivo.com/rss
+2026-06-23 18:07:50,202 [WARNING] ⚠️  Невалидный фид: https://www.mundodeportivo.com/rss
+2026-06-23 18:07:50,203 [INFO] 🌐 RSS: https://www.sport.es/es/rss/
+2026-06-23 18:07:50,413 [WARNING] ⚠️  Невалидный фид: https://www.sport.es/es/rss/
+2026-06-23 18:07:50,413 [INFO] ⏭️  Пропуск (dead feed): https://www.larazon.es/rss/
+2026-06-23 18:07:50,413 [INFO] 🌐 RSS: https://www.eldiario.es/rss
+2026-06-23 18:07:51,292 [INFO] 🌐 RSS: https://www.lavozdegalicia.es/index.xml
+2026-06-23 18:07:51,723 [INFO] ⏭️  Пропуск (dead feed): https://www.eleconomista.es/rss/rss-seleccion-ee.php
+2026-06-23 18:07:51,723 [INFO] ⏭️  Пропуск (dead feed): https://www.rtve.es/noticias/rss/noticias.xml
+2026-06-23 18:07:51,723 [INFO] 🌐 RSS: https://www.lavanguardia.com/rss/home
+2026-06-23 18:07:52,421 [INFO] 🌐 RSS: https://www.elindependiente.com/feed/
+2026-06-23 18:07:52,772 [INFO] ⏭️  Пропуск (dead feed): https://www.eldebate.com/rss/
+2026-06-23 18:07:52,772 [INFO] ⏭️  Пропуск (dead feed): https://www.elplural.com/rss/
+2026-06-23 18:07:52,772 [INFO] ⏭️  Пропуск (dead feed): http://www.publico.es/estaticos/rss/espana
+2026-06-23 18:07:52,772 [INFO] ⏭️  Пропуск (dead feed): https://www.vozpopuli.com/rss/
+2026-06-23 18:07:52,772 [INFO] ⏭️  Пропуск (dead feed): https://www.infolibre.es/uploads/rss/contenidos.xml
+2026-06-23 18:07:52,772 [INFO] 🌐 RSS: https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital
+2026-06-23 18:07:52,855 [ERROR] 🌍 Сетевая ошибка https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital: 403 Client Error: Forbidden for url: https://www.elconfidencialdigital.com/rss?seccion=el_confidencial_digital
+2026-06-23 18:07:52,857 [INFO] 🌐 RSS: https://www.elcomercio.es/rss/2.0/portada/
+2026-06-23 18:07:52,996 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodenavarra.es/rss/
+2026-06-23 18:07:52,996 [INFO] 🌐 RSS: https://www.diariosur.es/rss/2.0/portada/
+2026-06-23 18:07:53,113 [INFO] 🌐 RSS: https://www.ideal.es/rss/2.0/portada/
+2026-06-23 18:07:53,252 [INFO] ⏭️  Пропуск (dead feed): http://www.heraldo.es/index.php/mod.portadas/mem.rss
+2026-06-23 18:07:53,252 [INFO] 🌐 RSS: https://www.elcorreo.com/rss/2.0/portada/
+2026-06-23 18:07:53,369 [INFO] 🌐 RSS: https://www.diariodeleon.es/rss/home.xml
+2026-06-23 18:07:53,746 [INFO] 🌐 RSS: https://www.canarias7.es/rss/2.0/portada/
+2026-06-23 18:07:53,851 [INFO] 🌐 RSS: http://www.diariodeburgos.es/RSS/DBPortada.xml
+2026-06-23 18:07:54,043 [INFO] 🌐 RSS: https://www.diariovasco.com/rss/2.0/portada/
+2026-06-23 18:07:54,163 [INFO] 🌐 RSS: https://www.elnortedecastilla.es/rss/2.0/portada/
+2026-06-23 18:07:54,324 [INFO] 🌐 RSS: https://www.diariosur.es/rss/2.0/portada/
+2026-06-23 18:07:54,447 [INFO] ⏭️  Пропуск (dead feed): https://www.expansion.com/rss/portada
+2026-06-23 18:07:54,448 [INFO] ⏭️  Пропуск (dead feed): https://cincodias.elpais.com/rss/
+2026-06-23 18:07:54,448 [INFO] ⏭️  Пропуск (dead feed): https://cadenaser.com/feed/
+2026-06-23 18:07:54,448 [INFO] ⏭️  Пропуск (dead feed): https://www.cope.es/rss/portada
+2026-06-23 18:07:54,448 [INFO] ⏭️  Пропуск (dead feed): https://www.antena3.com/rss.xml
+2026-06-23 18:07:54,448 [INFO] ⏭️  Пропуск (dead feed): https://www.telecinco.es/rss.xml
+2026-06-23 18:07:54,448 [INFO] ⏭️  Пропуск (dead feed): https://www.lne.es/
+2026-06-23 18:07:54,448 [INFO] ⏭️  Пропуск (dead feed): https://www.diariocordoba.com/
+2026-06-23 18:07:54,448 [INFO] ⏭️  Пропуск (dead feed): https://www.farodevigo.es/
+2026-06-23 18:07:54,449 [INFO] ⏭️  Пропуск (dead feed): https://www.elperiodicodearagon.com/
+2026-06-23 18:07:54,449 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodemallorca.es/
+2026-06-23 18:07:54,449 [INFO] ⏭️  Пропуск (dead feed): https://www.levante-emv.com/
+2026-06-23 18:07:54,449 [INFO] ⏭️  Пропуск (dead feed): https://www.laopiniondemurcia.es/
+2026-06-23 18:07:54,449 [INFO] ⏭️  Пропуск (dead feed): https://www.diariodeibiza.es/
+2026-06-23 18:07:54,449 [INFO] ⏭️  Пропуск (dead feed): https://www.eldia.es/
+2026-06-23 18:07:54,449 [INFO] ⏭️  Пропуск (dead feed): https://www.laprovincia.es/
+2026-06-23 18:07:54,469 [INFO] 📡 RSS итог: новых=1208, дублей=573, пропущено=27
+2026-06-23 18:07:54,469 [INFO] ============================================================
+2026-06-23 18:07:54,469 [INFO] 🕷️  ФАЗА 2: Скрапинг сайтов напрямую (dead_feeds.txt)
+2026-06-23 18:07:54,469 [INFO] ============================================================
+2026-06-23 18:07:54,469 [INFO] 📋 Загружено 27 сайтов из /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/dead_feeds.txt
+2026-06-23 18:07:54,470 [INFO] 🔄 Скрапинг: https://www.elmundo.es/
+2026-06-23 18:07:54,471 [INFO] 🔄 Скрапинг: https://www.larazon.es/
+2026-06-23 18:07:54,471 [INFO] 🔄 Скрапинг: https://www.eleconomista.es/
+2026-06-23 18:07:54,472 [INFO] 🔄 Скрапинг: https://www.rtve.es/noticias/
+2026-06-23 18:07:54,477 [INFO] 🔄 Скрапинг: https://www.eldebate.com/
+2026-06-23 18:07:54,579 [WARNING] ⚠️  https://www.eleconomista.es/ вернул 403 — сайт блокирует парсеры.
+2026-06-23 18:07:54,580 [INFO] 🔄 Скрапинг: https://www.elplural.com/
+2026-06-23 18:07:54,581 [INFO] ✅ https://www.eleconomista.es/ → найдено: 0, новых: 0
+2026-06-23 18:07:55,102 [INFO] 🔄 Скрапинг: http://www.publico.es/
+2026-06-23 18:07:55,117 [INFO] 🔄 Скрапинг: https://www.vozpopuli.com/
+2026-06-23 18:07:55,655 [INFO] 🔄 Скрапинг: https://www.infolibre.es/
+2026-06-23 18:07:55,780 [INFO] ✅ https://www.elmundo.es/ → найдено: 50, новых: 43
+2026-06-23 18:07:55,917 [INFO] 🔄 Скрапинг: https://www.diariodenavarra.es/
+2026-06-23 18:07:55,955 [INFO] 🔄 Скрапинг: http://www.heraldo.es/
+2026-06-23 18:07:56,171 [INFO] ✅ https://www.rtve.es/noticias/ → найдено: 50, новых: 39
+2026-06-23 18:07:56,261 [INFO] ✅ https://www.elplural.com/ → найдено: 7, новых: 6
+2026-06-23 18:07:56,286 [INFO] 🔄 Скрапинг: https://www.expansion.com/
+2026-06-23 18:07:56,336 [INFO] 🔄 Скрапинг: https://cincodias.elpais.com/
+2026-06-23 18:07:56,568 [INFO] 🔄 Скрапинг: https://cadenaser.com/
+2026-06-23 18:07:56,925 [INFO] 🔄 Скрапинг: https://www.cope.es/
+2026-06-23 18:07:56,970 [INFO] 🔄 Скрапинг: https://www.antena3.com/
+2026-06-23 18:07:57,012 [INFO] ✅ https://www.vozpopuli.com/ → найдено: 50, новых: 47
+2026-06-23 18:07:57,099 [INFO] ✅ https://www.eldebate.com/ → найдено: 50, новых: 50
+2026-06-23 18:07:57,203 [INFO] 🔄 Скрапинг: https://www.telecinco.es/
+2026-06-23 18:07:57,297 [INFO] 🔄 Скрапинг: https://www.lne.es/
+2026-06-23 18:07:57,327 [INFO] ✅ http://www.publico.es/ → найдено: 50, новых: 36
+2026-06-23 18:07:57,377 [WARNING] ⚠️  https://www.telecinco.es/ вернул 403 — сайт блокирует парсеры.
+2026-06-23 18:07:57,389 [INFO] 🔄 Скрапинг: https://www.diariocordoba.com/
+2026-06-23 18:07:57,716 [INFO] ✅ https://www.infolibre.es/ → найдено: 50, новых: 16
+2026-06-23 18:07:58,144 [INFO] 🔄 Скрапинг: https://www.farodevigo.es/
+2026-06-23 18:07:58,174 [INFO] 🔄 Скрапинг: https://www.elperiodicodearagon.com/
+2026-06-23 18:07:58,397 [INFO] ✅ https://www.diariodenavarra.es/ → найдено: 50, новых: 38
+2026-06-23 18:07:58,472 [INFO] ✅ https://cincodias.elpais.com/ → найдено: 12, новых: 4
+2026-06-23 18:07:58,700 [INFO] 🔄 Скрапинг: https://www.diariodemallorca.es/
+2026-06-23 18:07:58,726 [INFO] 🔄 Скрапинг: https://www.levante-emv.com/
+2026-06-23 18:07:58,752 [INFO] ✅ http://www.heraldo.es/ → найдено: 50, новых: 50
+2026-06-23 18:07:58,875 [INFO] ✅ https://www.expansion.com/ → найдено: 50, новых: 44
+2026-06-23 18:07:59,172 [INFO] 🔄 Скрапинг: https://www.laopiniondemurcia.es/
+2026-06-23 18:07:59,223 [INFO] 🔄 Скрапинг: https://www.diariodeibiza.es/
+2026-06-23 18:07:59,288 [INFO] ✅ https://cadenaser.com/ → найдено: 50, новых: 44
+2026-06-23 18:07:59,293 [INFO] ✅ https://www.telecinco.es/ → найдено: 0, новых: 0
+2026-06-23 18:07:59,548 [INFO] 🔄 Скрапинг: https://www.eldia.es/
+2026-06-23 18:07:59,761 [INFO] ✅ https://www.larazon.es/ → найдено: 50, новых: 48
+2026-06-23 18:08:00,026 [INFO] 🔄 Скрапинг: https://www.laprovincia.es/
+2026-06-23 18:08:00,088 [INFO] ✅ https://www.cope.es/ → найдено: 50, новых: 24
+2026-06-23 18:08:00,391 [INFO] ✅ https://www.diariocordoba.com/ → найдено: 50, новых: 38
+2026-06-23 18:08:00,705 [INFO] ✅ https://www.lne.es/ → найдено: 50, новых: 40
+2026-06-23 18:08:01,034 [INFO] ✅ https://www.farodevigo.es/ → найдено: 50, новых: 40
+2026-06-23 18:08:01,042 [INFO] ✅ https://www.elperiodicodearagon.com/ → найдено: 50, новых: 41
+2026-06-23 18:08:01,057 [INFO] ✅ https://www.antena3.com/ → найдено: 50, новых: 36
+2026-06-23 18:08:01,065 [INFO] ✅ https://www.levante-emv.com/ → найдено: 50, новых: 40
+2026-06-23 18:08:01,072 [INFO] ✅ https://www.diariodemallorca.es/ → найдено: 50, новых: 35
+2026-06-23 18:08:01,080 [INFO] ✅ https://www.laopiniondemurcia.es/ → найдено: 50, новых: 43
+2026-06-23 18:08:01,087 [INFO] ✅ https://www.diariodeibiza.es/ → найдено: 50, новых: 36
+2026-06-23 18:08:01,096 [INFO] ✅ https://www.eldia.es/ → найдено: 50, новых: 35
+2026-06-23 18:08:01,104 [INFO] ✅ https://www.laprovincia.es/ → найдено: 50, новых: 30
+2026-06-23 18:08:01,106 [INFO] 🕷️  Скрапинг итог: найдено=1169, новых=903, ошибок=0
+2026-06-23 18:08:01,107 [INFO] 
+2026-06-23 18:08:01,107 [INFO] ============================================================
+2026-06-23 18:08:01,108 [INFO] 📊 ИТОГО:
+2026-06-23 18:08:01,108 [INFO]    Было в БД:            2992
+2026-06-23 18:08:01,108 [INFO]    Новых из RSS:         1208
+2026-06-23 18:08:01,108 [INFO]    RSS-фидов пропущено:  27 (dead feeds)
+2026-06-23 18:08:01,108 [INFO]    Новых из скрапинга:   903
+2026-06-23 18:08:01,108 [INFO]    Всего в БД сейчас:    5103
+2026-06-23 18:08:01,108 [INFO]    Время:                15.8 сек
+2026-06-23 18:08:01,108 [INFO]    БД:                   /home/vitaly/PycharmProjects/Antigravity/news_feeds_parser/baza.db
+2026-06-23 18:08:01,108 [INFO] ============================================================

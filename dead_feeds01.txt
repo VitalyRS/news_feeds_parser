@@ -1,0 +1,39 @@
+https://www.elmundo.es/rss/  no
+https://www.abc.es/rss/ https://www.abc.es/rss/2.0/ultima-hora/
+https://www.elconfidencial.com/rss/ https://rss.elconfidencial.com/espana/
+https://www.larazon.es/rss/ no
+https://www.lavozdegalicia.es/rss/index.htm https://www.lavozdegalicia.es/index.xml
+https://www.eleconomista.es/rss/ https://www.eleconomista.es/rss/rss-seleccion-ee.php
+https://www.rtve.es/noticias/rss/noticias.xml no
+https://www.eldebate.com/rss/ no
+https://www.elplural.com/rss/ no
+http://www.publico.es/estaticos/rss/espana no
+https://www.vozpopuli.com/rss/ no
+https://www.infolibre.es/uploads/rss/contenidos.xmlno
+https://www.elcomercio.es/rss/ https://www.elcomercio.es/rss/2.0/portada/
+https://www.diariodenavarra.es/rss/ no
+https://www.diariosur.es/rss/ https://www.diariosur.es/rss/2.0/portada/
+https://www.ideal.es/rss/ https://www.ideal.es/rss/2.0/portada/
+http://www.heraldo.es/index.php/mod.portadas/mem.rss no
+https://www.elcorreo.com/rss/ https://www.elcorreo.com/rss/2.0/portada/
+https://www.diariodeleon.es/rss/portada.xml https://www.diariodeleon.es/rss/home.xml
+https://www.canarias7.es/rss/?sec=3 https://www.canarias7.es/rss/2.0/portada/
+https://www.diariovasco.com/rss/ https://www.diariovasco.com/rss/2.0/portada/
+https://www.elnortedecastilla.es/rss/ https://www.elnortedecastilla.es/rss/2.0/portada/
+https://www.sur.es/rss/ https://www.diariosur.es/rss/2.0/portada/
+https://www.expansion.com/rss/portada no
+https://cincodias.elpais.com/rss/ no
+https://cadenaser.com/feed/ no
+https://www.cope.es/rss/portada no
+https://www.antena3.com/rss.xml no
+https://www.telecinco.es/rss.xml https://www.telecinco.es/rss.xml
+https://www.lne.es/ no
+https://www.diariocordoba.com/ no
+https://www.farodevigo.es/ no
+https://www.elperiodicodearagon.com/ no
+https://www.diariodemallorca.es/
+https://www.levante-emv.com/
+https://www.laopiniondemurcia.es/
+https://www.diariodeibiza.es/
+https://www.eldia.es/
+https://www.laprovincia.es/
