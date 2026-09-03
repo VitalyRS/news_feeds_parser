@@ -434,9 +434,10 @@ def call_openai_compatible_raw(
     base_url: str,
     api_key: str,
     model_name: str,
-    system_prompt: str = SCORING_SYSTEM_PROMPT
+    system_prompt: str = SCORING_SYSTEM_PROMPT,
+    max_retries: int = 3
 ) -> Optional[dict]:
-    """Выполняет запрос к OpenAI-совместимому API и возвращает распарсенный JSON dict."""
+    """Выполняет запрос к OpenAI-совместимому API с автоматическим retry при 429 и fallback."""
     import requests
 
     endpoint = f"{base_url.rstrip('/')}/chat/completions"
@@ -453,25 +454,51 @@ def call_openai_compatible_raw(
         "temperature": 0.1,
         "response_format": {"type": "json_object"}
     }
-    try:
-        r = requests.post(endpoint, headers=headers, json=payload, timeout=25)
-        if r.status_code != 200:
-            log.warning("⚠️ API (%s, %s) вернул статус %d: %s", base_url, model_name, r.status_code, r.text[:200])
-            return None
-        data = r.json()
-        choices = data.get("choices") or []
-        if not choices:
-            return None
-        content = choices[0].get("message", {}).get("content", "")
-        
-        # Удаляем markdown-блоки ```json ... ``` если модель их добавила
-        clean_text = re.sub(r"^```json\s*", "", content.strip(), flags=re.IGNORECASE)
-        clean_text = re.sub(r"\s*```$", "", clean_text)
-        
-        return json.loads(clean_text)
-    except Exception as e:
-        log.warning("⚠️ Ошибка OpenAI-совместимого вызова (%s): %s", model_name, e)
-        return None
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            r = requests.post(endpoint, headers=headers, json=payload, timeout=30)
+            if r.status_code == 429:
+                # Извлекаем время ожидания, если API вернул Retry-After
+                retry_after = 5 * attempt
+                try:
+                    header_wait = r.headers.get("Retry-After")
+                    if header_wait:
+                        retry_after = min(int(header_wait), 30)
+                except Exception:
+                    pass
+                log.warning("⚠️ API (%s, %s) rate limit 429 (попытка %d/%d). Ждём %d сек...",
+                            base_url, model_name, attempt, max_retries, retry_after)
+                time.sleep(retry_after)
+                continue
+
+            if r.status_code != 200:
+                log.warning("⚠️ API (%s, %s) вернул статус %d: %s", base_url, model_name, r.status_code, r.text[:200])
+                if attempt < max_retries:
+                    time.sleep(2 * attempt)
+                    continue
+                return None
+
+            data = r.json()
+            choices = data.get("choices") or []
+            if not choices:
+                return None
+            content = choices[0].get("message", {}).get("content", "")
+
+            # Удаляем markdown-блоки ```json ... ``` если модель их добавила
+            clean_text = re.sub(r"^```json\s*", "", content.strip(), flags=re.IGNORECASE)
+            clean_text = re.sub(r"\s*```$", "", clean_text)
+
+            return json.loads(clean_text)
+        except requests.exceptions.Timeout:
+            log.warning("⚠️ Таймаут запроса к %s (%s), попытка %d/%d", base_url, model_name, attempt, max_retries)
+            time.sleep(2 * attempt)
+        except Exception as e:
+            log.warning("⚠️ Ошибка OpenAI-совместимого вызова (%s, %s): %s", base_url, model_name, e)
+            if attempt < max_retries:
+                time.sleep(2 * attempt)
+
+    return None
 
 
 def call_openai_compatible_scorer(
@@ -518,21 +545,20 @@ def score_single_news(
         base_url = os.environ.get("ANYMODEL_BASE_URL", "https://anymodel.org/v1")
         api_key = os.environ["ANYMODEL_KEY"]
         
-        editorial = call_openai_compatible_scorer(
-            prompt,
-            base_url=base_url,
-            api_key=api_key,
-            model_name=target_model
-        )
-        # Если модель перегружена, быстрый fallback на вторую бесплатную модель AnyModel
-        if not editorial and not model:
-            fallback_model = "ag/gemini-3.1-flash-lite-preview"
+        candidate_models = [target_model]
+        for fb in ("ag/gemini-2.5-flash", "ag/gemini-3.1-flash-lite-preview", "qwen/qwen3.7-max", "am/deepseek-v4-flash"):
+            if fb not in candidate_models:
+                candidate_models.append(fb)
+
+        for m_name in candidate_models:
             editorial = call_openai_compatible_scorer(
                 prompt,
                 base_url=base_url,
                 api_key=api_key,
-                model_name=fallback_model
+                model_name=m_name
             )
+            if editorial:
+                break
 
     # 2. Резервный вызов OpenRouter
     if not editorial and (provider in ("openrouter", "auto") and os.environ.get("OPENROUTER_API_KEY")):
@@ -779,16 +805,26 @@ def score_articles_chunk(
 
     batch_result = None
 
-    # 1. AnyModel
+    # 1. AnyModel с перебором моделей при перегрузке (429)
     if provider in ("anymodel", "auto") and os.environ.get("ANYMODEL_KEY"):
-        target_model = model or os.environ.get("ANYMODEL_MODEL") or "ag/gemini-2.5-flash"
         base_url = os.environ.get("ANYMODEL_BASE_URL", "https://anymodel.org/v1")
-        raw = call_openai_compatible_raw(prompt, base_url, os.environ["ANYMODEL_KEY"], target_model)
-        if raw:
-            try:
-                batch_result = BatchEditorialClassification.model_validate(raw)
-            except Exception:
-                pass
+        primary_model = model or os.environ.get("ANYMODEL_MODEL") or "ag/gemini-2.5-flash"
+
+        # Список моделей AnyModel для перебора
+        candidate_models = [primary_model]
+        for fb in ("ag/gemini-2.5-flash", "ag/gemini-3.1-flash-lite-preview", "qwen/qwen3.7-max", "am/deepseek-v4-flash"):
+            if fb not in candidate_models:
+                candidate_models.append(fb)
+
+        for m_name in candidate_models:
+            raw = call_openai_compatible_raw(prompt, base_url, os.environ["ANYMODEL_KEY"], m_name)
+            if raw:
+                try:
+                    batch_result = BatchEditorialClassification.model_validate(raw)
+                    if batch_result and batch_result.results:
+                        break
+                except Exception:
+                    pass
 
     # 2. OpenRouter
     if not batch_result and (provider in ("openrouter", "auto") and os.environ.get("OPENROUTER_API_KEY")):
@@ -969,6 +1005,102 @@ def print_top_summary(scored_articles: List[ScoredArticle], top_n: int = 15):
     print("\n" + "=" * 80)
 
 
+# =================== ЗАГРУЗКА РАНЕЕ ОЦЕНЁННЫХ СТАТЕЙ ДЛЯ TELEGRAM ===================
+
+def _load_scored_articles_for_telegram(conn, args, since_val) -> List[ScoredArticle]:
+    """
+    Загружает уже оценённые статьи из БД (news_scores + news) или из scored.json.
+    Используется для повторной отправки в Telegram, когда новых статей для скоринга нет.
+    """
+    scored_articles = []
+
+    # Способ 1: Загрузка из БД (предпочтительный — свежие данные)
+    if conn:
+        try:
+            query = """
+                SELECT n.id, n.title, n.llm_summary, n.source, n.link, n.published,
+                       s.news_score, s.content_score, s.tier, s.is_top, s.is_evergreen,
+                       s.scores_json, s.scored_at
+                FROM news_scores s
+                JOIN news n ON n.id = s.news_id
+            """
+            conditions = []
+            params = []
+
+            if since_val:
+                date_cond, date_params = build_since_condition(since_val)
+                if date_cond:
+                    conditions.append(date_cond)
+                    params.extend(date_params)
+
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
+            query += " ORDER BY s.news_score DESC"
+
+            if args.tg_top:
+                query += f" LIMIT {int(args.tg_top * 2)}"
+
+            cursor = conn.cursor()
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+
+            for r in rows:
+                try:
+                    editorial_data = json.loads(r[11])
+                    editorial = EditorialClassification.model_validate(editorial_data)
+                    news_score = r[6]
+                    content_score = r[7]
+                    tier = r[8]
+                    is_top = bool(r[9])
+                    is_evergreen = bool(r[10])
+                    is_breaking = editorial.scores.urgency >= 8
+
+                    scored_articles.append(ScoredArticle(
+                        id=r[0],
+                        title=r[1] or "",
+                        summary=r[2] or "",
+                        source=r[3],
+                        url=r[4],
+                        published_at=r[5],
+                        country="Spain",
+                        editorial=editorial,
+                        news_score=news_score,
+                        content_score=content_score,
+                        tier=tier,
+                        is_top=is_top,
+                        is_evergreen_gem=is_evergreen,
+                        is_breaking=is_breaking,
+                        scored_at=r[12] or datetime.now(timezone.utc).isoformat()
+                    ))
+                except Exception as e:
+                    log.warning("⚠️ Ошибка восстановления статьи id=%s из БД: %s", r[0], e)
+
+            if scored_articles:
+                log.info("📋 Загружено %d ранее оценённых статей из БД для отправки в Telegram.", len(scored_articles))
+                return scored_articles
+
+        except Exception as e:
+            log.warning("⚠️ Ошибка загрузки оценённых статей из БД: %s", e)
+
+    # Способ 2: Fallback на scored.json
+    if os.path.exists(args.out):
+        try:
+            with open(args.out, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for item in data:
+                try:
+                    scored_articles.append(ScoredArticle.model_validate(item))
+                except Exception:
+                    continue
+            if scored_articles:
+                log.info("📋 Загружено %d статей из %s для отправки в Telegram.", len(scored_articles), args.out)
+        except Exception as e:
+            log.warning("⚠️ Ошибка загрузки из %s: %s", args.out, e)
+
+    return scored_articles
+
+
 # =================== CLI ТОЧКА ВХОДА ===================
 
 def main():
@@ -1034,6 +1166,23 @@ def main():
 
     if not articles:
         log.warning("⚠️ Не найдено новых статей для скоринга (все уже оценены или нет подходящих).")
+
+        # Если запрошена отправка в Telegram — загружаем уже оценённые статьи из БД или JSON
+        if args.telegram or os.environ.get("AUTO_SEND_TELEGRAM") == "1":
+            scored_articles = _load_scored_articles_for_telegram(conn, args, since_val)
+            if scored_articles:
+                log.info("📲 Повторная отправка %d ранее оценённых статей в Telegram...", len(scored_articles))
+                if args.show_top:
+                    print_top_summary(scored_articles, top_n=args.top)
+                send_top_articles_to_telegram(
+                    scored_articles=scored_articles,
+                    token=os.environ.get("TELEGA_BOT"),
+                    chat_id=args.tg_chat_id,
+                    top_n=args.tg_top,
+                    min_score=args.tg_min_score
+                )
+            else:
+                log.warning("⚠️ Нет ранее оценённых статей для отправки в Telegram.")
         return
 
     log.info("Найдено новых статей для обработки: %d", len(articles))

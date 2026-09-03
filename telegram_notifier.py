@@ -1,15 +1,23 @@
 """
 Модуль отправки отобранных и оцененных новостей в Telegram бот.
 Использует токен из переменной окружения TELEGA_BOT (или TELEGRAM_BOT_TOKEN).
+
+Добавлена поддержка inline-кнопок для генерации ТГ-постов через NotebookLM RAG:
+- Каждое сообщение со скоринговой статьёй получает кнопку "📝 Сгенерировать ТГ-пост"
+- Контекст статей сохраняется в .tg_bot_articles.json для обработки telegram_bot.py
 """
 
 import os
+import json
 import time
 import logging
 import requests
 from typing import List, Optional, Dict, Any
 
 log = logging.getLogger("telegram_notifier")
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ARTICLES_CONTEXT_FILE = os.path.join(SCRIPT_DIR, '.tg_bot_articles.json')
 
 
 def escape_html(text: str) -> str:
@@ -74,6 +82,84 @@ def send_telegram_message(
         return False
 
 
+def send_telegram_message_with_buttons(
+    token: str,
+    chat_id: str,
+    text: str,
+    inline_keyboard: List[List[Dict[str, str]]],
+    parse_mode: str = "HTML",
+    disable_web_page_preview: bool = False
+) -> bool:
+    """Отправляет текстовое сообщение с inline-кнопками в Telegram."""
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": parse_mode,
+        "disable_web_page_preview": disable_web_page_preview,
+        "reply_markup": json.dumps({
+            "inline_keyboard": inline_keyboard
+        })
+    }
+    try:
+        resp = requests.post(url, json=payload, timeout=10)
+        if resp.status_code == 200:
+            return True
+        else:
+            log.error("❌ Ошибка отправки в Telegram с кнопками (%d): %s", resp.status_code, resp.text)
+            return False
+    except Exception as e:
+        log.error("❌ Ошибка соединения с Telegram API: %s", e)
+        return False
+
+
+def _save_article_context(scored_article: Any) -> None:
+    """Сохраняет контекст статьи в JSON-файл для обработки telegram_bot.py."""
+    # Загружаем существующий файл или создаём новый
+    context = {}
+    if os.path.exists(ARTICLES_CONTEXT_FILE):
+        try:
+            with open(ARTICLES_CONTEXT_FILE, 'r', encoding='utf-8') as f:
+                context = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            context = {}
+
+    article_id = str(scored_article.id or hash(scored_article.title))
+    ed = scored_article.editorial
+
+    context[article_id] = {
+        "title": scored_article.title,
+        "url": scored_article.url or "",
+        "source": scored_article.source or "",
+        "published_at": scored_article.published_at or "",
+        "news_score": scored_article.news_score,
+        "tier": scored_article.tier,
+        "categories": ed.categories,
+        "audience": ed.audience,
+        "formats": ed.formats,
+        "editorial_angles": ed.editorial_angles,
+        "why": ed.why,
+        "scores": {
+            "practical_value": ed.scores.practical_value,
+            "resident_relevance": ed.scores.resident_relevance,
+            "content_potential": ed.scores.content_potential,
+        },
+        "saved_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    }
+
+    # Храним максимум 200 последних статей, чтобы файл не рос бесконечно
+    if len(context) > 200:
+        sorted_keys = sorted(context.keys(),
+                             key=lambda k: context[k].get("saved_at", ""), reverse=True)
+        context = {k: context[k] for k in sorted_keys[:200]}
+
+    try:
+        with open(ARTICLES_CONTEXT_FILE, 'w', encoding='utf-8') as f:
+            json.dump(context, f, ensure_ascii=False, indent=2)
+    except IOError as e:
+        log.warning("⚠️ Не удалось сохранить контекст статьи: %s", e)
+
+
 def format_article_telegram(scored_article: Any) -> str:
     """
     Форматирует одну оцененную статью в красивый HTML пост для Telegram.
@@ -118,7 +204,7 @@ def format_article_telegram(scored_article: Any) -> str:
 
     # Ссылка на первоисточник
     if url:
-        lines.append(f"🔗 <a href=\"{url}\">Читать оригинальную статью</a>")
+        lines.append(f'🔗 <a href="{url}">Читать оригинальную статью</a>')
 
     return "\n".join(lines)
 
@@ -133,6 +219,7 @@ def send_top_articles_to_telegram(
 ) -> int:
     """
     Фильтрует ТОП статьи и отправляет их в Telegram.
+    Каждое сообщение содержит inline-кнопку для генерации ТГ-поста через RAG.
     Возвращает количество успешно отправленных сообщений.
     """
     bot_token = token or os.environ.get("TELEGA_BOT") or os.environ.get("TELEGRAM_BOT_TOKEN")
@@ -173,8 +260,22 @@ def send_top_articles_to_telegram(
 
     sent_count = 0
     for art in selected:
+        # Сохраняем контекст статьи для telegram_bot.py
+        _save_article_context(art)
+
         msg_text = format_article_telegram(art)
-        success = send_telegram_message(bot_token, target_chat_id, msg_text)
+
+        # Определяем article_id для callback_data
+        article_id = str(art.id or hash(art.title))
+
+        # Inline-кнопка "Сгенерировать ТГ-пост"
+        inline_keyboard = [
+            [{"text": "📝 Сгенерировать ТГ-пост", "callback_data": f"sel_nb:{article_id}"}]
+        ]
+
+        success = send_telegram_message_with_buttons(
+            bot_token, target_chat_id, msg_text, inline_keyboard
+        )
         if success:
             sent_count += 1
         time.sleep(delay_between_messages)

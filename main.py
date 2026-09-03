@@ -2,19 +2,22 @@
 """
 Главный оркестратор пайплайна сбора новостей и подготовки данных для NotebookLM / RAG:
 
-Пайплайн включает 6 фаз:
+Пайплайн включает 7 фаз:
 1. 📡 Фаза 1: Сбор свежих ссылок из RSS/Atom (feeds.json) и прямой скрапинг (dead_feeds.txt) в SQLite.
 2. 📥 Фаза 2: Выкачивание полных текстов свежих статей (Googlebot bypass + curl_cffi Chrome + trafilatura + Jina Reader).
 3. 🧠 Фаза 3: LLM-классификация и генерация саммари статей про Испанию.
 4. 📄 Фаза 4: Экспорт новых статей в Markdown (RAW/<Source>/<Date>/article.md и NOTEBOOKLM/<YYYY-MM>.md).
 5. 🧠 Фаза 5: Прямая загрузка сводки в Google NotebookLM (notebooklm-py).
 6. ☁️ Фаза 6: Синхронизация папки NewsRAG с Google Drive (Service Account / OAuth).
+7. 🎯 Фаза 7: Редакционный классификатор и LLM-скоринг новостей (scorer.py) для Telegram-бота.
 
 Запуск:
-    python3 main.py                          # Полный быстрый цикл за сегодня
+    python3 main.py                          # Полный быстрый цикл за сегодня (все 7 фаз)
     python3 main.py --all-time               # Обработать все статьи из базы
     python3 main.py --since 2026-08-19       # Обработать статьи начиная с даты
     python3 main.py --skip-drive             # Без синхронизации с Google Drive
+    python3 main.py --skip-scoring           # Без фазы скоринга
+    python3 main.py --auto-tg                # Сразу отправить ТОП-15 в Telegram
     python3 main.py --export-only            # Только экспорт в Markdown и NotebookLM
 """
 
@@ -44,6 +47,14 @@ from md_exporter import (export_news, export_notebooklm_pending,
                          split_oversized_digests, DEFAULT_OUTPUT_DIR)
 from gdrive_sync import sync_to_gdrive
 from upload_to_notebooklm import upload_monthly_digest, is_authenticated
+from scorer import (
+    load_articles_from_db as load_scorer_articles,
+    run_scoring_batch,
+    init_scoring_db,
+    save_score_to_db,
+    DEFAULT_OUTPUT_FILE as SCORER_OUTPUT_FILE
+)
+from telegram_notifier import send_top_articles_to_telegram
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILE = os.path.join(SCRIPT_DIR, 'pipeline.log')
@@ -126,6 +137,10 @@ def run_pipeline(skip_scrape: bool = False,
                  skip_export: bool = False,
                  skip_notebooklm: bool = False,
                  skip_drive: bool = True,
+                 skip_scoring: bool = False,
+                 scoring_workers: int = 4,
+                 scoring_batch_size: int = 5,
+                 auto_send_telegram: bool = False,
                  since_date: str | None = DEFAULT_SINCE_DATE,
                  text_limit: int | None = None,
                  summary_limit: int | None = None,
@@ -137,7 +152,7 @@ def run_pipeline(skip_scrape: bool = False,
                  re_export: bool = False,
                  drive_dry_run: bool = False,
                  output_dir: str = DEFAULT_OUTPUT_DIR) -> dict:
-    """Выполняет полный цикл пайплайна от сбора до NotebookLM и Google Drive."""
+    """Выполняет полный цикл пайплайна от сбора до NotebookLM, скоринга и Google Drive."""
     start_time = datetime.now()
     log.info("=" * 70)
     log.info("🚀 ЗАПУСК НОВОСТНОГО ПАЙПЛАЙНА — %s (фильтр: %s)",
@@ -155,6 +170,7 @@ def run_pipeline(skip_scrape: bool = False,
         "summaries_failed": 0,
         "raw_exported": 0,
         "notebooklm_exported": 0,
+        "scored_count": 0,
         "notebooklm_synced": False,
         "drive_uploaded": 0,
         "drive_updated": 0,
@@ -274,10 +290,11 @@ def run_pipeline(skip_scrape: bool = False,
         log.info("\n⏩ === [ФАЗА 5/6] Прямая выгрузка в NotebookLM пропущена (--skip-notebooklm) ===")
 
     # -------------------------------------------------------------
+    # -------------------------------------------------------------
     # ФАЗА 6: Синхронизация с Google Drive
     # -------------------------------------------------------------
     if not skip_drive:
-        log.info("\n☁️ === [ФАЗА 6/6] Синхронизация с Google Drive ===")
+        log.info("\n☁️ === [ФАЗА 6/7] Синхронизация с Google Drive ===")
         try:
             drive_stats = sync_to_gdrive(local_dir=output_dir, dry_run=drive_dry_run)
             summary["drive_uploaded"] = drive_stats.get("uploaded", 0)
@@ -287,7 +304,56 @@ def run_pipeline(skip_scrape: bool = False,
         except Exception as e:
             log.warning("⚠️ Синхронизация с Google Drive не удалась: %s", e)
     else:
-        log.info("\n⏩ === [ФАЗА 6/6] Google Drive пропущен (--skip-drive) ===")
+        log.info("\n⏩ === [ФАЗА 6/7] Google Drive пропущен (--skip-drive) ===")
+
+    # -------------------------------------------------------------
+    # ФАЗА 7: Редакционный классификатор и скоринг новостей (scorer)
+    # -------------------------------------------------------------
+    if not skip_scoring:
+        log.info("\n🎯 === [ФАЗА 7/7] Редакционный скоринг новых статей (since=%s) ===", since_date)
+        try:
+            conn_scoring = sqlite3.connect(DB_FILE)
+            init_scoring_db(conn_scoring)
+
+            # Загружаем не оцененные статьи
+            unscored = load_scorer_articles(
+                conn=conn_scoring,
+                since_date=since_date,
+                skip_scored=True
+            )
+
+            if unscored:
+                log.info("📊 Найдено новых статей для скоринга: %d", len(unscored))
+                # Для скоринга используем быструю и стабильную модель без лимитов deepseek
+                scoring_model = os.environ.get("ANYMODEL_SCORING_MODEL") or "ag/gemini-2.5-flash"
+                scored_res = run_scoring_batch(
+                    articles=unscored,
+                    provider="anymodel",
+                    model=scoring_model,
+                    workers=scoring_workers,
+                    batch_size=scoring_batch_size,
+                    conn=conn_scoring,
+                    out_file=SCORER_OUTPUT_FILE
+                )
+                summary["scored_count"] = len(scored_res)
+                log.info("✅ Успешно оценено %d статей", len(scored_res))
+
+                if auto_send_telegram or os.environ.get("AUTO_SEND_TELEGRAM") == "1":
+                    log.info("📲 Автоматическая отправка ТОП новостей в Telegram...")
+                    send_top_articles_to_telegram(
+                        scored_articles=scored_res,
+                        token=os.environ.get("TELEGA_BOT"),
+                        top_n=15,
+                        min_score=6.5
+                    )
+            else:
+                log.info("ℹ️ Все статьи за указанный период уже оценены (новых для скоринга нет)")
+
+            conn_scoring.close()
+        except Exception as e:
+            log.error("❌ Ошибка при выполнении редакционного скоринга: %s", e)
+    else:
+        log.info("\n⏩ === [ФАЗА 7/7] Редакционный скоринг пропущен (--skip-scoring) ===")
 
     elapsed = (datetime.now() - start_time).total_seconds()
     summary["elapsed_seconds"] = elapsed
@@ -306,6 +372,8 @@ def run_pipeline(skip_scrape: bool = False,
     log.info("   📓 Статус Google NotebookLM:   %s", "✅ Выгружено напрямую" if summary["notebooklm_synced"] else "Пропущено")
     if not skip_drive:
         log.info("   ☁️ Google Drive загружено:    %d, обновлено: %d", summary["drive_uploaded"], summary["drive_updated"])
+    if not skip_scoring:
+        log.info("   🎯 Оценено статей (скоринг):   %d", summary["scored_count"])
     log.info("   ------------------------------------------------------")
     log.info("   📚 Всего статей в базе данных: %d (с текстом: %d, с саммари: %d)",
              summary["total_articles"], summary["total_with_text"], summary["total_with_summary"])
@@ -338,6 +406,10 @@ def main():
     parser.add_argument('--re-export', action='store_true', help="Переэкспортировать все статьи в Markdown заново")
     parser.add_argument('--drive-dry-run', action='store_true', help="Имитация синхронизации с Google Drive")
     parser.add_argument('--output-dir', default=DEFAULT_OUTPUT_DIR, help="Каталог для Markdown файлов")
+    parser.add_argument('--skip-scoring', action='store_true', help="Пропустить фазу 7 (редакционный скоринг)")
+    parser.add_argument('--scoring-workers', type=int, default=4, help="Число потоков для редакционного скоринга (по умолчанию 4)")
+    parser.add_argument('--scoring-batch-size', type=int, default=5, help="Размер пачки статей для одного LLM-скоринга (по умолчанию 5)")
+    parser.add_argument('--auto-tg', action='store_true', help="Автоматически отправить ТОП оцененных новостей в Telegram после скоринга")
 
     args = parser.parse_args()
 
@@ -375,6 +447,10 @@ def main():
         skip_export=args.skip_export,
         skip_notebooklm=args.skip_notebooklm,
         skip_drive=skip_drive,
+        skip_scoring=args.skip_scoring,
+        scoring_workers=args.scoring_workers,
+        scoring_batch_size=args.scoring_batch_size,
+        auto_send_telegram=args.auto_tg,
         since_date=since_date,
         text_limit=args.text_limit,
         summary_limit=args.summary_limit,
