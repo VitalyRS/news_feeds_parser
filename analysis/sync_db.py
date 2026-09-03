@@ -102,32 +102,79 @@ def sync():
     sl_cur.execute("CREATE INDEX IF NOT EXISTS idx_news_link ON news(link)")
     sl_conn.commit()
 
-    # 6. Получение данных из PostgreSQL
-    print("📥 Загрузка новостей из PostgreSQL...")
+    # 6. Получение списка ссылок из локальной SQLite
+    print("🔎 Получение списка локальных ссылок...")
     try:
-        pg_cur.execute("""
-            SELECT source, source_type, title, link, description, published, scraped_at 
-            FROM news
-        """)
-        rows = pg_cur.fetchall()
-        print(f"✅ Успешно получено {len(rows)} записей из PostgreSQL.")
+        sl_cur.execute("SELECT link FROM news")
+        local_links = set(r[0] for r in sl_cur.fetchall())
+        print(f"✅ В локальной базе найдено {len(local_links)} уникальных ссылок.")
+    except Exception as e:
+        print(f"❌ Ошибка чтения из SQLite: {e}")
+        pg_conn.close()
+        sl_conn.close()
+        sys.exit(1)
+
+    # 7. Получение списка ссылок из PostgreSQL
+    print("🔎 Получение списка удалённых ссылок...")
+    try:
+        pg_cur.execute("SELECT link FROM news")
+        remote_links = set(r[0] for r in pg_cur.fetchall())
+        print(f"✅ В удалённой базе найдено {len(remote_links)} уникальных ссылок.")
     except Exception as e:
         print(f"❌ Ошибка чтения из PostgreSQL: {e}")
         pg_conn.close()
         sl_conn.close()
         sys.exit(1)
 
+    # Вычисляем разницу
+    new_links = list(remote_links - local_links)
+    print(f"🆕 Найдено новых статей для скачивания: {len(new_links)}")
+
+    rows = []
+    if new_links:
+        print("📥 Загрузка новых новостей из PostgreSQL...")
+        chunk_size = 500
+        for i in range(0, len(new_links), chunk_size):
+            chunk = new_links[i:i + chunk_size]
+            placeholders = ', '.join(['%s'] * len(chunk))
+            try:
+                pg_cur.execute(
+                    f"""SELECT source, source_type, title, link, description, published, scraped_at 
+                        FROM news
+                        WHERE link IN ({placeholders})""",
+                    chunk
+                )
+                rows.extend(pg_cur.fetchall())
+            except Exception as e:
+                print(f"❌ Ошибка загрузки порции данных из PostgreSQL: {e}")
+                pg_conn.close()
+                sl_conn.close()
+                sys.exit(1)
+        print(f"✅ Успешно получено {len(rows)} новых записей из PostgreSQL.")
+
     if not rows:
-        print("📭 В удалённой базе данных нет записей для копирования.")
+        print("📭 Нет новых записей для копирования.")
         pg_conn.close()
         sl_conn.close()
         return
 
-    # 7. Запись новостей в SQLite
-    print("📤 Сохранение новостей в локальную базу SQLite (дубликаты будут пропущены)...")
+    # 8. Запись новостей в SQLite
+    print("📤 Сохранение новостей в локальную базу SQLite...")
     new_inserted = 0
     for row in rows:
         source, source_type, title, link, description, published, scraped_at = row
+        
+        # Преобразуем datetime в строки для предотвращения DeprecationWarning в Python 3.12+
+        if hasattr(published, 'isoformat'):
+            published = published.isoformat()
+        elif published is not None:
+            published = str(published)
+            
+        if hasattr(scraped_at, 'isoformat'):
+            scraped_at = scraped_at.isoformat()
+        elif scraped_at is not None:
+            scraped_at = str(scraped_at)
+
         try:
             sl_cur.execute(
                 """INSERT OR IGNORE INTO news
@@ -142,7 +189,7 @@ def sync():
 
     sl_conn.commit()
     print("🎉 Синхронизация успешно завершена!")
-    print(f"📊 Всего записей обработано: {len(rows)}")
+    print(f"📊 Всего новых записей обработано: {len(rows)}")
     print(f"🆕 Добавлено новых статей в SQLite: {new_inserted}")
 
     # Закрытие подключений

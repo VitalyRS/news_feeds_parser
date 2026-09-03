@@ -17,6 +17,8 @@ import sys
 import os
 import json
 import concurrent.futures
+import argparse
+from text_downloader import download_pending_texts
 from datetime import datetime
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
@@ -117,7 +119,7 @@ def load_dead_feed_domains() -> set[str]:
             line = line.strip()
             if line and not line.startswith('#'):
                 netloc = urlparse(line).netloc or ''
-                domain = netloc.lstrip('www.')
+                domain = netloc.removeprefix('www.')
                 if domain:
                     domains.add(domain)
     return domains
@@ -126,7 +128,7 @@ def load_dead_feed_domains() -> set[str]:
 def is_dead_feed(feed_url: str, dead_domains: set[str]) -> bool:
     """Проверяет, принадлежит ли RSS-ссылка домену из dead_feeds.txt."""
     netloc = urlparse(feed_url).netloc or ''
-    domain = netloc.lstrip('www.')
+    domain = netloc.removeprefix('www.')
     # Проверяем точное совпадение и суффикс (напр. cincodias.elpais.com → elpais.com)
     for dead in dead_domains:
         if domain == dead or domain.endswith('.' + dead):
@@ -167,60 +169,66 @@ def parse_rss_feeds(conn: sqlite3.Connection) -> tuple[int, int]:
     new_count = 0
     dup_count = 0
     skip_count = 0
-    cursor = conn.cursor()
 
+    # Отбираем живые фиды (домен не в dead_feeds.txt)
+    live_feeds = []
     for feed_url in all_feeds:
-        # Пропускаем фиды, чей домен есть в dead_feeds.txt
         if is_dead_feed(feed_url, dead_domains):
             log.info("⏭️  Пропуск (dead feed): %s", feed_url)
             skip_count += 1
-            continue
+        else:
+            live_feeds.append(feed_url)
 
-        log.info("🌐 RSS: %s", feed_url)
+    def _fetch_feed(feed_url: str) -> tuple[str, list[dict]]:
+        """Качает и парсит одну ленту. Возвращает (url, список записей).
+        Только сеть/парсинг — без работы с БД (соединение SQLite не потокобезопасно)."""
+        entries_out: list[dict] = []
         try:
-            resp = requests.get(
-                feed_url, headers=HEADERS, timeout=REQUEST_TIMEOUT
-            )
+            resp = requests.get(feed_url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
             resp.raise_for_status()
-
             feed = feedparser.parse(resp.content)
             if feed.bozo and not feed.entries:
                 log.warning("⚠️  Невалидный фид: %s", feed_url)
-                continue
+                return feed_url, entries_out
 
             for entry in feed.entries:
-                title = entry.get('title', 'Без заголовка')
                 link = entry.get('link', '').strip()
                 if not link:
                     continue
-
-                # Описание
-                description = (
-                    entry.get('summary')
-                    or entry.get('description')
-                    or ''
-                )
+                description = entry.get('summary') or entry.get('description') or ''
                 if not description and 'content' in entry and len(entry.content) > 0:
                     description = entry.content[0].get('value', '')
-
-                # Дата публикации
                 pub_dt = None
                 if hasattr(entry, 'published_parsed') and entry.published_parsed:
                     try:
                         pub_dt = datetime(*entry.published_parsed[:6]).isoformat()
                     except (TypeError, ValueError):
                         pass
-
-                if insert_article(cursor, feed_url, 'rss', title, link,
-                                  description, pub_dt):
-                    new_count += 1
-                else:
-                    dup_count += 1
-
+                entries_out.append({
+                    'title': entry.get('title', 'Без заголовка'),
+                    'link': link,
+                    'description': description,
+                    'published': pub_dt,
+                })
         except requests.RequestException as e:
             log.error("🌍 Сетевая ошибка %s: %s", feed_url, e)
         except Exception as e:
             log.error("💥 Ошибка %s: %s", feed_url, e)
+        return feed_url, entries_out
+
+    # Параллельно скачиваем ленты (I/O-bound), вставку в БД делаем в главном потоке.
+    cursor = conn.cursor()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = {executor.submit(_fetch_feed, url): url for url in live_feeds}
+        for future in concurrent.futures.as_completed(futures):
+            feed_url, entries = future.result()
+            log.info("🌐 RSS: %s → записей: %d", feed_url, len(entries))
+            for e in entries:
+                if insert_article(cursor, feed_url, 'rss', e['title'], e['link'],
+                                  e['description'], e['published']):
+                    new_count += 1
+                else:
+                    dup_count += 1
 
     conn.commit()
     cursor.close()
@@ -518,7 +526,7 @@ PARSER_MAP: dict[str, callable] = {
 
 def get_parser(url: str) -> callable:
     """Возвращает подходящую функцию парсинга для URL."""
-    domain_full = urlparse(url).netloc.lstrip('www.')
+    domain_full = urlparse(url).netloc.removeprefix('www.')
     if domain_full in PARSER_MAP:
         return PARSER_MAP[domain_full]
     if domain_full in PRENSA_IBERICA_DOMAINS:
@@ -562,7 +570,7 @@ def scrape_site(url: str) -> tuple[str, list[dict], str | None]:
         return url, [], msg
 
 
-def scrape_dead_feeds(conn: sqlite3.Connection) -> int:
+def scrape_dead_feeds(conn: sqlite3.Connection, workers: int = MAX_WORKERS) -> int:
     """
     Скрапит все сайты из dead_feeds.txt.
     Возвращает количество новых статей.
@@ -576,14 +584,14 @@ def scrape_dead_feeds(conn: sqlite3.Connection) -> int:
         return 0
 
     sites = load_sites(DEAD_FEEDS_FILE)
-    log.info("📋 Загружено %d сайтов из %s", len(sites), DEAD_FEEDS_FILE)
+    log.info("📋 Загружено %d сайтов из %s (потоков: %d)", len(sites), DEAD_FEEDS_FILE, workers)
 
     total_new = 0
     total_found = 0
     errors = []
     cursor = conn.cursor()
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
         futures = {executor.submit(scrape_site, url): url for url in sites}
         for future in concurrent.futures.as_completed(futures):
             url, articles, error = future.result()
@@ -616,7 +624,42 @@ def scrape_dead_feeds(conn: sqlite3.Connection) -> int:
 #                         MAIN
 # ================================================================
 
+
+# ================================================================
+#                ФАЗА 3: СКАЧИВАНИЕ ПОЛНЫХ ТЕКСТОВ
+# ================================================================
+
+def download_full_texts_phase(conn: sqlite3.Connection,
+                              workers: int = 8,
+                              limit: int | None = None,
+                              since_date: str | None = None,
+                              retry_failed: bool = False) -> tuple[int, int]:
+    """Выкачивает полные тексты статей с поддержкой фильтра по дате."""
+    return download_pending_texts(
+        conn=conn,
+        limit=limit,
+        workers=workers,
+        since_date=since_date,
+        retry_failed=retry_failed
+    )
+
+
+# ================================================================
+#                         MAIN
+# ================================================================
+
 def main():
+    parser = argparse.ArgumentParser(description="Сборщик новостей из RSS и веб-страниц")
+    parser.add_argument('--skip-text', action='store_true', help="Пропустить фазу загрузки полных текстов")
+    parser.add_argument('--today', action='store_true', help="Скачивать тексты только для статей за сегодня (быстро)")
+    parser.add_argument('--since', type=str, default=None, help="Скачивать тексты для статей начиная с YYYY-MM-DD")
+    parser.add_argument('--all-time', action='store_true', help="Обработать архивные статьи без фильтра по дате")
+    parser.add_argument('--text-limit', type=int, default=None, help="Лимит на скачивание текстов статей")
+    parser.add_argument('--text-workers', type=int, default=8, help="Потоков для скачивания текстов")
+    parser.add_argument('--scrape-workers', type=int, default=MAX_WORKERS, help="Потоков для скрапинга")
+    parser.add_argument('--retry-failed', action='store_true', help="Повторить скачивание для неудачных")
+    args = parser.parse_args()
+
     start_time = datetime.now()
     log.info("🚀 Запуск news_collector.py — %s", start_time.strftime('%Y-%m-%d %H:%M:%S'))
 
@@ -626,15 +669,40 @@ def main():
 
     # Считаем статьи до запуска
     before = conn.execute("SELECT COUNT(*) FROM news").fetchone()[0]
+    texts_before = conn.execute("SELECT COUNT(*) FROM news WHERE full_text IS NOT NULL AND length(full_text) > 30").fetchone()[0]
 
     # 2. Фаза 1 — RSS/Atom
+    log.info("\n📡 === [ФАЗА 1/3] Сбор новостей из RSS ===")
     rss_new, rss_skipped = parse_rss_feeds(conn)
 
-    # 3. Фаза 2 — Скрапинг
+    # 3. Фаза 2 — Скрапинг dead_feeds
+    log.info("\n🕷️  === [ФАЗА 2/3] Скрапинг HTML сайтов ===")
     scrape_new = scrape_dead_feeds(conn)
 
-    # 4. Итого
+    # 4. Фаза 3 — Загрузка полных текстов
+    texts_downloaded = 0
+    texts_failed = 0
+    if not args.skip_text:
+        log.info("\n📥 === [ФАЗА 3/3] Извлечение полных текстов статей ===")
+        since_date = None
+        if args.today:
+            since_date = 'today'
+        elif args.since:
+            since_date = args.since
+        elif not args.all_time:
+            # По умолчанию скачиваем свежие новости за сегодня
+            since_date = 'today'
+
+        texts_downloaded, texts_failed = download_full_texts_phase(
+            conn=conn,
+            workers=args.text_workers,
+            limit=args.text_limit,
+            since_date=since_date,
+            retry_failed=args.retry_failed
+        )
+
     after = conn.execute("SELECT COUNT(*) FROM news").fetchone()[0]
+    texts_after = conn.execute("SELECT COUNT(*) FROM news WHERE full_text IS NOT NULL AND length(full_text) > 30").fetchone()[0]
     conn.close()
 
     elapsed = (datetime.now() - start_time).total_seconds()
@@ -642,13 +710,15 @@ def main():
     log.info("")
     log.info("=" * 60)
     log.info("📊 ИТОГО:")
-    log.info("   Было в БД:            %d", before)
-    log.info("   Новых из RSS:         %d", rss_new)
-    log.info("   RSS-фидов пропущено:  %d (dead feeds)", rss_skipped)
-    log.info("   Новых из скрапинга:   %d", scrape_new)
-    log.info("   Всего в БД сейчас:    %d", after)
-    log.info("   Время:                %.1f сек", elapsed)
-    log.info("   БД:                   %s", DB_FILE)
+    log.info("   Статей в БД до:         %d (с текстом: %d)", before, texts_before)
+    log.info("   Новых из RSS:           %d", rss_new)
+    log.info("   RSS-фидов пропущено:    %d (dead feeds)", rss_skipped)
+    log.info("   Новых из скрапинга:     %d", scrape_new)
+    log.info("   Всего статей в БД:      %d", after)
+    log.info("   Скачано текстов сейчас: %d (сбоев: %d)", texts_downloaded, texts_failed)
+    log.info("   Всего статей с текстом: %d", texts_after)
+    log.info("   Время выполнения:       %.1f сек", elapsed)
+    log.info("   БД:                     %s", DB_FILE)
     log.info("=" * 60)
 
 

@@ -1,0 +1,315 @@
+[
+  {
+    "id": 246290,
+    "title": "Los inquilinos pueden quedarse hasta 5 años en el alquiler aunque firmen un contrato de solo un año: así les protege la ley",
+    "summary": "El artículo explica la protección que ofrece la Ley de Arrendamientos Urbanos (LAU) a los inquilinos en España. Aunque el contrato se firme por un año, la ley establece prórrogas obligatorias anuales hasta alcanzar un mínimo de cinco años (siete si el arrendador es persona jurídica), impidiendo al propietario finalizar el contrato unilateralmente durante ese periodo. El inquilino, en cambio, puede desistir tras seis meses con 30 días de preaviso. También se detalla que el propietario no puede recuperar la vivienda salvo necesidad acreditada y pactada, ni subir la renta por encima de los límites legales. Cualquier cláusula que renuncie a estos derechos es nula.",
+    "source": "https://www.larazon.es/",
+    "url": "https://www.larazon.es/economia/inquilinos-pueden-quedarse-5-anos-alquiler-aunque-firmen-contrato-solo-ano-asi-les-protege-ley_202609026a9864312d7d3022177c20fb.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 9,
+        "immigration_relevance": 6,
+        "practical_value": 9,
+        "impact": 8,
+        "novelty": 3,
+        "emotion": 6,
+        "discussion": 8,
+        "urgency": 3,
+        "content_potential": 9,
+        "evergreen": 10
+      },
+      "penalties": {
+        "too_local": 0.0,
+        "repetitive": 0.5,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "housing",
+        "cost_of_living"
+      ],
+      "audience": [
+        "resident",
+        "immigrant",
+        "potential_immigrant",
+        "family"
+      ],
+      "locality": "national",
+      "formats": [
+        "explainer",
+        "how_to",
+        "guide"
+      ],
+      "why": [
+        "касается практически всех арендаторов жилья в Испании, включая экспатов",
+        "высокая практическая польза: защищает права жильцов от недобросовестных арендодателей",
+        "отличный материал для базы знаний и сохранения в закладки"
+      ],
+      "editorial_angles": [
+        "как работает Закон об аренде городской недвижимости (LAU) на практике",
+        "что делать, если арендодатель заставляет подписать контракт на один год",
+        "права и обязанности арендатора и арендодателя при досрочном расторжении"
+      ],
+      "confidence": 0.98
+    },
+    "news_score": 6.95,
+    "content_score": 9.05,
+    "tier": "⚪ MAYBE",
+    "is_top": false,
+    "is_evergreen_gem": true,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:26:21.596236+00:00"
+  },
+  {
+    "id": 246508,
+    "title": "El Gobierno premiará con 90 millones de euros a las comunidades que aplican la ley estatal de Vivienda",
+    "summary": "El Gobierno destinará 90 millones de euros a cinco comunidades autónomas (Cataluña, Euskadi, Navarra, Galicia y Asturias) que aplican la ley estatal de vivienda para aumentar el parque de alquileres asequibles. La ministra Isabel Rodríguez anunció subvenciones para construir vivienda pública, rehabilitar edificios y ampliar ayudas al alquiler. El reparto se basa en población y hogares en situación de sobreesfuerzo.",
+    "source": "https://cadenaser.com/",
+    "url": "https://cadenaser.com/nacional/2026/09/02/el-gobierno-premiara-con-90-millones-de-euros-a-las-comunidades-autonomas-que-aplican-la-ley-estatal-de-vivienda-cadena-ser/",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 7,
+        "immigration_relevance": 4,
+        "practical_value": 6,
+        "impact": 6,
+        "novelty": 8,
+        "emotion": 4,
+        "discussion": 8,
+        "urgency": 3,
+        "content_potential": 8,
+        "evergreen": 6
+      },
+      "penalties": {
+        "too_local": 0.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.3
+      },
+      "categories": [
+        "housing",
+        "cost_of_living",
+        "economy"
+      ],
+      "audience": [
+        "resident",
+        "immigrant",
+        "family"
+      ],
+      "locality": "national",
+      "formats": [
+        "news",
+        "explainer"
+      ],
+      "why": [
+        "напрямую касается рынка аренды и жилищной политики в ключевых автономиях",
+        "выделение 90 млн евро на поддержку доступного жилья и субсидии",
+        "затрагивает интересы миллионов арендаторов, включая экспатов и семьи"
+      ],
+      "editorial_angles": [
+        "какие именно автономии получат финансирование и почему там выгоднее снимать жилье",
+        "как эти средства помогут увеличить количество доступных квартир",
+        "что такое закон о жилье и как он работает на практике для экспатов"
+      ],
+      "confidence": 0.95
+    },
+    "news_score": 5.95,
+    "content_score": 7.1,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:26:13.165043+00:00"
+  },
+  {
+    "id": 247063,
+    "title": "Los efectos de la regularización de migrantes en Ibiza: crece un 80% la contratación de extranjeros de fuera de la UE",
+    "summary": "El artículo analiza el impacto de la regularización de migrantes en Ibiza, donde la contratación de extranjeros no comunitarios aumentó un 80% interanual en agosto de 2025, pasando de descensos previos a un crecimiento sin precedentes. Según datos del SOIB, se firmaron 880 contratos con este perfil en Ibiza, representando el 87% del total de nuevos contratos en la isla. La regularización administrativa iniciada en abril por el Gobierno facilitó la formalización de empleos en economía sumergida, con 283 personas inscritas como demandantes de empleo bajo este proceso. Además, se registró un descenso del paro del 0,4% (2.252 desempleados), la cifra más baja en dos décadas, aunque con críticas sindicales sobre precariedad laboral y saturación turística en Baleares.",
+    "source": "https://www.diariodeibiza.es/",
+    "url": "https://www.diariodeibiza.es/ibiza/2026/09/02/efectos-regularizacion-migrantes-ibiza-133872140.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 5,
+        "immigration_relevance": 9,
+        "practical_value": 6,
+        "impact": 5,
+        "novelty": 8,
+        "emotion": 4,
+        "discussion": 7,
+        "urgency": 2,
+        "content_potential": 8,
+        "evergreen": 5
+      },
+      "penalties": {
+        "too_local": 0.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "immigration",
+        "jobs",
+        "economy"
+      ],
+      "audience": [
+        "resident",
+        "immigrant",
+        "potential_immigrant"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news",
+        "numbers",
+        "explainer"
+      ],
+      "why": [
+        "демонстрирует реальный эффект от недавней государственной легализации мигрантов",
+        "показывает динамику рынка труда для граждан третьих стран на конкретном примере",
+        "затрагивает темы занятости и выхода из теневой экономики"
+      ],
+      "editorial_angles": [
+        "как легализация меняет рынок труда в курортных регионах Испании",
+        "статистика найма иностранцев вне ЕС после апрельской реформы",
+        "плюсы и минусы массового выхода работников из тени"
+      ],
+      "confidence": 0.95
+    },
+    "news_score": 5.6,
+    "content_score": 6.65,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:26:17.097497+00:00"
+  },
+  {
+    "id": 246759,
+    "title": "La DGT confirma para octubre el cambio que revolucionará el tráfico en Vigo: peatones y conductores no circularán a la vez",
+    "summary": "La DGT implementará a partir del 1 de octubre una reforma del Reglamento General de Circulación (Real Decreto 518/2026) que prohíbe la circulación simultánea de vehículos y peatones en los cruces semaforizados. La medida, que busca mejorar la seguridad de los usuarios vulnerables, obligará a modificar los ciclos semafóricos en numerosos puntos de Vigo, eliminando el ámbar para vehículos mientras los viandantes tienen paso verde. El objetivo es priorizar la seguridad del peatón frente al vehículo.",
+    "source": "https://www.farodevigo.es/",
+    "url": "https://www.farodevigo.es/gran-vigo/2026/09/02/dgt-confirma-octubre-cambio-trafico-vigo-codigo-circulacion-peatones-semaforo-133786953.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 5,
+        "immigration_relevance": 2,
+        "practical_value": 4,
+        "impact": 3,
+        "novelty": 7,
+        "emotion": 4,
+        "discussion": 6,
+        "urgency": 4,
+        "content_potential": 6,
+        "evergreen": 5
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "transport",
+        "cars"
+      ],
+      "audience": [
+        "resident",
+        "immigrant"
+      ],
+      "locality": "city",
+      "formats": [
+        "news",
+        "explainer"
+      ],
+      "why": [
+        "новость касается исключительно жителей и водителей города Виго",
+        "меняет правила движения на светофорах только в одном конкретном муниципалитете",
+        "не имеет прямого значения для большинства русскоязычных экспатов в других регионах Испании"
+      ],
+      "editorial_angles": [
+        "как изменится движение для водителей и пешеходов в Виго с октября",
+        "тестируют ли подобные нововведения в других городах Галисии или всей Испании"
+      ],
+      "confidence": 0.95
+    },
+    "news_score": 2.95,
+    "content_score": 5.35,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:26:08.941021+00:00"
+  },
+  {
+    "id": 247161,
+    "title": "Mallorca fijará antes de que acabe el año el límite de coches particulares y de alquiler que podrán entrar en la isla a partir del próximo verano",
+    "summary": "TÍTULO: Mallorca limitará entrada de coches particulares y de alquiler desde verano 2027\nFECHA: Desconocida\nFUENTE: diariodemallorca.es\nRESUMEN: El Consell de Mallorca fijará antes de fin de año el límite de vehículos que podrán entrar en la isla. Llorenç Galmés defenderá la ley en el Parlament el 9 de septiembre.\nHECHOS CLAVE:\n- Estudio de carga determinará el máximo en octubre.\n- Ley de regulación de entrada de vehículos impulsada por PP.\n- Se prepara tasa y ordenanza fiscal.\n- Recopilación de datos de flotas de alquiler.\n- Apoyo de izquierda y Coalició per Mallorca; Vox podría oponerse.\nPERSONAS:\n- Llorenç Galmés — presidente del Consell de Mallorca — anunció la fijación del límite\n- Fernando Rubio — conseller de Movilidad\nORGANIZACIONES:\n- Consell de Mallorca\n- Parlament de les Illes Balears\n- PP\nPOLÍTICAS/MEDIDAS:\n- Proposición de ley de regulación de entrada de vehículos\n- Límite máximo de coches particulares y alquiler\n- Tasa para conductores\nCAUSA: Regular la afluencia de vehículos en temporada turística.\nCONSECUENCIAS: Aplicación prevista para el próximo verano.\nTIPO: Ley, Decisión política\nTEMAS: Política, Transporte\nUBICACIÓN: Baleares, Mallorca\nIMPORTANCIA: 4\nINTERÉS: 3",
+    "source": "https://www.diariodemallorca.es/",
+    "url": "https://www.diariodemallorca.es/mallorca/2026/09/02/mallorca-fijara-acabe-ano-limite-133876446.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 4,
+        "immigration_relevance": 2,
+        "practical_value": 4,
+        "impact": 5,
+        "novelty": 7,
+        "emotion": 4,
+        "discussion": 7,
+        "urgency": 3,
+        "content_potential": 6,
+        "evergreen": 5
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.5
+      },
+      "categories": [
+        "transport",
+        "travel",
+        "politics"
+      ],
+      "audience": [
+        "resident",
+        "tourist"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news",
+        "explainer"
+      ],
+      "why": [
+        "касается конкретного региона (Мальорка), а не всей Испании",
+        "важно для тех, кто планирует поездки на Балеарские острова на машине или аренду авто",
+        "вводит новые ограничения и возможные сборы для туристов и местных автомобилистов"
+      ],
+      "editorial_angles": [
+        "как новые ограничения на авто изменят отдых на Мальорке",
+        "сколько придется платить за въезд и кого это коснется",
+        "опыт Балеар: станет ли это трендом для других регионов Испании"
+      ],
+      "confidence": 0.95
+    },
+    "news_score": 2.55,
+    "content_score": 5.55,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:26:05.050001+00:00"
+  }
+]

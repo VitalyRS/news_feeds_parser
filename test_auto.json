@@ -1,0 +1,604 @@
+[
+  {
+    "id": 247219,
+    "title": "El Gobierno de Canarias buscará nuevos dueños para negocios sin relevo generacional",
+    "summary": "El Gobierno de Canarias destinará 2,1 millones de euros a dos programas para apoyar a autónomos y negocios locales. 'Continúa Canarias' (600.000 euros) facilitará el traspaso de negocios viables sin relevo generacional, mientras que 'Reactívate' (1,5 millones) ofrecerá apoyo integral a autónomos con dificultades financieras.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/economia/2026/09/02/gobierno-canarias-buscara-nuevos-duenos-133880248.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 5,
+        "immigration_relevance": 2,
+        "practical_value": 6,
+        "impact": 5,
+        "novelty": 6,
+        "emotion": 3,
+        "discussion": 5,
+        "urgency": 3,
+        "content_potential": 7,
+        "evergreen": 5
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "economy",
+        "jobs",
+        "consumer",
+        "interesting_spain"
+      ],
+      "audience": [
+        "resident",
+        "potential_immigrant",
+        "immigrant"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news",
+        "explainer",
+        "guide"
+      ],
+      "why": [
+        "новость касается только одного региона Испании (Канарские острова)",
+        "не имеет прямого отношения к большинству русскоязычных жителей",
+        "может быть интересна тем, кто ищет бизнес или хочет его продать на Канарских островах"
+      ],
+      "editorial_angles": [
+        "как правительство Канарских островов помогает бизнесу",
+        "возможности для предпринимателей на островах",
+        "что такое 'relevo generacional' и почему это важно для экономики"
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 3.5,
+    "content_score": 5.9,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:50.438651+00:00"
+  },
+  {
+    "id": 247218,
+    "title": "Los afectados por la Ley de Costas piden frenar los derribos en Canarias",
+    "summary": "TÍTULO: Los afectados por la Ley de Costas piden frenar los derribos en Canarias\n\nFECHA: 2 de septiembre de",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/canarias/2026/09/02/afectados-ley-costas-piden-frenar-133881528.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 6,
+        "immigration_relevance": 1,
+        "practical_value": 3,
+        "impact": 5,
+        "novelty": 6,
+        "emotion": 5,
+        "discussion": 6,
+        "urgency": 2,
+        "content_potential": 5,
+        "evergreen": 4
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "housing",
+        "consumer",
+        "politics",
+        "society"
+      ],
+      "audience": [
+        "resident",
+        "immigrant",
+        "potential_immigrant"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news",
+        "opinion"
+      ],
+      "why": [
+        "новость касается конкретного региона (Канарские острова)",
+        "затрагивает узкую группу людей, чья собственность находится в прибрежной зоне",
+        "не имеет прямого практического применения для большинства жителей Испании"
+      ],
+      "editorial_angles": [
+        "как закон о побережье влияет на владельцев недвижимости в прибрежных зонах",
+        "истории людей, столкнувшихся с угрозой сноса",
+        "мнения экспертов о применении закона о побережье на Канарских островах"
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 2.9,
+    "content_score": 4.55,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:50.247331+00:00"
+  },
+  {
+    "id": 247214,
+    "title": "Las mareas vivas agitan las costas de Canarias al coincidir con fuerte oleaje: qué son y cuándo alcanzarán su máximo",
+    "summary": "Las costas de Canarias, especialmente en Tenerife, La Gomera y Gran Canaria, se encuentran en prealerta por fenómenos costeros debido a la coincidencia de mareas vivas, conocidas como 'mareas del Pino', con un fuerte oleaje que podría dejar olas de entre 2,5 y 4 metros. La Dirección General de Emergencias y la Aemet recomiendan extremar las precauciones, evitar zonas costeras expuestas como diques o paseos marítimos y seguir las recomendaciones de seguridad ante el incremento del riesgo en el litoral.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/canarias/2026/09/02/mareas-vivas-agitan-costas-canarias-133867476.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 3,
+        "immigration_relevance": 0,
+        "practical_value": 2,
+        "impact": 3,
+        "novelty": 5,
+        "emotion": 4,
+        "discussion": 3,
+        "urgency": 6,
+        "content_potential": 4,
+        "evergreen": 1
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "weather",
+        "events",
+        "interesting_spain"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news",
+        "explainer"
+      ],
+      "why": [
+        "новость касается только жителей Канарских островов",
+        "не имеет практической ценности для большинства читателей",
+        "информация о погодных явлениях, не влияющих на жизнь в других регионах"
+      ],
+      "editorial_angles": [
+        "как природные явления влияют на жизнь островитян",
+        "особенности климата Канарских островов",
+        "рекомендации по безопасности во время экстремальных погодных условий"
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 1.5,
+    "content_score": 2.65,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:50.151528+00:00"
+  },
+  {
+    "id": 247210,
+    "title": "El oligarca venezolano muy próximo a Trump e investigado por corrupción que pone sus ojos en Canarias",
+    "summary": "El magnate y oligarca venezolano Alejandro Betancourt, estrechamente vinculado a la administración de Donald Trump e investigado por corrupción y blanqueo de capitales, ha puesto su foco empresarial en Canarias. Aunque no se trata de inversiones directas, su plataforma promueve las oportunidades energéticas del Archipiélago, destacando el potencial de la eólica marina —como el proyecto Gofio en Gran Canaria— y la geotermia, aprovechando el origen volcánico de las islas. Además, su trayectoria empresarial e judicial tiene profundas conexiones con España, donde sociedades de su grupo han acumulado propiedades investigadas por presunto blanqueo y la Audiencia Nacional mantiene abiertas causas relacionadas con fondos de PDVSA.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/canarias/2026/09/02/oligarca-venezolano-proximo-trump-investigado-133881485.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 3,
+        "immigration_relevance": 2,
+        "practical_value": 2,
+        "impact": 3,
+        "novelty": 6,
+        "emotion": 4,
+        "discussion": 5,
+        "urgency": 2,
+        "content_potential": 5,
+        "evergreen": 3
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.5
+      },
+      "categories": [
+        "economy",
+        "interesting_spain",
+        "politics"
+      ],
+      "audience": [
+        "resident",
+        "potential_immigrant",
+        "general"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news",
+        "interesting_fact"
+      ],
+      "why": [
+        "новость касается конкретного региона (Канарские острова) и не имеет прямого отношения к большинству жителей Испании.",
+        "упоминание связей с Трампом и расследования коррупции добавляет элемент интриги, но не влияет на повседневную жизнь.",
+        "потенциально может вызвать интерес у тех, кто следит за крупными инвестициями и энергетическим сектором, а также у тех, кто интересуется связями между Венесуэлой, США и Испанией."
+      ],
+      "editorial_angles": [
+        "инвестиции в энергетику на Канарских островах: что это значит для региона?",
+        "связи венесуэльского олигарха с Испанией: расследования и недвижимость.",
+        "влияние американской политики на испанские инвестиции: случай с Трампом и Бетанкуром."
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 1.3,
+    "content_score": 3.9,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:52.401276+00:00"
+  },
+  {
+    "id": 247208,
+    "title": "«El pueblo unido jamás será vencido»: miles de personas salen a la calle en Santa Cruz de Tenerife en apoyo a Ceuta",
+    "summary": "Miles de personas se manifestaron en Santa Cruz de Tenerife, Las Palmas de Gran Canaria y otros municipios canarios para mostrar su solidaridad con Ceuta y exigir al Gobierno central una mayor protección de las fronteras y una respuesta más firme ante la crisis migratoria. Las movilizaciones, celebradas en coincidencia con el Día Nacional de Ceuta, congregaron a unos 2.000 manifestantes frente al Ayuntamiento de Santa Cruz, quienes portaron banderas de España, Canarias y Ceuta, corearon consignas contra el presidente Pedro Sánchez y reclamaron más recursos para hacer frente a la llegada continua de embarcaciones al Archipiélago.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/canarias/2026/09/02/pueblo-unido-sera-vencido-miles-133888787.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 3,
+        "immigration_relevance": 5,
+        "practical_value": 1,
+        "impact": 3,
+        "novelty": 4,
+        "emotion": 5,
+        "discussion": 6,
+        "urgency": 2,
+        "content_potential": 4,
+        "evergreen": 1
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 1.0
+      },
+      "categories": [
+        "society",
+        "politics",
+        "immigration"
+      ],
+      "audience": [
+        "resident",
+        "immigrant",
+        "potential_immigrant"
+      ],
+      "locality": "local",
+      "formats": [
+        "news",
+        "opinion"
+      ],
+      "why": [
+        "Новость касается конкретного города (Санта-Крус-де-Тенерифе) и его жителей, а не всей Испании.",
+        "Хотя тема миграции важна, сама новость — это митинг, а не изменение политики или правил.",
+        "Новость носит политический характер, выражая мнение одной группы, что снижает её объективность и практическую ценность.",
+        "Эмоциональный заряд присутствует из-за лозунгов и призывов, но не является шокирующим или уникальным."
+      ],
+      "editorial_angles": [
+        "Как митинги в поддержку Сеуты отражают настроения на Канарских островах?",
+        "Какова реальная позиция правительства Испании по миграционному кризису на фоне таких протестов?",
+        "Сравнение реакции жителей Канарских островов на миграционный кризис с другими регионами Испании."
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 0.7,
+    "content_score": 3.05,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:52.583351+00:00"
+  },
+  {
+    "id": 247215,
+    "title": "Custodiado en Tenerife un remolcador interceptado con tres toneladas de cocaína",
+    "summary": "La Policía y la Guardia Civil interceptaron en aguas cercanas a Canarias un remolcador panameño con más de 3.300 kg de cocaína. El barco, llamado GT Victory, fue custodiado en el puerto de Santa Cruz de Tenerife y sus ocho tripulantes detenidos. Se incautaron 139 fardos de droga con un peso total de 3.361 kg. Los detenidos fueron trasladados a Las Palmas de Gran Canaria a la espera de la decisión judicial de la Audiencia Nacional.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/sucesos/sucesos-en-canarias/2026/09/02/custodiado-tenerife-remolcador-interceptado-tres-133878889.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 2,
+        "immigration_relevance": 0,
+        "practical_value": 0,
+        "impact": 2,
+        "novelty": 5,
+        "emotion": 3,
+        "discussion": 2,
+        "urgency": 2,
+        "content_potential": 2,
+        "evergreen": 0
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "crime",
+        "interesting_spain"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "Новость касается конкретного инцидента на Тенерифе, не имеющего прямого отношения к жизни большинства русскоязычных жителей Испании.",
+        "Не содержит практической пользы или информации для повседневной жизни.",
+        "Хотя и является криминальной новостью, её масштаб локален и не затрагивает широкие слои населения."
+      ],
+      "editorial_angles": [
+        "Крупная партия наркотиков перехвачена у берегов Канарских островов.",
+        "Восемь человек задержаны по подозрению в контрабанде кокаина."
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 0.25,
+    "content_score": 1.1,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:50.335246+00:00"
+  },
+  {
+    "id": 247216,
+    "title": "Rescatan a una senderista de 74 años tras sufrir una caída en La Palma",
+    "summary": "TÍTULO: Rescate de senderista de 74 años tras caída en La Palma\n\nFECHA: —\n\nFUENTE: El Día (eldia.es)\n\nRESUMEN:\nUna senderista de 74 años sufrió una caída sobre las 15:15 horas en una zona de costa del Sendero Caldera del Agua con La Zarza, en el municipio de Garafía (La Palma). Fue rescatada por Bomberos de La Palma y Medio Ambiente y trasladada al Centro de Salud de Los Llanos de Aridane con un traumatismo moderado en miembro inferior.\n\nHECHOS CLAVE:\n- La mujer, de 74 años, cayó sobre las 15:15 horas en zona de costa.\n- Lugar: Sendero Caldera del Agua con La Zarza, Garafía, La Palma.\n- Presentaba traumatismo moderado en miembro inferior.\n- Trasladada en ambulancia al Centro de Salud de Los Llanos de Aridane.\n\nPERSONAS:\n- —\n\nORGANIZACIONES:\n- Centro Coordinador de Emergencias y Seguridad (CECOES) 112 del Gobierno de Canarias\n- Bomberos de La Palma\n- Medio Ambiente (Cabildo)\n- Centro de Salud de Los Llanos de Aridane\n\nPOLÍTICAS/MEDIDAS:\n- —\n\nCAUSA:\nCaída de la senderista durante el recorrido por el sendero.\n\nCONSECUENCIAS:\nHerida con traumatismo moderado en miembro inferior; traslado hospitalario.\n\nTIPO:\n[Noticia, Accidente, Operación de rescate]\n\nTEMAS:\n[Seguridad, Senderismo]\n\nUBICACIÓN:\nCanarias, Santa Cruz de Tenerife (provincia), La Palma, Garafía\n\nIMPORTANCIA:\n1\n\nINTERÉS:\n1",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/sucesos/sucesos-en-canarias/2026/09/02/rescatan-senderista-74-anos-sufrir-133888663.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 0,
+        "practical_value": 0,
+        "impact": 1,
+        "novelty": 2,
+        "emotion": 3,
+        "discussion": 1,
+        "urgency": 1,
+        "content_potential": 1,
+        "evergreen": 0
+      },
+      "penalties": {
+        "too_local": 2.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "events",
+        "interesting_spain"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "Новость касается только одного конкретного происшествия на острове Ла-Пальма.",
+        "Не имеет никакого отношения к жизни большинства русскоязычных жителей Испании.",
+        "Не содержит практической пользы или информации для аудитории."
+      ],
+      "editorial_angles": [
+        "Единичные случаи происшествий во время туристических активностей в Испании."
+      ],
+      "confidence": 0.98
+    },
+    "news_score": 0.0,
+    "content_score": 0.55,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:50.076435+00:00"
+  },
+  {
+    "id": 247211,
+    "title": "Gomis y Jureskin debutan y Dani Fernández y Jesús de Miguel golean en el amistoso entre CD Tenerife y CD Laguna (5-0)",
+    "summary": "El CD Tenerife se impuso por 5-0 al CD Laguna en un partido amistoso disputado en la Ciudad Deportiva de Tenerife Javier Pérez. El encuentro destacó por los dobletes de Dani Fernández y Jesús de Miguel, la actuación de Anes Krdzalic y los debuts de los nuevos fichajes Christian Gomis y Roko Jureskin, ante unos 400 aficionados.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/deportes/cd-tenerife/2026/09/02/amistoso-cd-tenerife-cd-laguna-133886380.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 0,
+        "practical_value": 1,
+        "impact": 1,
+        "novelty": 2,
+        "emotion": 2,
+        "discussion": 1,
+        "urgency": 1,
+        "content_potential": 1,
+        "evergreen": 0
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "events",
+        "interesting_spain"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "новость о товарищеском матче между двумя футбольными клубами на Тенерифе",
+        "не имеет отношения к жизни большинства русскоязычных жителей Испании",
+        "не содержит практической пользы или актуальной информации"
+      ],
+      "editorial_angles": [],
+      "confidence": 0.99
+    },
+    "news_score": 0.0,
+    "content_score": 0.75,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:51.698569+00:00"
+  },
+  {
+    "id": 247213,
+    "title": "Herida una motorista tras sufrir una colisión con un turismo en Tenerife",
+    "summary": "Una motorista resultó herida de carácter moderado con policontusiones tras colisionar contra un turismo en la carretera general de Santa Cruz a La Laguna, a la altura de la Vuelta de los Pájaros, en Tenerife. El Centro Coordinador de Emergencias y Seguridad (CECOES) 112 activó los recursos necesarios y la afectada fue trasladada por el personal sanitario al Hospital Universitario Nuestra Señora de la Candelaria.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/sucesos/sucesos-en-canarias/2026/09/02/herida-motorista-sufrir-colision-turismo-133885525.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 0,
+        "practical_value": 0,
+        "impact": 1,
+        "novelty": 2,
+        "emotion": 3,
+        "discussion": 1,
+        "urgency": 1,
+        "content_potential": 1,
+        "evergreen": 0
+      },
+      "penalties": {
+        "too_local": 2.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "transport",
+        "crime",
+        "events"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "новость о ДТП на острове Тенерифе",
+        "не имеет отношения к жизни большинства русскоязычных жителей Испании",
+        "не содержит практической пользы или новой информации"
+      ],
+      "editorial_angles": [],
+      "confidence": 0.98
+    },
+    "news_score": 0.0,
+    "content_score": 0.55,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:51.817380+00:00"
+  },
+  {
+    "id": 247209,
+    "title": "El Chorrillo se transformará en un nuevo pulmón industrial de Santa Cruz con una inversión de casi 13 millones de euros",
+    "summary": "El Cabildo de Tenerife ha aprobado inicialmente el proyecto de urbanización 'El Chorrillo Industrial', que transformará 29 hectáreas de suelo en Santa Cruz de Tenerife con una inversión público-privada de casi 13 millones de euros y un plazo de ejecución de 26 meses. Esta actuación, declarada de Interés Estratégico por el Gobierno de Canarias, busca completar la zona industrial del Suroeste e incluye infraestructuras clave como una estación depuradora de aguas residuales (EDAR) comarcal, la ampliación de la planta de residuos, una nueva subestación eléctrica y mejoras en la movilidad y eficiencia. El proyecto también contempla medidas específicas de protección para preservar los yacimientos arqueológicos de la zona.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/tenerife/2026/09/02/el-chorrillo-industrial-santa-cruz-pulmon-133872191.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 2,
+        "immigration_relevance": 0,
+        "practical_value": 1,
+        "impact": 2,
+        "novelty": 3,
+        "emotion": 1,
+        "discussion": 1,
+        "urgency": 1,
+        "content_potential": 2,
+        "evergreen": 1
+      },
+      "penalties": {
+        "too_local": 2.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "economy",
+        "transport",
+        "interesting_spain"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "Новость касается только одного конкретного района на острове Тенерифе.",
+        "Не имеет прямого отношения к жизни большинства русскоязычных жителей Испании.",
+        "Не содержит практической информации или инструкций для читателей."
+      ],
+      "editorial_angles": [
+        "Как развитие промышленных зон влияет на экономику региона?",
+        "Инвестиции в инфраструктуру: что это значит для местных жителей?"
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 0.0,
+    "content_score": 1.35,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:51.838154+00:00"
+  }
+]

@@ -37,7 +37,6 @@
     "http://www.diariodeburgos.es/RSS/DBPortada.xml",
     "https://www.diariovasco.com/rss/2.0/portada/",
     "https://www.elnortedecastilla.es/rss/2.0/portada/",
-    "https://www.diariosur.es/rss/2.0/portada/",
     "https://www.expansion.com/rss/portada",
     "https://cincodias.elpais.com/rss/",
     "https://cadenaser.com/feed/",
@@ -53,7 +52,15 @@
     "https://www.laopiniondemurcia.es/",
     "https://www.diariodeibiza.es/",
     "https://www.eldia.es/",
-    "https://www.laprovincia.es/"
+    "https://www.laprovincia.es/",
+    "https://www.europapress.es/rss/rss.aspx",
+    "https://theobjective.com/feed/",
+    "https://www.ara.cat/rss/",
+    "https://www.economiadigital.es/feed",
+    "https://cronicaglobal.elespanol.com/rss/",
+    "https://www.moncloa.com/feed/",
+    "https://www.republica.com/feed/",
+    "https://www.epe.es/"
   ],
   "atom": []
 }

@@ -1,0 +1,70 @@
+# ==============================================================================
+# Git Ignore - News Feeds Parser & NotebookLM Pipeline
+# ==============================================================================
+
+# --- Секреты, ключи и токены авторизации Google API ---
+service_account*.json
+credentials*.json
+token*.json
+client_secret*.json
+*.pem
+*.key
+.env
+.env.*
+
+# --- Кэш синхронизации и состояние ---
+gdrive_cache.json
+.pipeline_state.json
+
+# --- Базы данных SQLite ---
+*.db
+*.db-journal
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# --- Логи ---
+*.log
+cron_execution.log
+
+# --- Python кэш и байт-код ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+/koyeb
+/NewsRAG
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Виртуальные окружения ---
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Настройки IDE и редакторов ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

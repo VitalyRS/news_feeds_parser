@@ -1,0 +1,293 @@
+[
+  {
+    "id": 247331,
+    "title": "El carril Bus-VAO de la A-2 todavía no es definitivo: cuándo acabará su 'prueba' y quiénes puedan usarlo",
+    "summary": "El carril Bus-VAO de la A-2 (Madrid) está en fase de pruebas hasta la segunda semana de septiembre. Actualmente opera de 7 a 9 horas y de 15 a 17 horas en sentido salida de Madrid, restringido a autobuses, vehículos con dos o más ocupantes, motocicletas y vehículos autorizados. Tras las pruebas, se evaluará su viabilidad como carril definitivo.",
+    "source": "https://www.epe.es/",
+    "url": "https://www.epe.es/es/madrid/alcala-de-henares/20260902/carril-bus-vao-alcala-henares-fechas-pruebas-133880347",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 5,
+        "immigration_relevance": 2,
+        "practical_value": 6,
+        "impact": 4,
+        "novelty": 5,
+        "emotion": 3,
+        "discussion": 4,
+        "urgency": 4,
+        "content_potential": 5,
+        "evergreen": 4
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "transport",
+        "cars"
+      ],
+      "audience": [
+        "resident"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "касается автомобилистов, пользующихся выездом из Мадрида по трассе A-2",
+        "важно для планирования утренних и вечерних поездок",
+        "ограничено конкретным регионом Мадрида, что снижает общенациональную ценность"
+      ],
+      "editorial_angles": [
+        "как работает тестовый режим выделенной полосы на A-2",
+        "правила въезда для водителей и штрафы за нарушение"
+      ],
+      "confidence": 0.95
+    },
+    "news_score": 3.05,
+    "content_score": 4.75,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:23:34.665536+00:00"
+  },
+  {
+    "id": 247334,
+    "title": "¿Qué es un domo de calor y cómo afectará a Castilla-La Mancha con temperaturas de casi 40 ºC?",
+    "summary": "La Agencia Estatal de Meteorología (AEMET) alerta de un 'domo de calor' que elevará las temperaturas hasta 40°C en Castilla-La Mancha, especialmente en Toledo, entre el 4 y 5 de septiembre de 2026. Este fenómeno atmosférico, causado por altas presiones, generará calor persistente y noches tropicales (mínimas de 22°C). Se prevén riesgos de incendios forestales y un episodio que podría extenderse hasta el fin de semana, con posible inestabilidad posterior.",
+    "source": "https://www.epe.es/",
+    "url": "https://www.epe.es/es/toledo/20260902/domo-calor-afectara-castilla-mancha-133867691",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 5,
+        "immigration_relevance": 0,
+        "practical_value": 4,
+        "impact": 3,
+        "novelty": 5,
+        "emotion": 4,
+        "discussion": 4,
+        "urgency": 6,
+        "content_potential": 4,
+        "evergreen": 1
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.5,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "weather",
+        "interesting_spain"
+      ],
+      "audience": [
+        "resident",
+        "family"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "новость касается конкретного региона (Кастилия-Ла-Манча) и провинции Толедо",
+        "предупреждение об аномальной жаре важно для местных жителей, но не имеет общенационального масштаба",
+        "носит сезонный и кратковременный характер"
+      ],
+      "editorial_angles": [
+        "как пережить аномальную жару в центральной Испании",
+        "правила безопасности при риске лесных пожаров"
+      ],
+      "confidence": 0.95
+    },
+    "news_score": 1.85,
+    "content_score": 3.25,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:23:33.218534+00:00"
+  },
+  {
+    "id": 247333,
+    "title": "¿Cuándo empiezan las clases en la Universidad de Alcalá? Esta es la fecha del curso 2026/2027",
+    "summary": "La Universidad de Alcalá (UAH) inicia el curso académico 2026/2027 el 7 de septiembre (9 de septiembre en Guadalajara). El primer cuatrimestre termina el 18 de diciembre, con exámenes del 8 al 21 de enero. El segundo cuatrimestre comienza el 25 de enero y finaliza el 14 de mayo, con exámenes ordinarios del 17 al 29 de mayo y extraordinarios del 24 de junio al 7 de julio. Incluye festivos locales y nacionales, como el 12 de octubre o el 2 de mayo en algunos campus.",
+    "source": "https://www.epe.es/",
+    "url": "https://www.epe.es/es/madrid/alcala-de-henares/20260902/cuando-empieza-universidad-alcala-henares-fecha-133867563",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 3,
+        "immigration_relevance": 3,
+        "practical_value": 4,
+        "impact": 2,
+        "novelty": 7,
+        "emotion": 1,
+        "discussion": 1,
+        "urgency": 2,
+        "content_potential": 3,
+        "evergreen": 5
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "education"
+      ],
+      "audience": [
+        "resident",
+        "family"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "новости касается только студентов и преподавателей конкретного университета в Алькала-де-Энарес и Гвадалахаре",
+        "не имеет широкого значения для большинства русскоязычных жителей Испании",
+        "практическая ценность ограничена узкой академической аудиторией"
+      ],
+      "editorial_angles": [
+        "календарь нового учебного года для студентов Университета Алькала"
+      ],
+      "confidence": 0.98
+    },
+    "news_score": 1.7,
+    "content_score": 3.3,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:23:32.985481+00:00"
+  },
+  {
+    "id": 247332,
+    "title": "Pozuelo abre el último plazo para solicitar las ayudas por nacimiento, adopción o acogimiento: estos son los requisitos",
+    "summary": "El Ayuntamiento de Pozuelo de Alarcón (Madrid) abre el último plazo para solicitar ayudas municipales por nacimiento, adopción o acogimiento de menores nacidos entre mayo y agosto de 2026. Las ayudas oscilan entre 1.500 y 2.700 euros, con incrementos por número de hijos o discapacidad. El plazo finaliza el 15 de septiembre y pueden solicitarlo familias empadronadas en Pozuelo con al menos dos años de antigüedad. También se permite subsanar errores de convocatorias anteriores.",
+    "source": "https://www.epe.es/",
+    "url": "https://www.epe.es/es/madrid/pozuelo-de-alarcon/20260902/pozuelo-abre-ultimo-plazo-solicitar-ayudas-nacimiento-adopcion-acogimiento-133880291",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 2,
+        "immigration_relevance": 2,
+        "practical_value": 3,
+        "impact": 1,
+        "novelty": 5,
+        "emotion": 3,
+        "discussion": 1,
+        "urgency": 4,
+        "content_potential": 2,
+        "evergreen": 1
+      },
+      "penalties": {
+        "too_local": 2.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "family",
+        "education"
+      ],
+      "audience": [
+        "resident",
+        "family"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "новость касается исключительно жителей одного конкретного муниципалитета — Посуэло-де-Аларкон в Мадриде",
+        "требуется двухлетняя прописка, что сужает аудиторию до минимума",
+        "не имеет значения для русскоязычных экспатов, живущих в других городах Испании"
+      ],
+      "editorial_angles": [
+        "гид по местным субсидиям для жителей Мадрида и пригородов"
+      ],
+      "confidence": 0.98
+    },
+    "news_score": 0.45,
+    "content_score": 1.75,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:23:33.012150+00:00"
+  },
+  {
+    "id": 247337,
+    "title": "Enric Mas supera feliz otra etapa trampa camino de la montaña",
+    "summary": "Enric Mas, líder de la Vuelta a España, supera una etapa llana en Murcia bajo altas temperaturas. Destaca su dominio en la carrera, la protección de su equipo Movistar y su actitud positiva. La etapa, ganada por el británico Matthew Brennan, se desarrolló en Lorca con condiciones extremas de calor. Mas, que habla catalán, interactúa con la prensa y reflexiona sobre la estrategia frente a rivales como Pogacar. La Vuelta, sin Pogacar, se muestra más igualada y con mayor atención a la seguridad de los líderes.",
+    "source": "https://www.epe.es/",
+    "url": "https://www.elperiodico.com/es/deportes/20260902/esprint-victorioso-brennan-define-vuelta-133880298",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 0,
+        "practical_value": 0,
+        "impact": 1,
+        "novelty": 2,
+        "emotion": 3,
+        "discussion": 1,
+        "urgency": 1,
+        "content_potential": 2,
+        "evergreen": 0
+      },
+      "penalties": {
+        "too_local": 0.0,
+        "repetitive": 1.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "events",
+        "interesting_spain"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "новость о спорте и гонке Вуэльта — не влияет на повседневную жизнь русскоязычных экспатов в Испании",
+        "отсутствие практических действий или рекомендаций для читателей",
+        "тема спорта привлекательна лишь узкой аудитории, не является системной или срочной"
+      ],
+      "editorial_angles": [
+        "интервью с Энриком Масом о подготовке к этапу",
+        "анализ тактики команды Movistar в условиях жары",
+        "обзор этапа в Мурсии и влияние погоды на результаты"
+      ],
+      "confidence": 0.95
+    },
+    "news_score": 0.0,
+    "content_score": 0.9,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:23:43.727536+00:00"
+  }
+]

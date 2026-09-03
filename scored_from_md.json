@@ -1,0 +1,278 @@
+[
+  {
+    "id": null,
+    "title": "Shanghái y el problema real de la Universidad de Oviedo",
+    "summary": "El artículo aborda el descenso de la Universidad de Oviedo en el Ranking de Shanghái y argumenta que el problema fundamental no radica en sesgos académicos, sino en la deficiente y burocratizada gestión administrativa del servicio de investigación. Según el autor, la falta de profesionalización del personal administrativo y los obstáculos burocráticos dificultan la ejecución de proyectos, perjudicando la producción científica y la financiación de la institución académica asturiana.",
+    "source": "** https://www.lne.es/",
+    "url": "https://www.lne.es/opinion/2026/09/01/shanghai-problema-real-universidad-oviedo-133854038.html",
+    "published_at": "2026-09-02",
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 3,
+        "immigration_relevance": 2,
+        "practical_value": 2,
+        "impact": 3,
+        "novelty": 5,
+        "emotion": 3,
+        "discussion": 4,
+        "urgency": 1,
+        "content_potential": 3,
+        "evergreen": 3
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "education"
+      ],
+      "audience": [
+        "resident"
+      ],
+      "locality": "regional",
+      "formats": [
+        "opinion"
+      ],
+      "why": [
+        "новость касается конкретного регионального вуза в Астурии",
+        "обсуждается локальная академическая и бюрократическая проблема",
+        "не имеет прямого практического значения для большинства русскоязычных экспатов в Испании"
+      ],
+      "editorial_angles": [
+        "проблемы испанской университетской бюрократии глазами местных СМИ"
+      ],
+      "confidence": 0.95
+    },
+    "news_score": 1.35,
+    "content_score": 3.0,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:26:54.305640+00:00"
+  },
+  {
+    "id": null,
+    "title": "Julián Álvarez, bohemio y soñador",
+    "summary": "El artículo de opinión deportiva analiza la situación del futbolista argentino Julián Álvarez en el Atlético de Madrid tras frustrarse su posible fichaje por el FC Barcelona. El texto explora la deshumanización de los futbolistas de élite convertidos en activos millonarios con cláusulas de rescisión exorbitantes, como la de 500 millones de euros impuesta por el club rojiblanco. A través de referencias literarias y futbolísticas, se reflexiona sobre el descontento del jugador con el estilo de juego del 'cholismo' y su deseo de recalar en el conjunto azulgrana, describiendo las tensiones del mercado de fichajes actual en el contexto del fútbol español y la relación del deportista con la afición del Metropolitano.",
+    "source": "** https://www.lne.es/",
+    "url": "https://www.lne.es/opinion/2026/09/02/julian-alvarez-bohemio-sonador-133857968.html",
+    "published_at": "2026-09-02",
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 0,
+        "practical_value": 0,
+        "impact": 1,
+        "novelty": 2,
+        "emotion": 3,
+        "discussion": 3,
+        "urgency": 1,
+        "content_potential": 1,
+        "evergreen": 0
+      },
+      "penalties": {
+        "too_local": 0.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "culture"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "national",
+      "formats": [
+        "opinion"
+      ],
+      "why": [
+        "это чисто спортивная колонка об игроке футбольного клуба",
+        "новость не несёт практической пользы для жизни, легализации или адаптации в Испании",
+        "тема футбола и трансферов не затрагивает повседневные проблемы экспатов"
+      ],
+      "editorial_angles": [],
+      "confidence": 0.98
+    },
+    "news_score": 1.0,
+    "content_score": 0.95,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:26:50.260247+00:00"
+  },
+  {
+    "id": null,
+    "title": "Nos cuesta vernos de peón en tablero",
+    "summary": "El artículo de opinión reflexiona sobre la dificultad histórica de España para asumirse como una pieza menor en la geopolítica internacional debido a su pasado imperial. Analiza críticamente la gestión gubernamental de la crisis migratoria y fronteriza en Ceuta, señalando que pudo tratarse de una operación a gran escala impulsada por potencias extranjeras con alta capacidad tecnológica, con posibles complicidades por omisión de Marruecos. Asimismo, advierte que España se encuentra en una posición delicada, atrapada en un contexto de tensiones entre bloques en Europa tras haber tomado decisiones propias en política exterior, recordando que ignorar estos factores externos no elimina la realidad de la vulnerabilidad del país.",
+    "source": "** https://www.lne.es/",
+    "url": "https://www.lne.es/opinion/2026/09/02/cuesta-vernos-peon-tablero-133855481.html",
+    "published_at": "2026-09-02",
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 2,
+        "immigration_relevance": 3,
+        "practical_value": 1,
+        "impact": 3,
+        "novelty": 3,
+        "emotion": 4,
+        "discussion": 4,
+        "urgency": 1,
+        "content_potential": 2,
+        "evergreen": 1
+      },
+      "penalties": {
+        "too_local": 0.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 1.5
+      },
+      "categories": [
+        "politics"
+      ],
+      "audience": [
+        "resident"
+      ],
+      "locality": "national",
+      "formats": [
+        "opinion"
+      ],
+      "why": [
+        "Это авторская аналитическая колонка об абстрактной геополитике и историческом самоощущении Испании.",
+        "Новость не содержит практической пользы или инструкций для жителей и экспатов.",
+        "Тема носит умозрительный характер и перегружена политическими рассуждениями без конкретных законодательных изменений."
+      ],
+      "editorial_angles": [],
+      "confidence": 0.98
+    },
+    "news_score": 0.8,
+    "content_score": 1.95,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:26:46.000853+00:00"
+  },
+  {
+    "id": null,
+    "title": "Gijón Impulsa calienta motores para celebrar sus Desayunos Tecnológicos IUTA: eficiencia energética y medioambiente serán los temas a tratar en este encuentro",
+    "summary": "Gijón Impulsa y el Instituto Universitario de Tecnología Industrial de Asturias (IUTA) celebrarán el 11 de septiembre el cuarto de sus Desayunos Tecnológicos en el Edificio Impulsa, situado en el Parque Científico Tecnológico de Gijón. Bajo el título 'Energía invisible: almacenando y recuperando calor para edificios del futuro', el evento contará con las ponencias de Andrés Meana Fernández y Matías Álvarez Rodríguez. La iniciativa se enmarca dentro de las actividades de dinamización de la innovación en la Milla del Conocimiento Margarita Salas.",
+    "source": "** https://www.lne.es/",
+    "url": "https://www.lne.es/gijon/2026/08/31/gijon-impulsa-calienta-motores-proximo-133803682.html",
+    "published_at": "2026-09-02",
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 0,
+        "practical_value": 1,
+        "impact": 1,
+        "novelty": 3,
+        "emotion": 1,
+        "discussion": 1,
+        "urgency": 1,
+        "content_potential": 1,
+        "evergreen": 1
+      },
+      "penalties": {
+        "too_local": 2.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "economy",
+        "interesting_spain"
+      ],
+      "audience": [
+        "resident"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "новость касается узкого локального мероприятия в Хихоне",
+        "не имеет практической ценности для большинства русскоязычных экспатов в Испании",
+        "интересна только специалистам конкретной узкой сферы в данном регионе"
+      ],
+      "editorial_angles": [],
+      "confidence": 0.98
+    },
+    "news_score": 0.0,
+    "content_score": 1.0,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:26:37.704740+00:00"
+  },
+  {
+    "id": null,
+    "title": "El Gremio de Mareantes: omnipresencia en la historia llanisca",
+    "summary": "El artículo repasa la historia y la profunda influencia del Gremio de Mareantes y la Cofradía de Pescadores de Llanes, recientemente galardonada con el Premio Pueblo Ejemplar de Asturias 2026 por la Fundación Princesa de Asturias. Desde el siglo XIII, el colectivo marinero ha desempeñado un papel fundamental en el desarrollo económico, social e institucional de esta localidad asturiana, participando en hitos como la defensa de la costa frente a ataques piratas y potencias extranjeras, el comercio marítimo y la configuración de la identidad local. El texto destaca anécdotas históricas, como el enfrentamiento del gremio con un obispo en el siglo XVI para impedir sufragios en la iglesia parroquial, subrayando el poder y legado perdurable de los hombres del mar en la historia llanisca y española.",
+    "source": "** https://www.lne.es/",
+    "url": "https://www.lne.es/opinion/2026/09/02/gremio-mareantes-omnipresencia-historia-llanisca-133855914.html",
+    "published_at": "2026-09-02",
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 0,
+        "practical_value": 0,
+        "impact": 1,
+        "novelty": 3,
+        "emotion": 3,
+        "discussion": 1,
+        "urgency": 0,
+        "content_potential": 2,
+        "evergreen": 3
+      },
+      "penalties": {
+        "too_local": 2.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "culture",
+        "interesting_spain"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "новость касается исключительно истории конкретного муниципалитета (Льянес в Астурии)",
+        "не имеет практической ценности для экспатов или жителей других регионов",
+        "носит чисто краеведческий и познавательный характер"
+      ],
+      "editorial_angles": [
+        "история и традиции прибрежных районов Астурии"
+      ],
+      "confidence": 0.98
+    },
+    "news_score": 0.0,
+    "content_score": 1.65,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:26:41.905208+00:00"
+  }
+]

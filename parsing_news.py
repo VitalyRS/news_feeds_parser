@@ -165,7 +165,7 @@ def deduplicate(articles: list[dict]) -> list[dict]:
 PRENSA_IBERICA_DOMAINS = {
     'lne.es', 'diariocordoba.com', 'farodevigo.es', 'elperiodicodearagon.com',
     'diariodemallorca.es', 'levante-emv.com', 'laopiniondemurcia.es',
-    'diariodeibiza.es', 'eldia.es', 'laprovincia.es',
+    'diariodeibiza.es', 'eldia.es', 'laprovincia.es', 'epe.es',
 }
 
 def parse_prensa_iberica(url: str) -> list[dict]:

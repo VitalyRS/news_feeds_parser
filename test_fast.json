@@ -1,0 +1,608 @@
+[
+  {
+    "id": 247235,
+    "title": "RIU aumenta un 62% su inversión social en 2025 y supera los cinco millones",
+    "summary": "La cadena hotelera RIU Hotels & Resorts, con sede en España, incrementó su inversión social un 62% en 2025, alcanzando los 5,13 millones de euros destinados a 119 proyectos. La compañía, que cerró el ejercicio con 4.188 millones de euros en ingresos, centró el 56% de su inversión en la infancia y avanzó en su estrategia de sostenibilidad, logrando que el 90% de su consumo eléctrico provenga de fuentes renovables.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/economia/2026/09/02/riu-aumenta-62-inversion-social-133885381.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 3,
+        "immigration_relevance": 0,
+        "practical_value": 1,
+        "impact": 3,
+        "novelty": 5,
+        "emotion": 3,
+        "discussion": 3,
+        "urgency": 1,
+        "content_potential": 4,
+        "evergreen": 2
+      },
+      "penalties": {
+        "too_local": 0.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "economy",
+        "society",
+        "interesting_spain"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "national",
+      "formats": [
+        "news",
+        "numbers"
+      ],
+      "why": [
+        "новость о социальной ответственности крупной испанской компании, но не имеет прямого отношения к повседневной жизни большинства резидентов",
+        "не затрагивает миграционные или практические вопросы",
+        "информация о финансовых показателях и инвестициях компании, интересна скорее для сферы бизнеса или тех, кто интересуется экономикой Испании в целом"
+      ],
+      "editorial_angles": [
+        "как крупные испанские компании инвестируют в социальные проекты",
+        "социальная ответственность бизнеса в Испании: пример RIU",
+        "финансовые итоги года для туристического сектора Испании"
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 2.5,
+    "content_score": 2.7,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:32.928359+00:00"
+  },
+  {
+    "id": 247229,
+    "title": "Lopesan recurre a la inteligencia artificial para combatir el desperdicio de alimentos en sus hoteles",
+    "summary": "TÍTULO: Lopesan usa inteligencia artificial para reducir el desperdicio alimentario en sus hoteles\n\nFECHA: 02/09/2026\n\nFUENTE: El Día / La Provincia - Diario de Las Palmas\n\nRESUMEN:\nLopesan Hotel Group ha implantado un sistema de inteligencia y visión artificial para medir en tiempo real las sobras de los buffets y ajustar compras y menús. El proyecto piloto se inicia en el Lopesan Baobab Resort con previsión de extensión progresiva al resto de la cadena, junto a Open Revenue Consulting, y persigue la certificación THE PLEDGE on Food Waste.\n\nHECHOS CLAVE:\n- El sistema Buffet Waste combina estaciones de pesaje inteligentes con visión artificial para registrar y analizar residuos en tiempo real.\n- En 2025 la tecnología logró una reducción del 79,6% del desperdicio en buffets implantados, con 0,011 kg de residuos por estancia.\n- Los residuos orgánicos se transforman en compost usado como abono en la Finca de Veneguera para producción agrícola de kilómetro cero.\n- La iniciativa adelanta el cumplimiento de la Ley 1/2025 de prevención de pérdidas y desperdicio alimentario.\n\nPERSONAS:\n—\n\nORGANIZACIONES:\n- Lopesan Hotel Group — cadena hotelera impulsora del proyecto\n- Open Revenue Consulting — consultora colaboradora\n\nPOLÍTICAS/MEDIDAS:\n- Ley 1/2025 de prevención de las pérdidas y el desperdicio alimentario\n- Certificación internacional THE PLEDGE on Food Waste\n\nCAUSA:\nNecesidad de reducir mermas alimentarias y anticiparse a la Ley 1/2025.\n\nCONSECUENCIAS:\nReducción del 79,6% del desperdicio en buffets; optimización de compras, logística y menús; aprovechamiento de residuos como compost.\n\nTIPO:\n[Noticia, Descubrimiento]\n\nTEMAS:\n[Tecnología, Inteligencia artificial, Turismo, Empresas, Medio ambiente]\n\nUBICACIÓN:\nCanarias, Las Palmas (Gran Canaria), Mogán (Veneguera)\n\nIMPORTANCIA:\n2\n\nINTERÉS:\n3",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/economia/2026/09/02/lopesan-recurre-inteligencia-artificial-combatir-133884933.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 3,
+        "immigration_relevance": 0,
+        "practical_value": 3,
+        "impact": 3,
+        "novelty": 7,
+        "emotion": 3,
+        "discussion": 5,
+        "urgency": 2,
+        "content_potential": 6,
+        "evergreen": 4
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "tourism",
+        "economy",
+        "environment",
+        "interesting_spain"
+      ],
+      "audience": [
+        "resident",
+        "immigrant",
+        "potential_immigrant"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news",
+        "explainer",
+        "interesting_fact"
+      ],
+      "why": [
+        "новость касается конкретной гостиничной сети и её инициативы на Канарских островах",
+        "не имеет прямого отношения к повседневной жизни большинства русскоязычных жителей Испании",
+        "интересна как пример внедрения новых технологий в туристическом секторе"
+      ],
+      "editorial_angles": [
+        "как испанские отели борются с пищевыми отходами",
+        "примеры использования ИИ в бизнесе Испании",
+        "экологические инициативы в туристической отрасли"
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 1.95,
+    "content_score": 4.7,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:32.880856+00:00"
+  },
+  {
+    "id": 247226,
+    "title": "El paro de larga duración cae en Canarias a mínimos desde 2009",
+    "summary": "TÍTULO: El paro de larga duración cae en Canarias a mínimos desde 2009\n\nFECHA: 02/09/2026\n\nFUENTE: El Día\n\nRESUMEN:\nEl mercado laboral de Canarias registró en agosto de 2026 un descenso interanual del desempleo del 3,8%, situándose en 144.459 personas. Destaca la reducción del paro de larga duración a niveles no vistos desde 2009, impulsada principalmente por la hostelería y la sanidad.\n\nHECHOS CLAVE:\n- El desempleo total en Canarias bajó en 5.756 personas respecto al año anterior.\n- El paro de larga duración se redujo en 4.899 personas.\n- La tasa de reducción interanual en Canarias (3,8%) supera la media nacional (2,9%).\n- El sector educativo sufrió un ajuste estacional con la pérdida de 1.962 afiliados en agosto.\n- El desempleo femenino (83.808) sigue siendo superior al masculino (60.651).\n\nPERSONAS:\n—\n\nORGANIZACIONES:\n- Sector hostelero\n- Sector sanitario\n\nPOLÍTICAS/MEDIDAS:\n—\n\nCAUSA:\nRefuerzo estacional de plantillas en hostelería y sanidad, compensado parcialmente por el fin del curso escolar.\n\nCONSECUENCIAS:\nMejora en las cifras de desempleo de larga duración y consolidación de la recuperación laboral en el archipiélago.\n\nTIPO:\nNoticia, Decisión política\n\nTEMAS:\nEconomía, Mercado laboral, Desempleo, Canarias\n\nUBICACIÓN:\nCanarias\n\nIMPORTANCIA:\n3\n\nINTERÉS:\n3",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/economia/2026/09/02/paro-larga-duracion-cae-canarias-133885281.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 3,
+        "immigration_relevance": 1,
+        "practical_value": 2,
+        "impact": 3,
+        "novelty": 5,
+        "emotion": 3,
+        "discussion": 4,
+        "urgency": 2,
+        "content_potential": 4,
+        "evergreen": 2
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "economy",
+        "jobs",
+        "statistics"
+      ],
+      "audience": [
+        "resident"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news",
+        "numbers"
+      ],
+      "why": [
+        "новость касается только одного региона Испании (Канарские острова)",
+        "не содержит практической информации для жителей других регионов",
+        "статистические данные без немедленного применения"
+      ],
+      "editorial_angles": [
+        "сравнение ситуации на Канарских островах с остальной Испанией",
+        "анализ причин снижения безработицы в конкретных секторах",
+        "долгосрочные перспективы рынка труда на островах"
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 1.4,
+    "content_score": 3.1,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:33.016127+00:00"
+  },
+  {
+    "id": 247232,
+    "title": "Torres ratifica que Canarias podrá usar 600 millones del superávit",
+    "summary": "TÍTULO: Torres confirma que Canarias usará más de 600 millones de superávit\n\nFECHA: —\nFUENTE: La Provincia - Diario de Las Palmas\n\nRESUMEN:\nEl ministro Ángel Víctor Torres ratificó que el próximo Consejo de Ministros aprobará el uso de más de 600 millones de euros del superávit de Canarias para servicios públicos esenciales. El decreto también incluye 100 millones para la agricultura de La Palma y la prórroga del descuento del 60% del IRPF en esa isla. En el Consejo de Política Fiscal y Financiera se aprobará un nuevo modelo de financiación que aportará 1.337 millones de euros adicionales anuales a Canarias.\n\nHECHOS CLAVE:\n- Más de 600 millones de euros del superávit de Canarias se destinarán a servicios públicos esenciales.\n- Se asignan 100 millones de euros al sector agrícola de La Palma.\n- Se prorroga el descuento del 60% del IRPF en La Palma.\n- El nuevo modelo de financiación aportará 1.337 millones de euros más al año a Canarias.\n- El Régimen Económico y Fiscal (REF) quedará excluido del sistema de financiación.\n- Matilde Asián (PP) no asistirá al CPFF; la sustituirá Nieves Lady Barreto.\n\nPERSONAS:\n- Ángel Víctor Torres — ministro de Política Territorial y Memoria Democrática — ratificó las medidas del decreto Canarias y criticó la ausencia de la consejera de Hacienda.\n- Fernando Clavijo — presidente del Gobierno de Canarias — negoció el contenido del decreto con Torres.\n- Matilde Asián — consejera de Hacienda de Canarias (PP) — no acudirá al Consejo de Política Fiscal y Financiera.\n- Nieves Lady Barreto — consejera de Administraciones Públicas de Canarias (Coalición Canaria) — asistirá en su lugar.\n\nORGANIZACIONES:\n- Gobierno de Canarias\n- Consejo de Ministros\n- Consejo de Política Fiscal y Financiera\n- Partido Popular (PP)\n- Coalición Canaria\n\nPOLÍTICAS/MEDIDAS:\n- Autorización para usar más de 600 millones de euros del superávit en servicios públicos esenciales.\n- Asignación de 100 millones de euros al sector agrícola de La Palma.\n- Prórroga del descuento del 60% del IRPF en La Palma.\n- Nuevo modelo de financiación autonómica con exclusión del REF.\n\nCAUSA:\n—\n\nCONSECUENCIAS:\n—\n\nTIPO:\nDecisión política, Noticia\n\nTEMAS:\nPolítica, Gobierno, Economía\n\nUBICACIÓN:\nCanarias\n\nIMPORTANCIA:\n3\n\nINTERÉS:\n3",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/canarias/2026/09/02/torres-ratifica-canarias-podra-600-133890103.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 5,
+        "immigration_relevance": 0,
+        "practical_value": 2,
+        "impact": 5,
+        "novelty": 6,
+        "emotion": 3,
+        "discussion": 5,
+        "urgency": 2,
+        "content_potential": 5,
+        "evergreen": 2
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 1.0
+      },
+      "categories": [
+        "politics",
+        "economy",
+        "regional_affairs"
+      ],
+      "audience": [
+        "resident",
+        "general"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "Новость касается только жителей Канарских островов, а не всей Испании.",
+        "Финансовые детали и политические маневры не имеют прямого практического применения для большинства читателей.",
+        "Хотя речь идет о государственных средствах, новость носит скорее политический и региональный характер, чем затрагивает повседневную жизнь большинства экспатов."
+      ],
+      "editorial_angles": [
+        "Как распределение бюджетных средств повлияет на жизнь на Канарских островах?",
+        "Политическая борьба вокруг распределения средств: что стоит за решением?",
+        "Сравнение финансовой помощи Канарским островам с другими регионами Испании."
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 1.25,
+    "content_score": 3.65,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:32.916462+00:00"
+  },
+  {
+    "id": 247221,
+    "title": "Guante del Gobierno de Canarias a las dos universidades públicas: cederá más fondos si hay peticiones \"realistas\"",
+    "summary": "El Gobierno de Canarias ha iniciado una negociación con las universidades públicas (ULL y ULPGC) para el contrato programa de financiación 2027-2030. Aunque la propuesta inicial prevé 45 millones adicionales, los rectores denuncian un desfase de 3,5 millones para 2027 y reclaman asegurar la financiación básica antes de vincular fondos a objetivos de eficiencia.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/canarias/2026/09/02/gobierno-canarias-lanza-guante-rectores-133867173.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 3,
+        "immigration_relevance": 0,
+        "practical_value": 2,
+        "impact": 3,
+        "novelty": 5,
+        "emotion": 2,
+        "discussion": 3,
+        "urgency": 2,
+        "content_potential": 4,
+        "evergreen": 2
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "education",
+        "economy",
+        "politics"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "regional",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "Новость касается только двух университетов на Канарских островах.",
+        "Финансирование университетов не является прямой заботой большинства жителей Испании.",
+        "Нет практической пользы для читателей, не связанных с этими университетами."
+      ],
+      "editorial_angles": [
+        "Как распределяются государственные средства на образование в Испании?",
+        "Каково положение дел с финансированием университетов в других автономиях?",
+        "Каковы критерии «реалистичных» предложений для получения финансирования?"
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 1.2,
+    "content_score": 2.9,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:34.245076+00:00"
+  },
+  {
+    "id": 247223,
+    "title": "Gofio para perros y gatos: así es el pienso con sabor a gastronomía canaria",
+    "summary": "Atlantic Pet, empresa canaria con 30 años de experiencia en alimentación animal, lanza Natura Canarias, una línea de pienso prémium para perros y gatos inspirada en la gastronomía local. Utiliza ingredientes como millo tostado y plátano, con mayor digestibilidad que la harina convencional. Fabricado en la Península por logística y costes (inversión inviable en Canarias), se comercializa en HiperDino a 2€/kg. La empresa apuesta por transparencia en ingredientes y procesos, respondiendo a la creciente exigencia de consumidores que priorizan alimentación natural y de calidad para sus mascotas.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/economia/2026/09/02/gofio-perros-gatos-pienso-sabor-133830169.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 2,
+        "immigration_relevance": 0,
+        "practical_value": 1,
+        "impact": 1,
+        "novelty": 6,
+        "emotion": 3,
+        "discussion": 2,
+        "urgency": 0,
+        "content_potential": 3,
+        "evergreen": 2
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "interesting_spain",
+        "consumer",
+        "society"
+      ],
+      "audience": [
+        "resident",
+        "family",
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news",
+        "interesting_fact"
+      ],
+      "why": [
+        "новость касается только жителей Канарских островов, и то лишь тех, у кого есть домашние животные",
+        "не имеет практической ценности для большинства читателей",
+        "информация о корме для животных не является срочной или жизненно важной"
+      ],
+      "editorial_angles": [
+        "интересные гастрономические традиции Испании",
+        "как местные компании адаптируются к рынку",
+        "забота о домашних животных как тренд"
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 0.4,
+    "content_score": 2.15,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:32.813298+00:00"
+  },
+  {
+    "id": 247225,
+    "title": "La Palma apuesta por convertir el saber artesanal en nuevo tejido productivo",
+    "summary": "La Palma impulsa una formación especializada en tejeduría tradicional bajo lizo para preservar oficios artesanales y convertirlos en oportunidades profesionales. El Cabildo de La Palma, a través de La Palma Artesanía y Sodepal, lanza el 21 de septiembre un curso de larga duración (hasta el 30 de noviembre) en la Escuela Insular de Artesanía de Villa de Mazo. Con plazas limitadas y coste reducido (5€/jornada, gratuito para estudiantes y demandantes de empleo), busca fomentar el relevo generacional, el emprendimiento y la diversificación económica local, vinculando cultura, turismo y desarrollo profesional.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/la-palma/2026/09/02/palma-apuesta-convertir-artesanal-nuevo-133887116.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 2,
+        "immigration_relevance": 0,
+        "practical_value": 1,
+        "impact": 1,
+        "novelty": 5,
+        "emotion": 3,
+        "discussion": 2,
+        "urgency": 1,
+        "content_potential": 3,
+        "evergreen": 2
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "culture",
+        "economy",
+        "interesting_spain"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "Новость касается только одного острова (Ла Пальма) и узкой сферы ремесел.",
+        "Не имеет прямого отношения к жизни большинства русскоязычных жителей Испании.",
+        "Практическая ценность для аудитории минимальна."
+      ],
+      "editorial_angles": [
+        "Как ремесла помогают развивать туризм на Канарских островах.",
+        "Примеры успешной монетизации традиционных ремесел в Испании."
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 0.35,
+    "content_score": 2.15,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:32.755774+00:00"
+  },
+  {
+    "id": 247224,
+    "title": "Laura Benítez, la primera directora en 47 años del César Manrique",
+    "summary": "Laura Benítez se convierte en la primera directora en 47 años del CIFP César Manrique de Santa Cruz de Tenerife, el mayor centro de Formación Profesional de Canarias con 2.400 alumnos y 170 profesores. Periodista de formación y con una trayectoria docente de once años en el centro (seis como vicedirectora), regresa tras trabajar en la Consejería de Educación. Su objetivo es reforzar la conexión con empresas y administraciones, reducir la brecha de género en áreas como Informática y Electricidad, y mantener el carácter abierto del centro. Destaca la necesidad de plazas en empresas para la FP dual y la importancia de itinerarios mixtos entre FP y universidad.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/santa-cruz-de-tenerife/2026/09/02/laura-benitez-primera-directora-cifp-cesar-manrique-133881423.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 2,
+        "immigration_relevance": 0,
+        "practical_value": 1,
+        "impact": 1,
+        "novelty": 5,
+        "emotion": 3,
+        "discussion": 2,
+        "urgency": 1,
+        "content_potential": 3,
+        "evergreen": 1
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "education",
+        "society"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "новость о назначении директора конкретного учебного заведения в одном городе",
+        "не имеет прямого отношения к жизни большинства русскоязычных жителей Испании",
+        "не затрагивает миграционные, экономические или социальные аспекты, важные для экспатов"
+      ],
+      "editorial_angles": [
+        "история первой женщины-директора в крупном учебном заведении",
+        "планы по развитию профессионального образования на Тенерифе"
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 0.35,
+    "content_score": 1.9,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:32.763280+00:00"
+  },
+  {
+    "id": 247234,
+    "title": "El Cabildo desbloquea el proyecto del futuro Matadero Insular",
+    "summary": "TÍTULO: El Cabildo de Tenerife desbloquea el proyecto del nuevo Matadero Insular\n\nFECHA: 02/09/2026\n\nFUENTE: El Día\n\nRESUMEN:\nEl Cabildo de Tenerife ha encargado a la empresa pública Tragsatec la redacción del proyecto de ejecución del nuevo Matadero Insular. Esta infraestructura, declarada de interés insular en 2024, busca modernizar las instalaciones actuales para cumplir con la normativa europea y fortalecer el sector primario.\n\nHECHOS CLAVE:\n- El Cabildo ha aprobado un presupuesto de 580.000 euros para la redacción del proyecto.\n- El plazo de ejecución para la redacción es de 15 meses.\n- El nuevo matadero se ubicará en el Polígono Agropecuario Comarcal de Los Rodeos, en El Ortigal (La Laguna).\n- La instalación ocupará una parcela de 17.094 metros cuadrados, con una nave industrial de 6.000 metros cuadrados.\n- El proyecto incluye tres líneas de sacrificio para ganado vacuno, ovino, caprino y porcino.\n\nPERSONAS:\n- Alicia Leirachá — directora insular de Proyectos Estratégicos — responsable de la agilización de la iniciativa.\n\nORGANIZACIONES:\n- Cabildo de Tenerife\n- Tragsatec\n- Dirección Insular de Proyectos Estratégicos\n\nPOLÍTICAS/MEDIDAS:\n- Proyecto de ejecución del nuevo Matadero Insular: infraestructura estratégica para el sector primario.\n- Declaración de interés insular (2024).\n\nCAUSA:\nNecesidad de sustituir las instalaciones actuales por haber quedado obsoletas y requerir adaptación a la normativa europea.\n\nCONSECUENCIAS:\nRefuerzo del sector primario en la isla y reducción de tiempos administrativos mediante la gestión de la unidad de Proyectos Estratégicos.\n\nTIPO:\nDecisión política, Proyecto estratégico.\n\nTEMAS:\nEconomía, Agricultura, Ganadería, Infraestructuras.\n\nUBICACIÓN:\nCanarias, Tenerife, La Laguna.\n\nIMPORTANCIA:\n3\n\nINTERÉS:\n2",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/tenerife/2026/09/02/nuevo-matadero-insular-cabildo-133876813.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 2,
+        "immigration_relevance": 0,
+        "practical_value": 1,
+        "impact": 2,
+        "novelty": 3,
+        "emotion": 1,
+        "discussion": 2,
+        "urgency": 1,
+        "content_potential": 2,
+        "evergreen": 1
+      },
+      "penalties": {
+        "too_local": 1.5,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "economy",
+        "agriculture",
+        "interesting_spain"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "Новость касается только одного острова (Тенерифе) и конкретной отрасли (сельское хозяйство/животноводство).",
+        "Не имеет прямого отношения к жизни большинства русскоязычных жителей Испании.",
+        "Практически нулевая ценность для иммигрантов или планирующих переезд."
+      ],
+      "editorial_angles": [
+        "Как строятся и модернизируются инфраструктурные объекты в Испании.",
+        "Примеры развития региональных отраслей экономики."
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 0.1,
+    "content_score": 1.55,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:32.920738+00:00"
+  },
+  {
+    "id": 247222,
+    "title": "La Policía Local de Santa Cruz de Tenerife estrena flota con 15 motos por 170.000 euros",
+    "summary": "La Policía Local de Santa Cruz de Tenerife ha incorporado 15 nuevas motocicletas BMW F 800 GS a su flota, con una inversión total de 170.000 euros (aproximadamente 11.000 euros por unidad). La medida busca modernizar el parque móvil, mejorar la capacidad de respuesta ante emergencias y facilitar la movilidad urbana en la capital tinerfeña.",
+    "source": "https://www.eldia.es/",
+    "url": "https://www.eldia.es/santa-cruz-de-tenerife/2026/09/02/quince-nuevas-motocicletas-policia-local-seguridad-ciudadana-133882920.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 0,
+        "practical_value": 0,
+        "impact": 1,
+        "novelty": 3,
+        "emotion": 2,
+        "discussion": 1,
+        "urgency": 0,
+        "content_potential": 1,
+        "evergreen": 0
+      },
+      "penalties": {
+        "too_local": 2.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "transport",
+        "crime",
+        "interesting_spain"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "новость касается только одного города (Санта-Крус-де-Тенерифе)",
+        "не имеет прямого отношения к жизни большинства русскоязычных жителей Испании",
+        "не содержит практической пользы или информации для принятия решений"
+      ],
+      "editorial_angles": [
+        "обновление парка техники местной полиции",
+        "стоимость содержания правоохранительных органов на местном уровне"
+      ],
+      "confidence": 0.9
+    },
+    "news_score": 0.0,
+    "content_score": 0.55,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:34:34.325398+00:00"
+  }
+]

@@ -1,0 +1,283 @@
+[
+  {
+    "id": 247202,
+    "title": "La Ruta Costera de la Calzada en Irlanda del Norte, en el número de septiembre de VIAJAR",
+    "summary": "El artículo presenta el número de septiembre de la revista VIAJAR, destacando diversos destinos turísticos internacionales y nacionales. Entre los contenidos se incluye un recorrido por la Ruta Costera de la Calzada en Irlanda del Norte y su Calzada del Gigante, la región de Austria en Estiria, los parques nacionales de la Patagonia chilena, la isla de Creta en Grecia, Ámsterdam, propuestas gastronómicas y un recorrido alternativo por Toledo con motivo de su 40 aniversario como Patrimonio de la Humanidad.",
+    "source": "https://www.diariodemallorca.es/",
+    "url": "https://www.diariodemallorca.es/ocio/planes/2026/09/02/ruta-costera-calzada-irlanda-norte-133864520.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 0,
+        "practical_value": 1,
+        "impact": 1,
+        "novelty": 2,
+        "emotion": 2,
+        "discussion": 1,
+        "urgency": 0,
+        "content_potential": 2,
+        "evergreen": 2
+      },
+      "penalties": {
+        "too_local": 0.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "travel",
+        "culture"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "national",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "Новость является рекламным анонсом туристического журнала.",
+        "Не несет никакой практической пользы для жизни, легализации или решения бытовых вопросов экспатов в Испании.",
+        "Тематика путешествий по миру (Ирландия, Чили, Греция) никак не связана с актуальной повесткой жизни в Испании."
+      ],
+      "editorial_angles": [
+        "не рекомендуется к публикации в канале о жизни в Испании"
+      ],
+      "confidence": 1.0
+    },
+    "news_score": 1.1,
+    "content_score": 1.6,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:37:18.019597+00:00"
+  },
+  {
+    "id": 247174,
+    "title": "Enric Mas afrontará Calar Alto con el maillot rojo: \"Tengo una renta agradable, importante\"",
+    "summary": "TÍTULO: Enric Mas lidera la Vuelta a España antes de la etapa de Calar Alto\n\nFECHA: 02/09/2026\n\nFUENTE: Diario de Mallorca / EFE\n\nRESUMEN:\nEnric Mas, ciclista mallorquín del equipo Movistar, afronta la etapa con final en Calar Alto portando el maillot rojo de líder de la Vuelta a España. El corredor reconoce que la retirada de Tadej Pogacar ha igualado el nivel competitivo de la prueba y se muestra optimista ante los próximos retos montañosos.\n\nHECHOS CLAVE:\n- Enric Mas ostenta el maillot rojo de líder tras la retirada de Tadej Pogacar.\n- La próxima etapa incluye los ascensos a los altos de Velefique y Calar Alto.\n- Mas califica su ventaja en la clasificación general como \"agradable e importante\".\n- El equipo Movistar recibió la visita de Alejandro Valverde en Cartagena.\n\nPERSONAS:\n- Enric Mas — ciclista profesional — líder de la Vuelta a España.\n- Tadej Pogacar — ciclista profesional — retirado de la competición.\n- Alejandro Valverde — seleccionador nacional de ciclismo — visitó al equipo Movistar.\n- Juanjo Lobato — masajista — miembro del equipo de apoyo de Mas.\n\nORGANIZACIONES:\n- Equipo Movistar — equipo ciclista profesional.\n\nPOLÍTICAS/MEDIDAS:\n—\n\nCAUSA:\nLa retirada de Tadej Pogacar de la competición, lo que ha provocado un cambio en la dinámica táctica de la carrera.\n\nCONSECUENCIAS:\nEnric Mas lidera la clasificación general y debe gestionar su ventaja táctica ante las etapas de montaña.\n\nTIPO:\nNoticia, Deporte.\n\nTEMAS:\nDeporte, Ciclismo.\n\nUBICACIÓN:\nMurcia (Lorca), Región de Murcia (Cartagena), Andalucía (Almería - Calar Alto).\n\nIMPORTANCIA:\n3\n\nINTERÉS:\n3",
+    "source": "https://www.diariodemallorca.es/",
+    "url": "https://www.diariodemallorca.es/deportes/2026/09/02/enric-afrontara-calar-alto-maillot-133886533.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 0,
+        "practical_value": 0,
+        "impact": 1,
+        "novelty": 3,
+        "emotion": 2,
+        "discussion": 2,
+        "urgency": 1,
+        "content_potential": 1,
+        "evergreen": 0
+      },
+      "penalties": {
+        "too_local": 0.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "events"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "national",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "это чисто спортивная новость, не влияющая на жизнь экспатов, их документы, финансы или быт",
+        "интерес представляет только для фанатов велоспорта, что является узкой нишей",
+        "отсутствует практическая польза для аудитории канала"
+      ],
+      "editorial_angles": [
+        "не рекомендуется к публикации в канале для экспатов"
+      ],
+      "confidence": 1.0
+    },
+    "news_score": 1.0,
+    "content_score": 0.75,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:37:28.624726+00:00"
+  },
+  {
+    "id": 247178,
+    "title": "Algaida reduce un 54% la fracción de rechazo tras limitar su recogida con la bolsa roja",
+    "summary": "El municipio de Algaida, en Mallorca, redujo en un 54% la fracción de residuos de rechazo entre marzo y julio tras introducir el sistema de la bolsa roja y limitar su uso a 40 unidades gratuitas por vivienda al año. Con este modelo, que complementa la recogida puerta a puerta, la recogida selectiva aumentó hasta alcanzar el 85,6% de los residuos en julio, según datos del Ayuntamiento.",
+    "source": "https://www.diariodemallorca.es/",
+    "url": "https://www.diariodemallorca.es/part-forana/2026/09/02/algaida-reduce-54-fraccion-rechazo-133880678.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 2,
+        "immigration_relevance": 1,
+        "practical_value": 2,
+        "impact": 1,
+        "novelty": 5,
+        "emotion": 2,
+        "discussion": 2,
+        "urgency": 1,
+        "content_potential": 3,
+        "evergreen": 2
+      },
+      "penalties": {
+        "too_local": 2.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "society",
+        "interesting_spain"
+      ],
+      "audience": [
+        "resident"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "новость касается исключительно одного муниципалитета (Algaida) на Майорке",
+        "практическая ценность для жителей других регионов Испании отсутствует",
+        "тема сортировки мусора важна, но данный кейс является узкоспециализированным локальным экспериментом"
+      ],
+      "editorial_angles": [
+        "как маленькие муниципалитеты Испании внедряют экологические инновации",
+        "почему система 'красных пакетов' может стать трендом в будущем"
+      ],
+      "confidence": 0.98
+    },
+    "news_score": 0.1,
+    "content_score": 2.35,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:37:17.914244+00:00"
+  },
+  {
+    "id": 247186,
+    "title": "Policías de Sóller auxilian a un ciclista que sufrió una parada cardiaca",
+    "summary": "Una patrulla de la Policía Local de Sóller, en Mallorca, auxilió a un ciclista francés de 63 años que sufrió una parada cardiorrespiratoria en la carretera Ma-10, entre Sóller y Deià. Los agentes le practicaron maniobras de reanimación y utilizaron un desfibrilador hasta la llegada de una ambulancia del 061, cuyo personal sanitario logró estabilizarlo y trasladarlo a un hospital.",
+    "source": "https://www.diariodemallorca.es/",
+    "url": "https://www.diariodemallorca.es/sucesos/sucesos-mallorca/2026/09/02/policias-soller-auxilian-ciclista-sufrio-133882439.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 1,
+        "practical_value": 1,
+        "impact": 1,
+        "novelty": 2,
+        "emotion": 3,
+        "discussion": 1,
+        "urgency": 1,
+        "content_potential": 1,
+        "evergreen": 1
+      },
+      "penalties": {
+        "too_local": 2.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 0.0
+      },
+      "categories": [
+        "society"
+      ],
+      "audience": [
+        "general"
+      ],
+      "locality": "local",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "Новость носит сугубо локальный характер (происшествие в одном муниципалитете Майорки).",
+        "Не несет практической пользы для широкой аудитории экспатов в Испании.",
+        "Это типичная криминальная/социальная хроника, не влияющая на жизнь резидентов страны."
+      ],
+      "editorial_angles": [],
+      "confidence": 1.0
+    },
+    "news_score": 0.0,
+    "content_score": 1.0,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:37:17.504538+00:00"
+  },
+  {
+    "id": 247176,
+    "title": "Cort insiste en que Son Sardina tendrá su plaza \"mediante el proceso que tenga que ser\" pese a la compra de Can Pesquet",
+    "summary": "El Ayuntamiento de Palma (Cort) ha reiterado su compromiso de construir una plaza pública en la zona de Son Sardina, a pesar de que el solar previsto en Can Pesquet ha sido adquirido por un particular. El portavoz adjunto del Consistorio, Llorenç Bauzà, ha asegurado que el equipo de gobierno municipal llevará a cabo este proyecto mediante el procedimiento legal o administrativo que sea necesario, sin descartar vías previas como la expropiación que ya había barajado el alcalde Jaime Martínez. Esta situación ha generado inquietud y malestar entre los vecinos, quienes llevan años reclamando dotaciones e infraestructuras públicas en el núcleo urbano. Por el momento, el consistorio no ha especificado plazos concretos ni la fórmula exacta que utilizará para materializar la tan demandada plaza.",
+    "source": "https://www.diariodemallorca.es/",
+    "url": "https://www.diariodemallorca.es/palma/2026/09/02/cort-insiste-son-sardina-tendra-plaza-can-pesquet-133880453.html",
+    "published_at": null,
+    "country": "Spain",
+    "editorial": {
+      "scores": {
+        "resident_relevance": 1,
+        "immigration_relevance": 0,
+        "practical_value": 1,
+        "impact": 1,
+        "novelty": 3,
+        "emotion": 2,
+        "discussion": 1,
+        "urgency": 1,
+        "content_potential": 1,
+        "evergreen": 1
+      },
+      "penalties": {
+        "too_local": 2.0,
+        "repetitive": 0.0,
+        "clickbait": 0.0,
+        "low_credibility": 0.0,
+        "too_political": 1.0
+      },
+      "categories": [
+        "society"
+      ],
+      "audience": [
+        "resident"
+      ],
+      "locality": "city",
+      "formats": [
+        "news"
+      ],
+      "why": [
+        "Новость касается исключительно локального вопроса благоустройства одного района (Son Sardina) в городе Пальма.",
+        "Для 99% аудитории канала, живущей в других частях Испании, информация не несет никакой практической пользы.",
+        "Это типичная муниципальная бюрократическая перепалка, не имеющая общенационального значения."
+      ],
+      "editorial_angles": [
+        "Не рекомендуется к публикации в общеиспанском канале."
+      ],
+      "confidence": 1.0
+    },
+    "news_score": 0.0,
+    "content_score": 1.0,
+    "tier": "❌ SKIP",
+    "is_top": false,
+    "is_evergreen_gem": false,
+    "is_breaking": false,
+    "scored_at": "2026-09-02T21:37:20.094542+00:00"
+  }
+]
