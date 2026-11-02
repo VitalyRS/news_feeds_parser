@@ -35,10 +35,12 @@ import sys
 import json
 import re
 import time
+import uuid
 import sqlite3
 import asyncio
 import logging
 import argparse
+import threading
 from datetime import datetime, timedelta, date, timezone
 from typing import Optional, Dict, Any, List
 
@@ -50,6 +52,11 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILE = os.path.join(SCRIPT_DIR, 'telegram_bot.log')
 ARTICLES_CONTEXT_FILE = os.path.join(SCRIPT_DIR, '.tg_bot_articles.json')
 DB_FILE = os.path.join(SCRIPT_DIR, 'baza.db')
+QUERY_SESSIONS_FILE = os.path.join(SCRIPT_DIR, '.tg_query_sessions.json')
+POST_QUEUE_FILE = os.path.join(SCRIPT_DIR, '.tg_post_queue.json')
+
+# Хранилище состояний FSM в памяти: chat_id -> {"action": "waiting_ask_question" | "waiting_post_topic", ...}
+USER_STATES: Dict[str, Dict[str, Any]] = {}
 
 # Загрузка .env
 def load_env_file():
@@ -86,6 +93,12 @@ ANYMODEL_KEY = os.environ.get("ANYMODEL_KEY")
 ANYMODEL_BASE_URL = os.environ.get("ANYMODEL_BASE_URL", "https://anymodel.org/v1").rstrip("/")
 ANYMODEL_MODEL = os.environ.get("ANYMODEL_MODEL", "ag/gemini-2.5-flash")
 
+# Канал для публикаций и интервал очереди
+TELEGRAM_CHANNEL = os.environ.get("TELEGRAM_CHANNEL", "@iberia_news").strip()
+if not TELEGRAM_CHANNEL.startswith("@") and not TELEGRAM_CHANNEL.startswith("-100"):
+    TELEGRAM_CHANNEL = f"@{TELEGRAM_CHANNEL}"
+PUBLISH_INTERVAL_HOURS = int(os.environ.get("PUBLISH_INTERVAL_HOURS", "8"))
+
 # Максимальная глубина выбора ноутбуков (месяцев назад)
 MAX_NOTEBOOK_MONTHS = 4
 
@@ -95,8 +108,10 @@ MAX_NOTEBOOK_MONTHS = 4
 def tg_api(method: str, **kwargs) -> Optional[dict]:
     """Вызывает метод Telegram Bot API."""
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/{method}"
+    # Убираем None значения, чтобы не отправлять 'null' в Telegram API (вызывает 400 Bad Request)
+    payload = {k: v for k, v in kwargs.items() if v is not None}
     try:
-        resp = requests.post(url, json=kwargs, timeout=30)
+        resp = requests.post(url, json=payload, timeout=30)
         if resp.status_code == 200:
             return resp.json()
         else:
@@ -115,33 +130,38 @@ def answer_callback_query(callback_query_id: str, text: str = "", show_alert: bo
            show_alert=show_alert)
 
 
-def send_message(chat_id: str, text: str, parse_mode: str = "HTML",
+def send_message(chat_id: str, text: str, parse_mode: Optional[str] = "HTML",
                  reply_markup: Optional[dict] = None,
                  disable_web_page_preview: bool = False) -> Optional[dict]:
     """Отправляет сообщение в Telegram."""
     params = {
         "chat_id": chat_id,
         "text": text,
-        "parse_mode": parse_mode,
         "disable_web_page_preview": disable_web_page_preview,
     }
+    if parse_mode:
+        params["parse_mode"] = parse_mode
     if reply_markup:
         params["reply_markup"] = reply_markup
     return tg_api("sendMessage", **params)
 
 
 def edit_message_text(chat_id: str, message_id: int, text: str,
-                      parse_mode: str = "HTML",
-                      reply_markup: Optional[dict] = None):
+                      parse_mode: Optional[str] = "HTML",
+                      reply_markup: Optional[dict] = None,
+                      disable_web_page_preview: bool = False):
     """Редактирует текст существующего сообщения."""
     params = {
         "chat_id": chat_id,
         "message_id": message_id,
         "text": text,
-        "parse_mode": parse_mode,
     }
+    if parse_mode:
+        params["parse_mode"] = parse_mode
     if reply_markup:
         params["reply_markup"] = reply_markup
+    if disable_web_page_preview:
+        params["disable_web_page_preview"] = disable_web_page_preview
     return tg_api("editMessageText", **params)
 
 
@@ -155,6 +175,1099 @@ def edit_message_reply_markup(chat_id: str, message_id: int,
     if reply_markup:
         params["reply_markup"] = reply_markup
     return tg_api("editMessageReplyMarkup", **params)
+
+
+def send_long_message(chat_id: str, text: str, parse_mode: Optional[str] = "HTML",
+                      reply_markup: Optional[dict] = None,
+                      disable_web_page_preview: bool = True):
+    """
+    Отправляет сообщение в Telegram, безопасно разбивая на части,
+    если длина превышает лимит Telegram (4096 символов).
+    При ошибке parse_mode пробует отправить чистым текстом.
+    """
+    max_chunk = 3800
+    if len(text) <= max_chunk:
+        resp = send_message(chat_id, text, parse_mode=parse_mode,
+                            reply_markup=reply_markup,
+                            disable_web_page_preview=disable_web_page_preview)
+        if not resp and parse_mode:
+            send_message(chat_id, text, parse_mode=None,
+                         reply_markup=reply_markup,
+                         disable_web_page_preview=disable_web_page_preview)
+        return
+
+    chunks = []
+    lines = text.split("\n")
+    current_chunk = ""
+    for line in lines:
+        if len(current_chunk) + len(line) + 1 > max_chunk:
+            if current_chunk:
+                chunks.append(current_chunk.strip())
+                current_chunk = ""
+            if len(line) > max_chunk:
+                for i in range(0, len(line), max_chunk):
+                    chunks.append(line[i:i + max_chunk])
+            else:
+                current_chunk = line + "\n"
+        else:
+            current_chunk += line + "\n"
+    if current_chunk.strip():
+        chunks.append(current_chunk.strip())
+
+    for idx, ch in enumerate(chunks):
+        markup = reply_markup if (idx == len(chunks) - 1) else None
+        resp = send_message(chat_id, ch, parse_mode=parse_mode,
+                            reply_markup=markup,
+                            disable_web_page_preview=disable_web_page_preview)
+        if not resp and parse_mode:
+            send_message(chat_id, ch, parse_mode=None,
+                         reply_markup=markup,
+                         disable_web_page_preview=disable_web_page_preview)
+        time.sleep(0.3)
+
+
+def escape_html(text: str) -> str:
+    """Экранирует спецсимволы для parse_mode='HTML' в Telegram."""
+    if not text:
+        return ""
+    return (
+        text.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
+# =================== ОЧЕРЕДЬ ПУБЛИКАЦИИ В КАНАЛ (@iberia_news) ===================
+
+QUEUE_LOCK = threading.Lock()
+
+
+def load_queue_data() -> Dict[str, Any]:
+    """Загружает очередь публикаций и черновики из .tg_post_queue.json."""
+    if os.path.exists(POST_QUEUE_FILE):
+        try:
+            with open(POST_QUEUE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    data.setdefault("queue", [])
+                    data.setdefault("drafts", {})
+                    data.setdefault("favorites", [])
+                    return data
+        except Exception as e:
+            log.warning("⚠️ Ошибка чтения %s: %s", POST_QUEUE_FILE, e)
+    return {
+        "last_published_at": None,
+        "queue": [],
+        "drafts": {},
+        "favorites": []
+    }
+
+
+def save_queue_data(data: Dict[str, Any]):
+    """Атомарно сохраняет очередь публикаций в .tg_post_queue.json."""
+    try:
+        tmp_file = f"{POST_QUEUE_FILE}.tmp"
+        with open(tmp_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        os.replace(tmp_file, POST_QUEUE_FILE)
+    except Exception as e:
+        log.error("❌ Ошибка сохранения %s: %s", POST_QUEUE_FILE, e)
+
+
+def save_post_draft(text: str, title: str = "", chat_id: str = "") -> str:
+    """
+    Сохраняет сгенерированный пост как черновик для привязки к inline-кнопкам.
+    Очищает старые черновики (>48ч). Возвращает draft_id.
+    """
+    draft_id = uuid.uuid4().hex[:8]
+    now = datetime.now(timezone.utc)
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        drafts = data.setdefault("drafts", {})
+        drafts[draft_id] = {
+            "id": draft_id,
+            "text": text,
+            "title": title[:100],
+            "chat_id": str(chat_id),
+            "created_at": now.isoformat()
+        }
+        # Чистим черновики старше 48 часов
+        cleaned_drafts = {}
+        for k, v in drafts.items():
+            try:
+                c_dt = datetime.fromisoformat(v.get("created_at", now.isoformat()))
+                if (now - c_dt).total_seconds() < 172800:
+                    cleaned_drafts[k] = v
+            except Exception:
+                pass
+        data["drafts"] = cleaned_drafts
+        save_queue_data(data)
+    log.info("📝 Сохранён черновик поста [%s] для канала (чат: %s)", draft_id, chat_id)
+    return draft_id
+
+
+def markdown_to_telegram_html(text: str) -> str:
+    """
+    Конвертирует стандартный Markdown от LLM в валидный HTML для Telegram Bot API:
+    - **жирный** или __жирный__ -> <b>жирный</b>
+    - *курсив* или _курсив_     -> <i>курсив</i>
+    - [текст](url)              -> <a href="url">текст</a>
+    - `код`                     -> <code>код</code>
+    - ```код```                 -> <pre>код</pre>
+    - # Заголовок               -> <b>Заголовок</b>
+    - ~~зачеркнутый~~           -> <s>зачеркнутый</s>
+    Экранирует сырые спецсимволы &, <, > перед разметкой.
+    """
+    if not text:
+        return ""
+
+    # 1. Экранируем спецсимволы HTML
+    res = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    # 2. Блоки кода: ```code``` и `inline`
+    res = re.sub(r'```(?:[a-zA-Z0-9_-]+)?\n?(.*?)```', r'<pre>\1</pre>', res, flags=re.DOTALL)
+    res = re.sub(r'`([^`\n]+)`', r'<code>\1</code>', res)
+
+    # 3. Ссылки: [текст](url) -> <a href="url">текст</a>
+    res = re.sub(r'\[([^\]]+)\]\((https?://[^\)\s]+)\)', r'<a href="\2">\1</a>', res)
+
+    # 4. Заголовки markdown: # Заголовок -> <b>Заголовок</b>
+    res = re.sub(r'^(?:#{1,6})\s+(.+)$', r'<b>\1</b>', res, flags=re.MULTILINE)
+
+    # 5. Жирный шрифт: **текст** и __текст__
+    res = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', res, flags=re.DOTALL)
+    res = re.sub(r'__(.+?)__', r'<b>\1</b>', res, flags=re.DOTALL)
+
+    # 6. Зачёркнутый: ~~текст~~
+    res = re.sub(r'~~(.+?)~~', r'<s>\1</s>', res, flags=re.DOTALL)
+
+    # 7. Курсив: *текст* или _текст_ (с безопасными границами, не ломая URLs)
+    res = re.sub(r'(?<!\*)\*([^\*\n]+?)\*(?!\*)', r'<i>\1</i>', res)
+    res = re.sub(r'(?<![a-zA-Z0-9_])_([^_]+?)_(?![a-zA-Z0-9_])', r'<i>\1</i>', res)
+
+    return res
+
+
+def publish_post_to_channel(text: str) -> bool:
+    """
+    Публикует пост в целевой Telegram-канал (TELEGRAM_CHANNEL).
+    Конвертирует Markdown-разметку (**, *, ссылки) в нативный Telegram HTML.
+    При сбое HTML безопасно отправляет чистым текстом (со снятыми звездочками).
+    """
+    channel_id = TELEGRAM_CHANNEL
+    log.info("📢 Публикую пост в канал %s (длина: %d симв.)", channel_id, len(text))
+
+    html_text = markdown_to_telegram_html(text)
+
+    if len(html_text) > 3800:
+        send_long_message(channel_id, html_text, parse_mode="HTML", disable_web_page_preview=False)
+        return True
+
+    resp = tg_api("sendMessage",
+                  chat_id=channel_id,
+                  text=html_text,
+                  parse_mode="HTML",
+                  disable_web_page_preview=False)
+    if resp and resp.get("ok"):
+        return True
+
+    # Fallback: если Telegram API отклонил HTML, пробуем отправить со снятыми звёздочками
+    log.warning("⚠️ Не удалось отправить пост с parse_mode='HTML', пробую fallback без звездочек...")
+    clean_text = text.replace("**", "").replace("__", "")
+    resp = tg_api("sendMessage",
+                  chat_id=channel_id,
+                  text=clean_text,
+                  parse_mode=None,
+                  disable_web_page_preview=False)
+    return bool(resp and resp.get("ok"))
+
+
+def calculate_next_publish_time(data: Dict[str, Any]) -> datetime:
+    """
+    Вычисляет дату и время следующего выхода в очереди с интервалом PUBLISH_INTERVAL_HOURS.
+    - Если в очереди есть ожидающие посты: берётся время последнего + 8ч.
+    - Если очередь пуста: max(now, last_published_at + 8ч).
+    """
+    now = datetime.now(timezone.utc)
+    interval = timedelta(hours=PUBLISH_INTERVAL_HOURS)
+
+    pending = [p for p in data.get("queue", []) if p.get("status") == "pending"]
+    if pending:
+        last_dt = None
+        for p in pending:
+            try:
+                p_dt = datetime.fromisoformat(p["publish_at"])
+                if last_dt is None or p_dt > last_dt:
+                    last_dt = p_dt
+            except Exception:
+                pass
+        if last_dt:
+            next_time = last_dt + interval
+            if next_time < now:
+                next_time = now
+            return next_time
+
+    # Очередь пуста: смотрим на время последней успешной публикации
+    last_pub_str = data.get("last_published_at")
+    if last_pub_str:
+        try:
+            last_pub = datetime.fromisoformat(last_pub_str)
+            earliest_next = last_pub + interval
+            if earliest_next > now:
+                return earliest_next
+        except Exception:
+            pass
+
+    return now
+
+
+def publish_draft_urgent(draft_id: str) -> tuple[bool, str]:
+    """
+    Публикует черновик поста немедленно в канал.
+    Сдвигает очередь регулярных постов, чтобы выдержать интервал 8ч.
+    """
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        draft = data.get("drafts", {}).get(draft_id)
+        if not draft:
+            return False, "Черновик поста не найден или срок его действия истёк."
+        text = draft["text"]
+        title = draft.get("title", "")
+        chat_id = draft.get("chat_id", "")
+
+    success = publish_post_to_channel(text)
+    if not success:
+        return False, f"Ошибка отправки в канал {TELEGRAM_CHANNEL}. Убедитесь, что бот является администратором канала с правом публикации."
+
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
+
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        data["last_published_at"] = now_iso
+        data.setdefault("queue", []).append({
+            "id": draft_id,
+            "title": title,
+            "text": text,
+            "status": "published",
+            "is_urgent": True,
+            "created_at": draft.get("created_at", now_iso),
+            "publish_at": now_iso,
+            "published_at": now_iso,
+            "chat_id": chat_id
+        })
+
+        # Сдвигаем ожидающие посты в очереди, чтобы следующий вышел не ранее now + 8ч
+        interval = timedelta(hours=PUBLISH_INTERVAL_HOURS)
+        min_next = now + interval
+        pending = [p for p in data.get("queue", []) if p.get("status") == "pending"]
+        pending.sort(key=lambda x: x.get("publish_at", ""))
+
+        curr_slot = min_next
+        for p in pending:
+            try:
+                p_dt = datetime.fromisoformat(p["publish_at"])
+                if p_dt < curr_slot:
+                    p["publish_at"] = curr_slot.isoformat()
+                curr_slot = datetime.fromisoformat(p["publish_at"]) + interval
+            except Exception:
+                pass
+
+        data.get("drafts", {}).pop(draft_id, None)
+        save_queue_data(data)
+
+    log.info("⚡ Срочный пост [%s] опубликован в канал %s", draft_id, TELEGRAM_CHANNEL)
+    return True, f"Пост опубликован в {TELEGRAM_CHANNEL}"
+
+
+def add_draft_to_queue(draft_id: str) -> tuple[bool, str, Optional[datetime]]:
+    """Ставит черновик поста в очередь регулярных публикаций (каждые 8 часов)."""
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        draft = data.get("drafts", {}).get(draft_id)
+        if not draft:
+            return False, "Черновик поста не найден или срок его действия истёк.", None
+
+        next_time = calculate_next_publish_time(data)
+        now = datetime.now(timezone.utc)
+
+        data.setdefault("queue", []).append({
+            "id": draft_id,
+            "title": draft.get("title", ""),
+            "text": draft["text"],
+            "status": "pending",
+            "is_urgent": False,
+            "created_at": draft.get("created_at", now.isoformat()),
+            "publish_at": next_time.isoformat(),
+            "published_at": None,
+            "chat_id": draft.get("chat_id", "")
+        })
+        data.get("drafts", {}).pop(draft_id, None)
+        save_queue_data(data)
+
+    log.info("🕒 Пост [%s] поставлен в очередь на %s", draft_id, next_time.isoformat())
+    return True, "Пост добавлен в очередь", next_time
+
+
+def publish_queued_now(post_id: str) -> tuple[bool, str]:
+    """Публикует пост из очереди немедленно (пользователь нажал 'Опубликовать сейчас' в /queue)."""
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        target = None
+        for p in data.get("queue", []):
+            if p.get("id") == post_id and p.get("status") == "pending":
+                target = p
+                break
+        if not target:
+            return False, "Пост не найден в очереди или уже был опубликован."
+
+    success = publish_post_to_channel(target["text"])
+    if not success:
+        return False, f"Ошибка отправки в канал {TELEGRAM_CHANNEL}"
+
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
+
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        for p in data.get("queue", []):
+            if p.get("id") == post_id and p.get("status") == "pending":
+                p["status"] = "published"
+                p["published_at"] = now_iso
+                p["is_urgent"] = True
+                break
+        data["last_published_at"] = now_iso
+
+        # Сдвигаем оставшиеся посты на +8ч
+        interval = timedelta(hours=PUBLISH_INTERVAL_HOURS)
+        min_next = now + interval
+        pending = [p for p in data.get("queue", []) if p.get("status") == "pending"]
+        pending.sort(key=lambda x: x.get("publish_at", ""))
+        curr_slot = min_next
+        for p in pending:
+            try:
+                p_dt = datetime.fromisoformat(p["publish_at"])
+                if p_dt < curr_slot:
+                    p["publish_at"] = curr_slot.isoformat()
+                curr_slot = datetime.fromisoformat(p["publish_at"]) + interval
+            except Exception:
+                pass
+
+        save_queue_data(data)
+
+    log.info("⚡ Пост из очереди [%s] досрочно опубликован в канал %s", post_id, TELEGRAM_CHANNEL)
+    return True, f"Пост опубликован в {TELEGRAM_CHANNEL}"
+
+
+def remove_from_queue(post_id: str) -> bool:
+    """Удаляет (отменяет) пост из очереди."""
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        found = False
+        for p in data.get("queue", []):
+            if p.get("id") == post_id and p.get("status") == "pending":
+                p["status"] = "cancelled"
+                found = True
+                break
+        if found:
+            save_queue_data(data)
+            log.info("🗑 Пост [%s] удалён из очереди", post_id)
+            return True
+        return False
+
+
+def check_and_publish_next_due():
+    """Проверяет, подошло ли время для публикации очередного поста из очереди."""
+    now = datetime.now(timezone.utc)
+    due_post = None
+
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        pending = [p for p in data.get("queue", []) if p.get("status") == "pending"]
+        pending.sort(key=lambda x: x.get("publish_at", ""))
+        for p in pending:
+            try:
+                p_dt = datetime.fromisoformat(p["publish_at"])
+                if p_dt <= now:
+                    due_post = p
+                    break
+            except Exception as e:
+                log.warning("⚠️ Некорректный publish_at в посте %s: %s", p.get("id"), e)
+
+    if not due_post:
+        return
+
+    post_id = due_post["id"]
+    post_text = due_post["text"]
+    title = due_post.get("title", "")
+    author_chat = due_post.get("chat_id")
+
+    log.info("⏰ Наступило время публикации поста [%s] в канал %s", post_id, TELEGRAM_CHANNEL)
+    success = publish_post_to_channel(post_text)
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        for p in data.get("queue", []):
+            if p.get("id") == post_id and p.get("status") == "pending":
+                if success:
+                    p["status"] = "published"
+                    p["published_at"] = now_iso
+                    data["last_published_at"] = now_iso
+                    log.info("✅ Пост [%s] успешно опубликован по расписанию!", post_id)
+                else:
+                    retry_time = datetime.now(timezone.utc) + timedelta(minutes=5)
+                    p["publish_at"] = retry_time.isoformat()
+                    log.error("❌ Сбой публикации [%s] в канал, повтор в %s", post_id, retry_time.isoformat())
+                break
+        save_queue_data(data)
+
+    if success and author_chat:
+        try:
+            preview = title or (post_text[:60] + "...")
+            channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
+            link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
+            send_message(
+                author_chat,
+                f"📢 <b>Пост из очереди опубликован в канале {link_html}!</b>\n\n"
+                f"📰 <i>«{escape_html(preview)}»</i>",
+                disable_web_page_preview=True
+            )
+        except Exception as e:
+            log.warning("⚠️ Не удалось отправить уведомление автору поста: %s", e)
+
+
+def queue_worker_thread_func():
+    """Фоновый поток планировщика публикаций."""
+    log.info("🕒 Планировщик публикаций запущен (канал: %s, интервал: %d ч)",
+             TELEGRAM_CHANNEL, PUBLISH_INTERVAL_HOURS)
+    while True:
+        try:
+            check_and_publish_next_due()
+        except Exception as e:
+            log.error("❌ Ошибка в планировщике публикаций: %s", e, exc_info=True)
+        time.sleep(30)
+
+
+def offer_channel_publication(chat_id: str, draft_id: str):
+    """Отправляет пользователю интерактивное меню публикации сгенерированного поста."""
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        next_time = calculate_next_publish_time(data)
+
+    now = datetime.now(timezone.utc)
+    diff_sec = int((next_time - now).total_seconds())
+    if diff_sec <= 60:
+        time_hint = "прямо сейчас (очередь свободна)"
+    else:
+        hours = diff_sec // 3600
+        mins = (diff_sec % 3600) // 60
+        time_hint = f"через {hours}ч {mins}м"
+
+    keyboard = {
+        "inline_keyboard": [
+            [
+                {"text": "📅 В очередь (раз в 8ч)", "callback_data": f"pub_q:{draft_id}"},
+                {"text": "⚡ Срочно (сейчас)", "callback_data": f"pub_now:{draft_id}"}
+            ],
+            [
+                {"text": "⭐ В избранное (на потом)", "callback_data": f"pub_fav:{draft_id}"},
+                {"text": "❌ Не публиковать", "callback_data": f"pub_c:{draft_id}"}
+            ]
+        ]
+    }
+    channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
+    link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
+
+    send_message(
+        chat_id,
+        f"📢 <b>Опубликовать этот пост в канале {link_html}?</b>\n\n"
+        f"• 📅 <b>В очередь:</b> выйдет <i>{time_hint}</i> (шаг {PUBLISH_INTERVAL_HOURS}ч)\n"
+        f"• ⚡ <b>Срочно:</b> мгновенная публикация прямо сейчас\n"
+        f"• ⭐ <b>В избранное:</b> отложить пост на потом (без таймера)\n"
+        f"• ❌ <b>Не публиковать:</b> оставить только в личке",
+        reply_markup=keyboard,
+        disable_web_page_preview=True
+    )
+
+
+def handle_publish_queue(callback_query: dict, draft_id: str):
+    """Обработка кнопки '📅 В очередь (раз в 8ч)'."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    message_id = callback_query["message"]["message_id"]
+
+    success, msg, next_time = add_draft_to_queue(draft_id)
+    if not success or not next_time:
+        answer_callback_query(callback_query["id"], f"❌ {msg}", show_alert=True)
+        edit_message_text(chat_id, message_id, f"❌ {msg}")
+        return
+
+    answer_callback_query(callback_query["id"], "📅 Пост поставлен в очередь")
+
+    time_str = next_time.strftime("%d.%m в %H:%M UTC")
+    now = datetime.now(timezone.utc)
+    diff_sec = max(0, int((next_time - now).total_seconds()))
+    hours = diff_sec // 3600
+    mins = (diff_sec % 3600) // 60
+    rel_str = f"через {hours}ч {mins}м" if diff_sec > 60 else "в ближайшую минуту"
+
+    keyboard = {
+        "inline_keyboard": [
+            [
+                {"text": "⚡ Опубликовать сейчас", "callback_data": f"pub_q_now:{draft_id}"},
+                {"text": "❌ Удалить из очереди", "callback_data": f"pub_q_del:{draft_id}"}
+            ]
+        ]
+    }
+    channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
+    link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
+
+    edit_message_text(
+        chat_id,
+        message_id,
+        f"✅ <b>Пост поставлен в очередь публикаций!</b>\n\n"
+        f"📢 Канал: {link_html}\n"
+        f"🕒 Запланировано на: <b>{time_str}</b> (<i>{rel_str}</i>)\n"
+        f"⏱ Интервал очереди: <b>каждые {PUBLISH_INTERVAL_HOURS} часов</b>\n\n"
+        f"<i>Управлять очередью можно командой <code>/queue</code>.</i>",
+        reply_markup=keyboard,
+        disable_web_page_preview=True
+    )
+
+
+def handle_publish_urgent(callback_query: dict, draft_id: str):
+    """Обработка кнопки '⚡ Срочно (сейчас)'."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    message_id = callback_query["message"]["message_id"]
+
+    answer_callback_query(callback_query["id"], "⚡ Публикую срочный пост...")
+    edit_message_text(chat_id, message_id, f"⏳ Публикую пост в {TELEGRAM_CHANNEL}...")
+
+    success, msg = publish_draft_urgent(draft_id)
+    channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
+    link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
+
+    if success:
+        now_str = datetime.now(timezone.utc).strftime("%H:%M UTC")
+        edit_message_text(
+            chat_id,
+            message_id,
+            f"⚡ <b>Пост успешно опубликован в канале!</b>\n\n"
+            f"📢 Канал: {link_html}\n"
+            f"🕒 Время публикации: <b>{now_str}</b>\n"
+            f"ℹ️ Следующая регулярная публикация в очереди сдвинута на {PUBLISH_INTERVAL_HOURS}ч.",
+            disable_web_page_preview=True
+        )
+    else:
+        keyboard = {
+            "inline_keyboard": [
+                [{"text": "🔄 Попробовать снова", "callback_data": f"pub_now:{draft_id}"}],
+                [{"text": "❌ Отмена", "callback_data": f"pub_c:{draft_id}"}]
+            ]
+        }
+        edit_message_text(
+            chat_id,
+            message_id,
+            f"❌ <b>Не удалось опубликовать пост в канале {link_html}:</b>\n\n"
+            f"<code>{escape_html(msg)}</code>\n\n"
+            f"<i>Убедитесь, что бот добавлен администратором канала с правом публикации.</i>",
+            reply_markup=keyboard,
+            disable_web_page_preview=True
+        )
+
+
+def handle_publish_cancel(callback_query: dict, draft_id: str):
+    """Обработка кнопки '❌ Не публиковать'."""
+    answer_callback_query(callback_query["id"], "❌ Публикация отменена")
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    message_id = callback_query["message"]["message_id"]
+
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        data.get("drafts", {}).pop(draft_id, None)
+        save_queue_data(data)
+
+    edit_message_text(chat_id, message_id, "ℹ️ Публикация отменена. Пост остался только в этом чате.")
+
+
+def handle_queue_publish_now(callback_query: dict, post_id: str):
+    """Публикует пост из очереди прямо сейчас."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    message_id = callback_query["message"]["message_id"]
+
+    answer_callback_query(callback_query["id"], "⚡ Публикую пост...")
+    success, msg = publish_queued_now(post_id)
+    channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
+    link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
+
+    if success:
+        now_str = datetime.now(timezone.utc).strftime("%H:%M UTC")
+        edit_message_text(
+            chat_id,
+            message_id,
+            f"⚡ <b>Пост опубликован в канале!</b>\n\n"
+            f"📢 Канал: {link_html}\n"
+            f"🕒 Время публикации: <b>{now_str}</b>",
+            disable_web_page_preview=True
+        )
+    else:
+        answer_callback_query(callback_query["id"], f"❌ {msg}", show_alert=True)
+
+
+def handle_queue_delete(callback_query: dict, post_id: str):
+    """Удаляет пост из очереди."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    message_id = callback_query["message"]["message_id"]
+
+    if remove_from_queue(post_id):
+        answer_callback_query(callback_query["id"], "🗑 Пост удалён из очереди")
+        edit_message_text(chat_id, message_id, "🗑 <b>Пост удалён из очереди публикаций.</b>")
+    else:
+        answer_callback_query(callback_query["id"], "❌ Пост не найден или уже опубликован", show_alert=True)
+
+
+def handle_queue_command(chat_id: str):
+    """Команда /queue — показывает текущую очередь публикаций."""
+    with QUEUE_LOCK:
+        data = load_queue_data()
+
+    pending = [p for p in data.get("queue", []) if p.get("status") == "pending"]
+    pending.sort(key=lambda x: x.get("publish_at", ""))
+
+    last_pub_str = data.get("last_published_at")
+    last_info = ""
+    if last_pub_str:
+        try:
+            lp_dt = datetime.fromisoformat(last_pub_str)
+            last_info = f"🕒 Последний пост на канале: <b>{lp_dt.strftime('%d.%m в %H:%M UTC')}</b>\n"
+        except Exception:
+            pass
+
+    channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
+    link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
+
+    header = (
+        f"📋 <b>Очередь публикаций канала {link_html}</b>\n\n"
+        f"{last_info}"
+        f"⏱ Дефолтный интервал: <b>каждые {PUBLISH_INTERVAL_HOURS} часов</b>\n"
+        f"📦 Постов в очереди: <b>{len(pending)}</b>\n\n"
+    )
+
+    if not pending:
+        send_message(
+            chat_id,
+            header + "📭 <i>Очередь публикаций пуста.</i>\n\n"
+                     "Новые посты можно сгенерировать через кнопку «📝 Сгенерировать ТГ-пост» в /top "
+                     "или через команду <code>/post [тема]</code>.",
+            disable_web_page_preview=True
+        )
+        return
+
+    lines = []
+    keyboard_buttons = []
+    now = datetime.now(timezone.utc)
+
+    for idx, p in enumerate(pending[:8], start=1):
+        p_id = p.get("id", "")
+        raw_text = p.get("text", "")
+        first_line = raw_text.split("\n")[0] if raw_text else ""
+        title = p.get("title") or first_line[:40] or f"Пост #{idx}"
+        try:
+            p_dt = datetime.fromisoformat(p["publish_at"])
+            diff_sec = int((p_dt - now).total_seconds())
+            if diff_sec <= 0:
+                time_badge = "🔥 <b>сейчас</b>"
+            else:
+                hours = diff_sec // 3600
+                mins = (diff_sec % 3600) // 60
+                time_badge = f"🕒 {p_dt.strftime('%d.%m %H:%M UTC')} (<i>через {hours}ч {mins}м</i>)"
+        except Exception:
+            time_badge = p.get("publish_at", "—")
+
+        lines.append(f"<b>{idx}.</b> {time_badge}\n    📰 <i>«{escape_html(title)}»</i>")
+        keyboard_buttons.append([
+            {"text": f"⚡ Опубликовать #{idx}", "callback_data": f"pub_q_now:{p_id}"},
+            {"text": f"❌ Удалить #{idx}", "callback_data": f"pub_q_del:{p_id}"}
+        ])
+
+    send_message(
+        chat_id,
+        header + "\n\n".join(lines),
+        reply_markup={"inline_keyboard": keyboard_buttons} if keyboard_buttons else None,
+        disable_web_page_preview=True
+    )
+
+
+# =================== ИЗБРАННЫЕ ПОСТЫ (FAV / НА ПОТОМ) ===================
+
+
+def add_draft_to_favorites(draft_id: str) -> tuple[bool, str]:
+    """Сохраняет черновик поста в Избранное (на потом)."""
+    now = datetime.now(timezone.utc)
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        draft = data.get("drafts", {}).get(draft_id)
+        if not draft:
+            return False, "Черновик поста не найден или срок его действия истёк."
+
+        fav_item = {
+            "id": draft_id,
+            "title": draft.get("title", ""),
+            "text": draft["text"],
+            "created_at": draft.get("created_at", now.isoformat()),
+            "saved_at": now.isoformat(),
+            "chat_id": draft.get("chat_id", "")
+        }
+        if not any(f.get("id") == draft_id for f in data.setdefault("favorites", [])):
+            data["favorites"].append(fav_item)
+        data.get("drafts", {}).pop(draft_id, None)
+        save_queue_data(data)
+
+    log.info("⭐ Пост [%s] сохранён в Избранное", draft_id)
+    return True, "Пост сохранён в Избранное"
+
+
+def move_favorite_to_queue(fav_id: str) -> tuple[bool, str, Optional[datetime]]:
+    """Переносит пост из Избранного в очередь регулярных публикаций (раз в 8 часов)."""
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        fav = None
+        for item in data.get("favorites", []):
+            if item.get("id") == fav_id:
+                fav = item
+                break
+        if not fav:
+            return False, "Пост не найден в Избранном.", None
+
+        next_time = calculate_next_publish_time(data)
+        now = datetime.now(timezone.utc)
+
+        data.setdefault("queue", []).append({
+            "id": fav["id"],
+            "title": fav.get("title", ""),
+            "text": fav["text"],
+            "status": "pending",
+            "is_urgent": False,
+            "created_at": fav.get("created_at", now.isoformat()),
+            "publish_at": next_time.isoformat(),
+            "published_at": None,
+            "chat_id": fav.get("chat_id", "")
+        })
+        data["favorites"] = [f for f in data.get("favorites", []) if f.get("id") != fav_id]
+        save_queue_data(data)
+
+    log.info("📅 Пост из Избранного [%s] отправлен в очередь на %s", fav_id, next_time.isoformat())
+    return True, "Пост перенесён из Избранного в очередь", next_time
+
+
+def publish_favorite_now(fav_id: str) -> tuple[bool, str]:
+    """Публикует пост из Избранного срочно прямо сейчас."""
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        fav = None
+        for item in data.get("favorites", []):
+            if item.get("id") == fav_id:
+                fav = item
+                break
+        if not fav:
+            return False, "Пост не найден в Избранном."
+
+    success = publish_post_to_channel(fav["text"])
+    if not success:
+        return False, f"Ошибка отправки в канал {TELEGRAM_CHANNEL}"
+
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
+
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        data["last_published_at"] = now_iso
+        data.setdefault("queue", []).append({
+            "id": fav["id"],
+            "title": fav.get("title", ""),
+            "text": fav["text"],
+            "status": "published",
+            "is_urgent": True,
+            "created_at": fav.get("created_at", now_iso),
+            "publish_at": now_iso,
+            "published_at": now_iso,
+            "chat_id": fav.get("chat_id", "")
+        })
+        data["favorites"] = [f for f in data.get("favorites", []) if f.get("id") != fav_id]
+
+        # Сдвигаем ожидающие посты
+        interval = timedelta(hours=PUBLISH_INTERVAL_HOURS)
+        min_next = now + interval
+        pending = [p for p in data.get("queue", []) if p.get("status") == "pending"]
+        pending.sort(key=lambda x: x.get("publish_at", ""))
+        curr_slot = min_next
+        for p in pending:
+            try:
+                p_dt = datetime.fromisoformat(p["publish_at"])
+                if p_dt < curr_slot:
+                    p["publish_at"] = curr_slot.isoformat()
+                curr_slot = datetime.fromisoformat(p["publish_at"]) + interval
+            except Exception:
+                pass
+
+        save_queue_data(data)
+
+    log.info("⚡ Пост из Избранного [%s] опубликован в канал %s", fav_id, TELEGRAM_CHANNEL)
+    return True, f"Пост опубликован в {TELEGRAM_CHANNEL}"
+
+
+def remove_from_favorites(fav_id: str) -> bool:
+    """Удаляет пост из Избранного."""
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        initial_len = len(data.get("favorites", []))
+        data["favorites"] = [f for f in data.get("favorites", []) if f.get("id") != fav_id]
+        if len(data["favorites"]) < initial_len:
+            save_queue_data(data)
+            log.info("🗑 Пост [%s] удалён из Избранного", fav_id)
+            return True
+        return False
+
+
+def handle_publish_fav(callback_query: dict, draft_id: str):
+    """Обработка кнопки '⭐ В избранное (на потом)'."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    message_id = callback_query["message"]["message_id"]
+
+    success, msg = add_draft_to_favorites(draft_id)
+    if not success:
+        answer_callback_query(callback_query["id"], f"❌ {msg}", show_alert=True)
+        edit_message_text(chat_id, message_id, f"❌ {msg}")
+        return
+
+    answer_callback_query(callback_query["id"], "⭐ Пост сохранён в Избранное!")
+
+    keyboard = {
+        "inline_keyboard": [
+            [
+                {"text": "📅 В очередь (раз в 8ч)", "callback_data": f"fav_q:{draft_id}"},
+                {"text": "⚡ Срочно (сейчас)", "callback_data": f"fav_now:{draft_id}"}
+            ],
+            [
+                {"text": "🗑 Удалить из избранного", "callback_data": f"fav_del:{draft_id}"}
+            ]
+        ]
+    }
+    edit_message_text(
+        chat_id,
+        message_id,
+        "⭐ <b>Пост сохранён в Избранное (на потом)!</b>\n\n"
+        "Он отложен без даты публикации. Вы можете:\n"
+        "• Опубликовать его в любое время кнопками ниже\n"
+        "• Или посмотреть список всех сохранённых постов командой <code>/fav</code>.",
+        reply_markup=keyboard,
+        disable_web_page_preview=True
+    )
+
+
+def handle_fav_to_queue(callback_query: dict, fav_id: str):
+    """Переносит пост из Избранного в очередь публикаций."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    message_id = callback_query["message"]["message_id"]
+
+    success, msg, next_time = move_favorite_to_queue(fav_id)
+    if not success or not next_time:
+        answer_callback_query(callback_query["id"], f"❌ {msg}", show_alert=True)
+        return
+
+    answer_callback_query(callback_query["id"], "📅 Пост поставлен в очередь")
+    time_str = next_time.strftime("%d.%m в %H:%M UTC")
+    now = datetime.now(timezone.utc)
+    diff_sec = max(0, int((next_time - now).total_seconds()))
+    hours = diff_sec // 3600
+    mins = (diff_sec % 3600) // 60
+    rel_str = f"через {hours}ч {mins}м" if diff_sec > 60 else "в ближайшую минуту"
+
+    channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
+    link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
+
+    keyboard = {
+        "inline_keyboard": [
+            [
+                {"text": "⚡ Опубликовать сейчас", "callback_data": f"pub_q_now:{fav_id}"},
+                {"text": "❌ Удалить из очереди", "callback_data": f"pub_q_del:{fav_id}"}
+            ]
+        ]
+    }
+    edit_message_text(
+        chat_id,
+        message_id,
+        f"✅ <b>Пост из Избранного поставлен в очередь!</b>\n\n"
+        f"📢 Канал: {link_html}\n"
+        f"🕒 Запланировано на: <b>{time_str}</b> (<i>{rel_str}</i>)\n"
+        f"⏱ Интервал очереди: <b>каждые {PUBLISH_INTERVAL_HOURS} часов</b>",
+        reply_markup=keyboard,
+        disable_web_page_preview=True
+    )
+
+
+def handle_fav_publish_now(callback_query: dict, fav_id: str):
+    """Публикует пост из Избранного немедленно."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    message_id = callback_query["message"]["message_id"]
+
+    answer_callback_query(callback_query["id"], "⚡ Публикую пост...")
+    success, msg = publish_favorite_now(fav_id)
+    channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
+    link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
+
+    if success:
+        now_str = datetime.now(timezone.utc).strftime("%H:%M UTC")
+        edit_message_text(
+            chat_id,
+            message_id,
+            f"⚡ <b>Пост из Избранного опубликован в канале!</b>\n\n"
+            f"📢 Канал: {link_html}\n"
+            f"🕒 Время публикации: <b>{now_str}</b>",
+            disable_web_page_preview=True
+        )
+    else:
+        answer_callback_query(callback_query["id"], f"❌ {msg}", show_alert=True)
+
+
+def handle_fav_show_text(callback_query: dict, fav_id: str):
+    """Показывает полный текст избранного поста в чате."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    answer_callback_query(callback_query["id"], "📖 Отправляю текст...")
+
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        fav = next((f for f in data.get("favorites", []) if f.get("id") == fav_id), None)
+
+    if not fav:
+        send_message(chat_id, "❌ Пост не найден в Избранном.")
+        return
+
+    title = fav.get("title") or "Избранный пост"
+    keyboard = {
+        "inline_keyboard": [
+            [
+                {"text": "📅 В очередь (8ч)", "callback_data": f"fav_q:{fav_id}"},
+                {"text": "⚡ Срочно (сейчас)", "callback_data": f"fav_now:{fav_id}"}
+            ],
+            [
+                {"text": "🗑 Удалить из избранного", "callback_data": f"fav_del:{fav_id}"}
+            ]
+        ]
+    }
+    send_message(
+        chat_id,
+        f"⭐ <b>Избранный пост:</b> <i>«{escape_html(title)}»</i>\n\n"
+        f"<i>(текст ниже)</i>",
+        disable_web_page_preview=True
+    )
+    send_long_message(
+        chat_id,
+        fav["text"],
+        parse_mode=None,
+        reply_markup=keyboard,
+        disable_web_page_preview=True
+    )
+
+
+def handle_fav_delete(callback_query: dict, fav_id: str):
+    """Удаляет пост из Избранного."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    message_id = callback_query["message"]["message_id"]
+
+    if remove_from_favorites(fav_id):
+        answer_callback_query(callback_query["id"], "🗑 Пост удалён из Избранного")
+        edit_message_text(chat_id, message_id, "🗑 <b>Пост удалён из Избранного.</b>")
+    else:
+        answer_callback_query(callback_query["id"], "❌ Пост не найден в Избранном", show_alert=True)
+
+
+def handle_favorites_command(chat_id: str):
+    """Команда /fav — показывает список сохранённых постов."""
+    with QUEUE_LOCK:
+        data = load_queue_data()
+    favorites = data.get("favorites", [])
+
+    if not favorites:
+        send_message(
+            chat_id,
+            "⭐ <b>Избранное пусто (нет отложенных постов).</b>\n\n"
+            "Вы можете сгенерировать пост через <code>/post</code> или по новости из <code>/top</code> "
+            "и нажать <b>«⭐ В избранное»</b>, чтобы сохранить его на потом.",
+            disable_web_page_preview=True
+        )
+        return
+
+    header = (
+        f"⭐ <b>Избранные посты (отложенные на потом)</b>\n"
+        f"📦 Всего сохранено: <b>{len(favorites)}</b>\n\n"
+    )
+
+    lines = []
+    keyboard_buttons = []
+    for idx, f_item in enumerate(favorites[:6], start=1):
+        f_id = f_item.get("id", "")
+        raw_text = f_item.get("text", "")
+        first_line = raw_text.split("\n")[0] if raw_text else ""
+        title = f_item.get("title") or first_line[:40] or f"Пост #{idx}"
+        saved_at = f_item.get("saved_at", "")
+        saved_str = ""
+        if saved_at:
+            try:
+                saved_str = f" (<i>{datetime.fromisoformat(saved_at).strftime('%d.%m %H:%M')}</i>)"
+            except Exception:
+                pass
+
+        lines.append(f"<b>{idx}.</b> 📰 <i>«{escape_html(title)}»</i>{saved_str}")
+        keyboard_buttons.append([
+            {"text": f"📅 В очередь #{idx}", "callback_data": f"fav_q:{f_id}"},
+            {"text": f"⚡ Срочно #{idx}", "callback_data": f"fav_now:{f_id}"},
+            {"text": f"👁 Текст", "callback_data": f"fav_show:{f_id}"},
+            {"text": f"🗑", "callback_data": f"fav_del:{f_id}"}
+        ])
+
+    send_message(
+        chat_id,
+        header + "\n\n".join(lines),
+        reply_markup={"inline_keyboard": keyboard_buttons} if keyboard_buttons else None,
+        disable_web_page_preview=True
+    )
+
+
+# =================== СЕССИИ ЗАПРОСОВ (RAG / ПОСТЫ) ===================
+
+
+def load_query_sessions() -> Dict[str, Dict[str, Any]]:
+    """Загружает сохраненные сессии вопросов/тем."""
+    if os.path.exists(QUERY_SESSIONS_FILE):
+        try:
+            with open(QUERY_SESSIONS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            log.warning("⚠️ Ошибка чтения сессий запросов: %s", e)
+            return {}
+    return {}
+
+
+def save_query_session(session_id: str, data: Dict[str, Any]):
+    """Сохраняет сессию с очисткой старых (>24ч)."""
+    sessions = load_query_sessions()
+    data["updated_at"] = time.time()
+    sessions[session_id] = data
+    now = time.time()
+    # Чистим устаревшие сессии (старше суток)
+    sessions = {k: v for k, v in sessions.items() if now - v.get("updated_at", 0) < 86400}
+    try:
+        with open(QUERY_SESSIONS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(sessions, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        log.warning("⚠️ Ошибка сохранения сессии запроса: %s", e)
+
+
+def get_query_session(session_id: str) -> Optional[Dict[str, Any]]:
+    """Получает данные сессии по ID."""
+    sessions = load_query_sessions()
+    return sessions.get(session_id)
 
 
 # =================== КОНТЕКСТ СТАТЕЙ ===================
@@ -229,15 +1342,53 @@ async def _get_available_notebooks_async() -> List[Dict[str, str]]:
         return []
 
 
-def query_notebooklm_rag(notebook_id: str, prompt: str) -> tuple[Optional[str], list[str]]:
+# =================== ПЕРИОДЫ ДЛЯ RAG ===================
+
+RAG_PERIODS = {
+    "today": {
+        "title": "📅 За сегодня",
+        "short_title": "Сегодня",
+        "days": 1,
+        "hint": "сегодня"
+    },
+    "3days": {
+        "title": "📅 За 3 дня",
+        "short_title": "3 дня",
+        "days": 3,
+        "hint": "последние 3 дня"
+    },
+    "week": {
+        "title": "📅 За неделю",
+        "short_title": "Неделя",
+        "days": 7,
+        "hint": "последнюю неделю (7 дней)"
+    },
+    "month": {
+        "title": "📅 За месяц",
+        "short_title": "Месяц",
+        "days": 31,
+        "hint": "текущий месяц"
+    }
+}
+
+
+def query_notebooklm_rag(
+    notebook_id: str,
+    prompt: str,
+    period_key: Optional[str] = None
+) -> tuple[Optional[str], list[str]]:
     """
     Отправляет RAG-запрос в NotebookLM и возвращает (ответ, список_ссылок_источников).
-    Синхронная обертка.
+    Синхронная обертка с поддержкой фильтрации по периоду (today, 3days, week, month).
     """
-    return asyncio.run(_query_rag_async(notebook_id, prompt))
+    return asyncio.run(_query_rag_async(notebook_id, prompt, period_key=period_key))
 
 
-async def _query_rag_async(notebook_id: str, prompt: str) -> tuple[Optional[str], list[str]]:
+async def _query_rag_async(
+    notebook_id: str,
+    prompt: str,
+    period_key: Optional[str] = None
+) -> tuple[Optional[str], list[str]]:
     """Отправляет RAG-запрос в NotebookLM через chat.ask(), возвращает ответ и найденные ссылки."""
     try:
         from notebooklm import NotebookLMClient
@@ -247,10 +1398,64 @@ async def _query_rag_async(notebook_id: str, prompt: str) -> tuple[Optional[str]
 
     try:
         async with NotebookLMClient.from_storage() as client:
-            result = await client.chat.ask(
-                notebook_id=notebook_id,
-                question=prompt,
-            )
+            source_ids = None
+            period_cfg = RAG_PERIODS.get(period_key) if period_key else None
+
+            # Фильтрация по дням (сегодня, 3 дня, неделя)
+            if period_cfg and period_cfg.get("days", 0) < 30:
+                days = period_cfg["days"]
+                target_dates = [(date.today() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(days)]
+
+                try:
+                    all_sources = await client.sources.list(notebook_id)
+                    matching_sources = [
+                        s for s in all_sources
+                        if any(d in (getattr(s, "title", "") or "") for d in target_dates)
+                    ]
+                    if matching_sources:
+                        source_ids = [s.id for s in matching_sources]
+                        log.info("🎯 RAG: фильтр источников за %s (%s): найдено %d источников (%s)",
+                                 period_cfg['title'], target_dates, len(source_ids),
+                                 [s.title for s in matching_sources])
+                    else:
+                        log.info("ℹ️ RAG: источники за %s (%s) не найдены в блокноте, ищем по блокноту с текстовым фильтром",
+                                 period_cfg['title'], target_dates)
+                except Exception as e:
+                    log.warning("⚠️ Не удалось отфильтровать sources.list: %s", e)
+
+                dates_str = ", ".join(target_dates)
+                enriched_prompt = f"""[ВРЕМЕННОЙ ФИЛЬТР: Ищи информацию строго за {period_cfg['hint']} (даты: {dates_str})].
+
+{prompt}
+
+Важно: Опирайся в первую очередь на факты, новости и события, произошедшие за {period_cfg['hint']} ({dates_str})."""
+            else:
+                enriched_prompt = prompt
+
+            try:
+                result = await client.chat.ask(
+                    notebook_id=notebook_id,
+                    question=enriched_prompt,
+                    source_ids=source_ids
+                )
+            except Exception as ask_err:
+                err_str = str(ask_err)
+                if "RPC response exceeded" in err_str or "RPCResponseTooLargeError" in type(ask_err).__name__:
+                    log.warning("⚠️ История диалога NotebookLM переполнена (>50 МБ), очищаем старую ветку и повторяем запрос...")
+                    try:
+                        conv_id = await client.chat.get_conversation_id(notebook_id)
+                        if conv_id:
+                            await client.chat.delete_conversation(notebook_id, conv_id)
+                    except Exception as del_err:
+                        log.warning("⚠️ Не удалось удалить переполненную беседу: %s", del_err)
+                    result = await client.chat.ask(
+                        notebook_id=notebook_id,
+                        question=enriched_prompt,
+                        source_ids=source_ids
+                    )
+                else:
+                    raise ask_err
+
             if not result or not result.answer:
                 log.warning("⚠️ NotebookLM вернул пустой ответ")
                 return None, []
@@ -449,6 +1654,105 @@ def _basic_cleanup(text: str, article_context: Dict[str, Any], extra_links: Opti
         cleaned += f"\n\n{hashtags}"
 
     return cleaned.strip()
+
+
+def polish_custom_topic_post_with_llm(
+    raw_rag_text: str,
+    topic: str,
+    style_key: str = "standard",
+    extra_links: Optional[List[str]] = None
+) -> str:
+    """
+    Прогоняет сырой RAG-ответ по произвольной теме через AnyModel LLM
+    для написания идеального ТГ-поста в выбранном стиле.
+    """
+    if not ANYMODEL_KEY:
+        log.warning("⚠️ ANYMODEL_KEY не задан. Возвращаю RAG-текст без пост-обработки.")
+        return _basic_topic_cleanup(raw_rag_text, topic, extra_links)
+
+    style_cfg = POST_STYLES.get(style_key, POST_STYLES["standard"])
+    style_instruction = style_cfg["prompt"]
+
+    links_text = "\n".join(f"- {lk}" for lk in extra_links) if extra_links else "(нет внешних ссылок)"
+
+    system_prompt = f"""Ты — главный редактор русскоязычного Telegram-канала о жизни, законах, налогах и новостях в Испании.
+Твоя задача — написать идеальный, готовый к публикации пост для канала на заданную тему, опираясь на факты и материал от RAG-системы.
+
+{style_instruction}
+
+СТРОГИЕ ПРАВИЛА:
+1. Пиши ТОЛЬКО на русском языке.
+2. КАТЕГОРИЧЕСКИ УДАЛИ все квадратные скобки вида [1], [2], [N], [source 1] — никаких технических меток цитирования в тексте быть не должно!
+3. Если есть ссылки на первоисточники или законы — органично включи их в текст или блок источников в конце.
+4. Длина поста — СТРОГО 800-1500 символов. Текст должен быть ёмким, без воды и клише, идеален для чтения с экрана смартфона.
+5. Используй продуманные эмодзи для структуры (📌, 💡, ⚠️, 📊, 🏠, 💰 и т.д.).
+6. В самом конце обязательно добавь 3-5 релевантных хэштегов (например: #испания #законы #новости #жизньвиспании).
+7. НЕ используй HTML теги. Выдавай чистый отформатированный текст с переносами строк и эмодзи, готовый к мгновенному копированию."""
+
+    user_prompt = f"""Тема поста, сформулированная автором:
+«{topic}»
+
+Фактический материал и контекст от RAG-системы (NotebookLM):
+---
+{raw_rag_text if (raw_rag_text and raw_rag_text.strip()) else "(RAG не вернул специфических данных, напиши максимально экспертный пост по теме, опираясь на общие знания о ситуации в Испании)"}
+---
+
+Найденные ссылки на источники:
+{links_text}
+
+Напиши готовый ТГ-пост в стиле «{style_cfg['title']}».
+Требования: ровно 800-1500 символов, без квадратных скобок цитирования, с чёткой структурой и хэштегами в конце."""
+
+    endpoint = f"{ANYMODEL_BASE_URL}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {ANYMODEL_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": ANYMODEL_MODEL,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        "temperature": 0.65,
+        "max_tokens": 1500,
+    }
+
+    try:
+        resp = requests.post(endpoint, headers=headers, json=payload, timeout=35)
+        if resp.status_code != 200:
+            log.warning("⚠️ AnyModel API ошибка (%d): %s", resp.status_code, resp.text[:200])
+            return _basic_topic_cleanup(raw_rag_text, topic, extra_links)
+
+        data = resp.json()
+        choices = data.get("choices", [])
+        if not choices:
+            return _basic_topic_cleanup(raw_rag_text, topic, extra_links)
+
+        polished = choices[0].get("message", {}).get("content", "")
+        if polished:
+            polished = re.sub(r'\[\d+\]', '', polished)
+            log.info("✅ Пост по теме '%s' отполирован через AnyModel (%d симв, стиль: %s)",
+                     topic[:30], len(polished), style_key)
+            return polished.strip()
+
+    except Exception as e:
+        log.warning("⚠️ Ошибка AnyModel пост-обработки: %s", e)
+
+    return _basic_topic_cleanup(raw_rag_text, topic, extra_links)
+
+
+def _basic_topic_cleanup(text: str, topic: str, extra_links: Optional[List[str]] = None) -> str:
+    """Базовая чистка для поста по теме без LLM."""
+    cleaned = re.sub(r'\[\d+\]', '', text or "")
+    cleaned = re.sub(r'\[source\s*\d+\]', '', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'  +', ' ', cleaned).strip()
+
+    res = f"📌 {topic}\n\n{cleaned}"
+    if extra_links:
+        res += "\n\n🔗 Источники:\n" + "\n".join(f"• {lk}" for lk in extra_links[:5])
+    res += "\n\n#испания #новости"
+    return res
 
 
 # =================== ПОСТРОЕНИЕ RAG-ПРОМПТА ===================
@@ -725,6 +2029,10 @@ def handle_rag_generate(
     log.info("✅ ТГ-пост сгенерирован для статьи '%s' (длина: %d симв, стиль: %s)",
              title, len(polished_post), style_key)
 
+    # Предлагаем публикацию в канал @iberia_news (в очередь 8ч или срочно)
+    draft_id = save_post_draft(polished_post, title=title, chat_id=chat_id)
+    offer_channel_publication(chat_id, draft_id)
+
 
 def handle_cancel(callback_query: dict):
     """Обрабатывает кнопку 'Отмена'."""
@@ -790,6 +2098,103 @@ def process_callback_query(callback_query: dict):
         if len(parts) == 2:
             count_str, date_key = parts
             handle_top_send(callback_query, int(count_str), date_key)
+        return
+
+    # --- Прямой вопрос к RAG ---
+    if data.startswith("ask_p:"):
+        parts = data[6:].split(":")
+        if len(parts) == 2:
+            session_id, period_key = parts
+            if period_key == "archive":
+                handle_ask_show_archive(callback_query, session_id)
+            else:
+                latest_nb = _get_latest_notebook_key()
+                handle_ask_execute(callback_query, session_id, latest_nb, period_key=period_key)
+        return
+
+    if data.startswith("ask_nb:"):
+        parts = data[7:].split(":")
+        if len(parts) == 2:
+            session_id, nb_key = parts
+            handle_ask_execute(callback_query, session_id, nb_key, period_key="month")
+        return
+
+    # --- Генерация поста по теме ---
+    if data.startswith("p_sty:"):
+        parts = data[6:].split(":")
+        if len(parts) == 2:
+            session_id, style_key = parts
+            handle_post_select_period(callback_query, session_id, style_key)
+        return
+
+    if data.startswith("p_p:"):
+        parts = data[4:].split(":")
+        if len(parts) == 3:
+            session_id, style_key, period_key = parts
+            if period_key == "archive":
+                handle_post_select_notebook(callback_query, session_id, style_key)
+            else:
+                latest_nb = _get_latest_notebook_key()
+                handle_post_execute(callback_query, session_id, style_key, latest_nb, period_key=period_key)
+        return
+
+    if data.startswith("p_nb:"):
+        parts = data[5:].split(":")
+        if len(parts) == 3:
+            session_id, style_key, nb_key = parts
+            handle_post_execute(callback_query, session_id, style_key, nb_key, period_key="month")
+        return
+
+    # --- Публикация в канал @iberia_news ---
+    if data.startswith("pub_q:"):
+        draft_id = data[6:]
+        handle_publish_queue(callback_query, draft_id)
+        return
+
+    if data.startswith("pub_now:"):
+        draft_id = data[8:]
+        handle_publish_urgent(callback_query, draft_id)
+        return
+
+    if data.startswith("pub_c:"):
+        draft_id = data[6:]
+        handle_publish_cancel(callback_query, draft_id)
+        return
+
+    if data.startswith("pub_q_now:"):
+        post_id = data[10:]
+        handle_queue_publish_now(callback_query, post_id)
+        return
+
+    if data.startswith("pub_q_del:"):
+        post_id = data[10:]
+        handle_queue_delete(callback_query, post_id)
+        return
+
+    if data.startswith("pub_fav:"):
+        draft_id = data[8:]
+        handle_publish_fav(callback_query, draft_id)
+        return
+
+    # --- Избранные посты (Fav) ---
+    if data.startswith("fav_q:"):
+        fav_id = data[6:]
+        handle_fav_to_queue(callback_query, fav_id)
+        return
+
+    if data.startswith("fav_now:"):
+        fav_id = data[8:]
+        handle_fav_publish_now(callback_query, fav_id)
+        return
+
+    if data.startswith("fav_show:"):
+        fav_id = data[9:]
+        handle_fav_show_text(callback_query, fav_id)
+        return
+
+    if data.startswith("fav_del:"):
+        fav_id = data[8:]
+        handle_fav_delete(callback_query, fav_id)
         return
 
     answer_callback_query(callback_query["id"], "❓ Неизвестная команда")
@@ -1066,6 +2471,338 @@ def _send_top_articles(chat_id: str, count: int, since_date: str, date_label: st
     log.info("✅ /top: отправлено %d/%d статей в чат %s", sent, len(selected), chat_id)
 
 
+# =================== ПРЯМОЙ ВОПРОС К RAG (/ask, /rag) ===================
+
+
+def _get_latest_notebook_key() -> str:
+    """Возвращает ключ самого свежего блокнота (например '2026-09')."""
+    notebooks = _get_available_notebooks_sync()
+    if notebooks:
+        nb = notebooks[0]
+        _save_notebook_mapping(nb['month'], nb['id'])
+        return nb['month']
+    return datetime.now().strftime("%Y-%m")
+
+
+def handle_ask_command(chat_id: str, args_text: str):
+    """
+    Обрабатывает команду /ask или /rag.
+    Если аргументы переданы -> сразу показываем выбор периода.
+    Если нет -> переходим в режим ожидания ввода вопроса.
+    """
+    question = args_text.strip()
+    if not question:
+        USER_STATES[chat_id] = {"action": "waiting_ask_question"}
+        send_message(
+            chat_id,
+            "❓ <b>Вопрос к базе знаний (NotebookLM RAG)</b>\n\n"
+            "Напишите ваш вопрос следующим сообщением, и бот обратится к базе накопленных материалов.\n\n"
+            "<i>(Для отмены отправьте /cancel)</i>"
+        )
+        return
+
+    handle_ask_question_input(chat_id, question)
+
+
+def handle_ask_question_input(chat_id: str, question: str):
+    """Принимает вопрос от пользователя и предлагает выбрать период поиска в RAG."""
+    session_id = uuid.uuid4().hex[:8]
+    save_query_session(session_id, {
+        "type": "ask",
+        "question": question,
+        "chat_id": chat_id
+    })
+
+    keyboard = [
+        [
+            {"text": "📅 За сегодня", "callback_data": f"ask_p:{session_id}:today"},
+            {"text": "📅 За 3 дня", "callback_data": f"ask_p:{session_id}:3days"}
+        ],
+        [
+            {"text": "📅 За неделю", "callback_data": f"ask_p:{session_id}:week"},
+            {"text": "📅 За месяц", "callback_data": f"ask_p:{session_id}:month"}
+        ],
+        [
+            {"text": "📓 Выбрать архивный месяц...", "callback_data": f"ask_p:{session_id}:archive"}
+        ],
+        [{"text": "❌ Отмена", "callback_data": "cancel"}]
+    ]
+
+    q_preview = question[:100] + ("..." if len(question) > 100 else "")
+    send_message(
+        chat_id,
+        f"❓ <b>Вопрос к RAG:</b>\n<i>«{q_preview}»</i>\n\n"
+        f"За какой период искать информацию в базе знаний?",
+        reply_markup={"inline_keyboard": keyboard}
+    )
+
+
+def handle_ask_show_archive(callback_query: dict, session_id: str):
+    """Показывает кнопки архивных месяцев блокнотов NotebookLM."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    answer_callback_query(callback_query["id"], "📓 Загружаю архивы...")
+
+    notebooks = _get_available_notebooks_sync()
+    if not notebooks:
+        send_message(chat_id, "❌ Не найдены блокноты NotebookLM.")
+        return
+
+    keyboard = []
+    for nb in notebooks[:MAX_NOTEBOOK_MONTHS]:
+        short_key = nb['month']
+        _save_notebook_mapping(short_key, nb['id'])
+        keyboard.append([{"text": f"📓 {nb['month']}", "callback_data": f"ask_nb:{session_id}:{short_key}"}])
+    keyboard.append([{"text": "❌ Отмена", "callback_data": "cancel"}])
+
+    send_message(
+        chat_id,
+        "📓 <b>Выберите блокнот архива для поиска:</b>",
+        reply_markup={"inline_keyboard": keyboard}
+    )
+
+
+def handle_ask_execute(
+    callback_query: dict,
+    session_id: str,
+    notebook_key: str,
+    period_key: Optional[str] = None
+):
+    """Выполняет прямой RAG-запрос к выбранному блокноту NotebookLM и возвращает ответ."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    answer_callback_query(callback_query["id"], "🔍 Ищу в NotebookLM...")
+
+    session = get_query_session(session_id)
+    if not session or "question" not in session:
+        send_message(chat_id, "❌ Сессия запроса истекла. Задайте вопрос заново через <code>/ask</code>.")
+        return
+
+    question = session["question"]
+    notebook_id = _resolve_notebook_id(notebook_key)
+
+    period_title = RAG_PERIODS.get(period_key, {}).get("title", f"Блокнот {notebook_key}")
+    q_preview = question[:70] + ("..." if len(question) > 70 else "")
+    send_message(
+        chat_id,
+        f"⏳ <b>Ищу ответ в NotebookLM RAG...</b>\n"
+        f"<i>«{q_preview}»</i>\n"
+        f"📅 Период: <b>{period_title}</b> (база: {notebook_key})\n\n"
+        f"Пожалуйста, подождите (обычно 5–15 сек)..."
+    )
+
+    raw_answer, extra_links = query_notebooklm_rag(notebook_id, question, period_key=period_key)
+
+    if not raw_answer:
+        send_message(
+            chat_id,
+            f"❌ <b>NotebookLM не вернул ответ</b> на вопрос за {period_title}.\n"
+            f"Возможно, за указанный период нет материалов в базе или требуется повторить вход: <code>notebooklm login</code>."
+        )
+        return
+
+    # Очищаем технические скобки [1], [2]
+    clean_answer = re.sub(r'\[\d+\]', '', raw_answer)
+    clean_answer = re.sub(r'\[source\s*\d+\]', '', clean_answer, flags=re.IGNORECASE)
+    clean_answer = re.sub(r'  +', ' ', clean_answer).strip()
+
+    ans_header = f"💡 <b>Ответ NotebookLM RAG ({period_title}):</b>\n\n"
+    response_text = ans_header + clean_answer
+
+    if extra_links:
+        response_text += "\n\n🔗 <b>Найденные источники:</b>\n" + "\n".join(f"• {lk}" for lk in extra_links[:10])
+
+    send_long_message(chat_id, response_text, parse_mode="HTML")
+
+
+# =================== ГЕНЕРАЦИЯ ПОСТА ПО ТЕМЕ (/post, /create_post) ===================
+
+
+def handle_post_command(chat_id: str, args_text: str):
+    """
+    Обрабатывает команду /post или /create_post.
+    Если тема передана -> сразу переходим к выбору стиля.
+    Если нет -> переходим в режим ожидания темы.
+    """
+    topic = args_text.strip()
+    if not topic:
+        USER_STATES[chat_id] = {"action": "waiting_post_topic"}
+        send_message(
+            chat_id,
+            "📝 <b>Генерация ТГ-поста на вашу тему</b>\n\n"
+            "Напишите тему, тезисы или вопрос для поста следующим сообщением.\n"
+            "Бот найдёт факты в RAG-системе и оформит готовый пост для Telegram-канала.\n\n"
+            "<i>(Для отмены отправьте /cancel)</i>"
+        )
+        return
+
+    handle_post_topic_input(chat_id, topic)
+
+
+def handle_post_topic_input(chat_id: str, topic: str):
+    """Принимает тему от пользователя и показывает кнопки выбора стиля."""
+    session_id = uuid.uuid4().hex[:8]
+    save_query_session(session_id, {
+        "type": "custom_post",
+        "topic": topic,
+        "chat_id": chat_id
+    })
+
+    keyboard = []
+    for s_key, s_data in POST_STYLES.items():
+        keyboard.append([{"text": s_data['title'], "callback_data": f"p_sty:{session_id}:{s_key}"}])
+    keyboard.append([{"text": "❌ Отмена", "callback_data": "cancel"}])
+
+    t_preview = topic[:100] + ("..." if len(topic) > 100 else "")
+    send_message(
+        chat_id,
+        f"📝 <b>Тема будущего поста:</b>\n<i>«{t_preview}»</i>\n\n"
+        f"✍️ <b>Выберите стиль написания:</b>",
+        reply_markup={"inline_keyboard": keyboard}
+    )
+
+
+def handle_post_select_period(callback_query: dict, session_id: str, style_key: str):
+    """Шаг выбора периода поиска в RAG (сегодня, 3 дня, неделя, месяц, архив)."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    answer_callback_query(callback_query["id"], "🎨 Стиль выбран")
+
+    session = get_query_session(session_id)
+    if not session:
+        send_message(chat_id, "❌ Сессия генерации истекла. Начните заново с <code>/post</code>.")
+        return
+
+    session["style_key"] = style_key
+    save_query_session(session_id, session)
+
+    keyboard = [
+        [
+            {"text": "📅 За сегодня", "callback_data": f"p_p:{session_id}:{style_key}:today"},
+            {"text": "📅 За 3 дня", "callback_data": f"p_p:{session_id}:{style_key}:3days"}
+        ],
+        [
+            {"text": "📅 За неделю", "callback_data": f"p_p:{session_id}:{style_key}:week"},
+            {"text": "📅 За месяц", "callback_data": f"p_p:{session_id}:{style_key}:month"}
+        ],
+        [
+            {"text": "📓 Выбрать архивный месяц...", "callback_data": f"p_p:{session_id}:{style_key}:archive"}
+        ],
+        [{"text": "❌ Отмена", "callback_data": "cancel"}]
+    ]
+
+    topic = session.get("topic", "")
+    t_preview = topic[:70] + ("..." if len(topic) > 70 else "")
+    style_title = POST_STYLES.get(style_key, {}).get("title", style_key)
+
+    send_message(
+        chat_id,
+        f"📝 <b>Генерация поста по теме</b>\n"
+        f"🎯 <i>«{t_preview}»</i>\n"
+        f"🎨 Стиль: <b>{style_title}</b>\n\n"
+        f"За какой период использовать информацию из базы знаний?",
+        reply_markup={"inline_keyboard": keyboard}
+    )
+
+
+def handle_post_select_notebook(callback_query: dict, session_id: str, style_key: str):
+    """Шаг выбора архивного блокнота (если выбран архивный месяц)."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    answer_callback_query(callback_query["id"], "📓 Загружаю блокноты...")
+
+    notebooks = _get_available_notebooks_sync()
+    if not notebooks:
+        send_message(chat_id, "❌ Не найдены блокноты NotebookLM.")
+        return
+
+    keyboard = []
+    for nb in notebooks[:MAX_NOTEBOOK_MONTHS]:
+        short_key = nb['month']
+        _save_notebook_mapping(short_key, nb['id'])
+        keyboard.append([{"text": f"📓 {nb['month']}", "callback_data": f"p_nb:{session_id}:{style_key}:{short_key}"}])
+    keyboard.append([{"text": "❌ Отмена", "callback_data": "cancel"}])
+
+    send_message(
+        chat_id,
+        "📓 <b>Выберите блокнот архива для генерации поста:</b>",
+        reply_markup={"inline_keyboard": keyboard}
+    )
+
+
+def handle_post_execute(
+    callback_query: dict,
+    session_id: str,
+    style_key: str,
+    notebook_key: str,
+    period_key: Optional[str] = None
+):
+    """Выполняет RAG-поиск по теме и пост-обработку через AnyModel LLM."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    answer_callback_query(callback_query["id"], "🚀 Запускаю генерацию...")
+
+    session = get_query_session(session_id)
+    if not session or "topic" not in session:
+        send_message(chat_id, "❌ Сессия генерации истекла. Начните заново с <code>/post</code>.")
+        return
+
+    topic = session["topic"]
+    notebook_id = _resolve_notebook_id(notebook_key)
+    style_title = POST_STYLES.get(style_key, {}).get("title", style_key)
+    period_title = RAG_PERIODS.get(period_key, {}).get("title", f"Блокнот {notebook_key}")
+    t_preview = topic[:60] + ("..." if len(topic) > 60 else "")
+
+    send_message(
+        chat_id,
+        f"⏳ <b>Генерирую ТГ-пост по вашей теме...</b>\n"
+        f"🎯 <i>«{t_preview}»</i>\n"
+        f"🎨 Стиль: <b>{style_title}</b>\n"
+        f"📅 Период: <b>{period_title}</b>\n\n"
+        f"1️⃣ Поиск фактов и ссылок в NotebookLM RAG...",
+        disable_web_page_preview=True
+    )
+
+    rag_prompt = f"""Найди всю ключевую информацию, факты, цифры, даты, контекст, цитаты и ссылки по следующей теме для русскоязычного Telegram-канала о жизни в Испании:
+
+Тема: {topic}
+
+Требования:
+- Опирайся на материалы и статьи в источниках блокнота.
+- Укажи конкретные цифры, законы, даты и ссылки на первоисточники/официальные порталы, если они есть.
+- Ответ на русском языке, подробно (1000-2500 символов)."""
+
+    raw_answer, extra_links = query_notebooklm_rag(notebook_id, rag_prompt, period_key=period_key)
+
+    links_found_count = len(extra_links)
+    rag_len = len(raw_answer) if raw_answer else 0
+    send_message(
+        chat_id,
+        f"✅ RAG-ответ получен ({rag_len} симв., ссылок: {links_found_count})\n"
+        f"2️⃣ Полирую пост через AnyModel ({style_title})...",
+        disable_web_page_preview=True
+    )
+
+    polished_post = polish_custom_topic_post_with_llm(
+        raw_rag_text=raw_answer or "",
+        topic=topic,
+        style_key=style_key,
+        extra_links=extra_links
+    )
+
+    send_message(
+        chat_id,
+        f"✅ <b>Готовый ТГ-пост ({style_title}):</b>\n"
+        f"<i>(скопируйте текст ниже)</i>",
+        disable_web_page_preview=True
+    )
+
+    # Отправляем чистый текст для копирования
+    send_long_message(chat_id, polished_post, parse_mode=None, disable_web_page_preview=True)
+
+    log.info("✅ ТГ-пост по теме '%s' успешно сгенерирован (стиль: %s, длина: %d)",
+             topic[:40], style_key, len(polished_post))
+
+    # Предлагаем публикацию в канал @iberia_news (в очередь 8ч или срочно)
+    draft_id = save_post_draft(polished_post, title=topic[:60], chat_id=chat_id)
+    offer_channel_publication(chat_id, draft_id)
+
+
 # =================== LONG-POLLING ===================
 
 
@@ -1077,18 +2814,31 @@ def run_polling():
 
     log.info("🤖 Telegram-бот запущен (long-polling)...")
     log.info("📋 Слушаю callback_query для генерации ТГ-постов через NotebookLM RAG")
-    log.info("📋 Команды: /top [N] [date] — отправить ТОП статей, /help — справка")
+    log.info("📋 Команды: /ask, /post, /top [N] [date], /queue, /status, /cancel, /help")
 
     # Регистрируем меню команд в клиенте Telegram
     try:
         tg_api("setMyCommands", commands=[
+            {"command": "ask", "description": "Задать вопрос RAG-системе (NotebookLM)"},
+            {"command": "post", "description": "Сгенерировать ТГ-пост на свою тему"},
             {"command": "top", "description": "Показать ТОП новостей (кнопки или /top 20)"},
+            {"command": "queue", "description": "Очередь публикаций в канал @iberia_news"},
+            {"command": "fav", "description": "Избранные посты (отложенные на потом)"},
             {"command": "help", "description": "Справка и список команд"},
             {"command": "status", "description": "Статус бота, блокноты NotebookLM и LLM"},
+            {"command": "cancel", "description": "Отменить текущий ввод"},
             {"command": "start", "description": "Начало работы"}
         ])
     except Exception as e:
         log.warning("⚠️ Не удалось зарегистрировать setMyCommands: %s", e)
+
+    # Запуск фонового воркера очереди публикаций в канал
+    try:
+        worker_thread = threading.Thread(target=queue_worker_thread_func, daemon=True, name="QueuePublisherWorker")
+        worker_thread.start()
+        log.info("🚀 Фоновый планировщик публикаций в канал запущен")
+    except Exception as e:
+        log.error("❌ Не удалось запустить планировщик публикаций: %s", e)
 
     offset = 0
     consecutive_errors = 0
@@ -1154,34 +2904,87 @@ def run_polling():
 
 
 def _handle_text_command(chat_id: str, text: str):
-    """Маршрутизирует текстовые команды бота."""
+    """Маршрутизирует текстовые команды и сообщения бота."""
     if not text:
         return
 
-    if text in ("/start", "/help"):
-        send_message(chat_id,
-                     "🤖 <b>News Intelligence Bot — Справка</b>\n\n"
-                     "Я помогаю работать с оценёнными новостями Испании и генерировать готовые Telegram-посты.\n\n"
-                     "📌 <b>Основные команды:</b>\n"
-                     "• <code>/top</code> — интерактивный выбор кнопками (кол-во + период)\n"
-                     "• <code>/top 20</code> — прислать 20 лучших новостей за сегодня\n"
-                     "• <code>/top 20 today</code> — аналогично\n"
-                     "• <code>/top 15 yesterday</code> — 15 лучших за вчера\n"
-                     "• <code>/top 10 3days</code> — 10 лучших за последние 3 дня\n"
-                     "• <code>/top 25 week</code> — 25 лучших за неделю\n"
-                     "• <code>/top 10 2026-09-02</code> — за конкретную дату YYYY-MM-DD\n"
-                     "• <code>/status</code> — статус бота, подключённые блокноты NotebookLM и LLM\n"
-                     "• <code>/help</code> — это справочное меню\n\n"
-                     "💡 <b>Генерация постов:</b>\n"
-                     "Под каждым сообщением есть кнопка <b>«📝 Сгенерировать ТГ-пост»</b>.\n"
-                     "1. Нажмите кнопку под интересующей новостью\n"
-                     "2. Выберите месяц блокнота NotebookLM (до 4 месяцев назад)\n"
-                     "3. Бот сделает RAG-запрос, отполирует через AnyModel LLM и пришлёт чистый пост без [N], подогнанный по длине с оригинальными ссылками!")
+    text_clean = text.strip()
+
+    # 1. Проверка состояния пользователя (FSM)
+    current_state = USER_STATES.get(chat_id, {})
+    action = current_state.get("action")
+
+    if text_clean.startswith("/cancel"):
+        if action:
+            USER_STATES.pop(chat_id, None)
+            send_message(chat_id, "❌ Действие отменено.")
+        else:
+            send_message(chat_id, "ℹ️ Нет активных действий для отмены.")
         return
 
-    if text.startswith("/top"):
-        args_text = text[4:].strip()  # убираем '/top'
+    if action == "waiting_ask_question" and not text_clean.startswith("/"):
+        USER_STATES.pop(chat_id, None)
+        handle_ask_question_input(chat_id, text_clean)
+        return
+
+    if action == "waiting_post_topic" and not text_clean.startswith("/"):
+        USER_STATES.pop(chat_id, None)
+        handle_post_topic_input(chat_id, text_clean)
+        return
+
+    # Если была активная сессия ввода, но пользователь прислал новую команду со слэшем
+    if action and text_clean.startswith("/"):
+        USER_STATES.pop(chat_id, None)
+
+    # 2. Справка
+    if text_clean in ("/start", "/help"):
+        send_message(chat_id,
+                     "🤖 <b>News Intelligence Bot — Справка</b>\n\n"
+                     "Я помогаю работать с новостями Испании, отвечать на вопросы через RAG и генерировать готовые Telegram-посты.\n\n"
+                     "📌 <b>Основные команды:</b>\n"
+                     "• <code>/ask [вопрос]</code> — задать вопрос напрямую RAG-системе (NotebookLM)\n"
+                     "• <code>/post [тема]</code> — сгенерировать ТГ-пост на вашу тему с фактами из RAG\n"
+                     "• <code>/top</code> — интерактивный выбор новостей кнопками (кол-во + период)\n"
+                     "• <code>/top 20</code> — 20 лучших новостей за сегодня\n"
+                     "• <code>/top 15 yesterday</code> — 15 лучших за вчера\n"
+                     "• <code>/queue</code> — очередь отложенных публикаций в канал @iberia_news\n"
+                     "• <code>/fav</code> — избранные посты (отложенные на потом)\n"
+                     "• <code>/status</code> — статус бота, подключённые блокноты NotebookLM и LLM\n"
+                     "• <code>/cancel</code> — отмена текущего ввода\n"
+                     "• <code>/help</code> — это справочное меню\n\n"
+                     "💡 <b>Способы создания постов:</b>\n"
+                     "1. <b>По любой вашей теме:</b> напишите <code>/post</code> или <code>/post Тема поста</code>, выберите стиль и блокнот.\n"
+                     "2. <b>По найденным новостям:</b> нажмите кнопку <b>«📝 Сгенерировать ТГ-пост»</b> под любой новостью из <code>/top</code>.")
+        return
+
+    # 3. Вопрос к RAG
+    if text_clean.startswith("/ask") or text_clean.startswith("/rag"):
+        prefix = "/ask" if text_clean.startswith("/ask") else "/rag"
+        args_text = text_clean[len(prefix):].strip()
+        handle_ask_command(chat_id, args_text)
+        return
+
+    # 4. Пост по теме
+    if text_clean.startswith("/post") or text_clean.startswith("/create_post"):
+        prefix = "/post" if text_clean.startswith("/post") else "/create_post"
+        args_text = text_clean[len(prefix):].strip()
+        handle_post_command(chat_id, args_text)
+        return
+
+    # 5. ТОП новостей
+    if text_clean.startswith("/top"):
+        args_text = text_clean[4:].strip()  # убираем '/top'
         handle_top_command(chat_id, args_text)
+        return
+
+    # 6. Очередь публикаций в канал
+    if text_clean in ("/queue", "/q"):
+        handle_queue_command(chat_id)
+        return
+
+    # 7. Избранные посты (на потом)
+    if text_clean in ("/fav", "/favorites"):
+        handle_favorites_command(chat_id)
         return
 
     if text == "/status":
@@ -1209,11 +3012,29 @@ def _handle_text_command(chat_id: str, text: str):
             except Exception:
                 pass
 
+        # Очередь публикаций и избранное
+        q_data = load_queue_data()
+        pending_q = [p for p in q_data.get("queue", []) if p.get("status") == "pending"]
+        fav_count = len(q_data.get("favorites", []))
+        last_pub = q_data.get("last_published_at")
+        last_pub_str = "нет"
+        if last_pub:
+            try:
+                last_pub_str = datetime.fromisoformat(last_pub).strftime('%d.%m %H:%M UTC')
+            except Exception:
+                pass
+
+        channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
+        link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
+
         send_message(chat_id,
                      f"📊 <b>Статус бота:</b>\n\n"
                      f"📓 <b>Доступные ноутбуки:</b>\n{nb_list}\n\n"
                      f"📰 Статей в контексте: <b>{ctx_count}</b>\n"
                      f"🗄 Оценено в БД: <b>{db_scored}</b>\n"
+                     f"📢 Канал: {link_html} (интервал: {PUBLISH_INTERVAL_HOURS}ч)\n"
+                     f"📦 В очереди: <b>{len(pending_q)}</b> постов (посл. публикация: {last_pub_str})\n"
+                     f"⭐ В избранном: <b>{fav_count}</b> постов (отложены на потом)\n"
                      f"🤖 LLM: <code>{ANYMODEL_MODEL}</code>\n"
                      f"✅ Бот работает")
         return

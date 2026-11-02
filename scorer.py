@@ -533,7 +533,7 @@ def score_single_news(
         "published_at": article.get("published_at") or article.get("published"),
         "url": article.get("url") or article.get("link"),
         "country": "Spain"
-    }, ensure_ascii=False, indent=2)
+    }, ensure_ascii=False)
 
     prompt = f"Оцени следующую новость:\n\n{article_payload}"
 
@@ -800,7 +800,7 @@ def score_articles_chunk(
     prompt = (
         f"Оцени каждую из следующих {len(compact_list)} новостей независимо для русскоязычной аудитории в Испании.\n"
         f"Верни JSON строго с ключом 'results', содержащим массив объектов с 'id' и оценками для каждой новости:\n\n"
-        f"{json.dumps(compact_list, ensure_ascii=False, indent=2)}"
+        f"{json.dumps(compact_list, ensure_ascii=False)}"
     )
 
     batch_result = None

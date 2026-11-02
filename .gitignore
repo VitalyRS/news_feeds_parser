@@ -15,6 +15,9 @@ client_secret*.json
 # --- Кэш синхронизации и состояние ---
 gdrive_cache.json
 .pipeline_state.json
+.tg_post_queue.json*
+.tg_query_sessions.json*
+.test_post_queue.json*
 
 # --- Базы данных SQLite ---
 *.db

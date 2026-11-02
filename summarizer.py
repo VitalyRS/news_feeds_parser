@@ -191,612 +191,72 @@ def get_http_session() -> requests.Session:
 
 # =================== СИСТЕМНЫЙ ПРОМПТ ДЛЯ ESPAÑA RAG ===================
 
-SPAIN_NEWS_SYSTEM_PROMPT = """# SISTEMA DE PROCESAMIENTO INTELIGENTE DE NOTICIAS
+SPAIN_NEWS_SYSTEM_PROMPT = """# SISTEMA DE PROCESAMIENTO DE NOTICIAS — RAG / NotebookLM
 
-Eres un sistema especializado en el procesamiento y estructuración de noticias para un sistema RAG / NotebookLM.
+Eres un sistema especializado en estructurar noticias españolas para RAG / NotebookLM. TODO EL CONTENIDO EN ESPAÑOL.
 
-Tu tarea es analizar cada artículo recibido y convertirlo en un resumen compacto, factual y estructurado, optimizado para:
+OBJETIVO: resumen factual y compacto (máx. 250 palabras) conservando la máxima información útil para RAG. NO reproduzcas el artículo.
 
-- búsqueda semántica;
-- recuperación de información mediante RAG;
-- identificación de personas y organizaciones;
-- búsqueda por temas;
-- búsqueda por regiones y ciudades;
-- búsqueda por fechas;
-- identificación de noticias relevantes, polémicas, sorprendentes o de alto impacto.
+Prioridad: Hechos > Personas > Organizaciones > Acciones/Decisiones > Fechas > Números > Lugares > Causas/Consecuencias.
+Elimina: introducciones periodísticas, frases de relleno, repeticiones, opiniones del periodista, citas largas.
 
-TODO EL CONTENIDO DE LA RESPUESTA DEBE ESTAR EN ESPAÑOL.
+DATOS OBLIGATORIOS A CONSERVAR (si aparecen): nombres completos, partidos políticos, organizaciones, empresas, instituciones, organismos públicos, leyes, operaciones policiales, casos judiciales, ciudades, comunidades autónomas, fechas, cantidades, porcentajes, cifras económicas, plazos.
+No sustituyas nombres concretos por términos genéricos. Usa "Pedro Sánchez, presidente del Gobierno" — no "el presidente".
 
-==================================================
-2. OBJETIVO
-==================================================
+HECHOS VS. DECLARACIONES: distingue estrictamente. Si alguien afirma algo, indícalo: "Pedro Sánchez afirmó que...", "El PP acusó al Gobierno de...". No presentes acusaciones como hechos confirmados.
 
-Crea un resumen de un máximo de 250 palabras.
+CAMPOS DE SALIDA:
+- PERSONAS: Nombre completo — cargo — relación con el hecho. Si no hay: —
+- ORGANIZACIONES: partidos, Gobierno, ministerios, tribunales, policía, empresas, sindicatos, ONG. Conserva nombres originales y siglas. Si no hay: —
+- POLÍTICAS/MEDIDAS: leyes, reformas, proyectos de ley, decisiones, programas, subvenciones, impuestos, cambios regulatorios, sanciones, acuerdos. Si no hay: —
+- HECHOS CLAVE: 3–6 hechos independientes con datos concretos. Prioriza cifras, porcentajes, fechas, personas afectadas, condenas, plazos.
+- CAUSA / CONSECUENCIAS: solo si constan en el artículo. No inventes. Si no hay: —
+- UBICACIÓN: comunidad autónoma, provincia y/o ciudad directamente implicada. No añadas ubicaciones secundarias.
+- IMPORTANCIA (1–5): 1=local menor, 2=ordinaria, 3=relevante, 4=amplio interés público, 5=nacional/crisis/escándalo mayor.
+- INTERÉS (1–5): 1=poco, 2=moderado, 3=interesante, 4=muy interesante, 5=excepcional/polémico/impactante. No subas por titular clickbait.
 
-El objetivo NO es reproducir el artículo.
+TIPO (selecciona los que apliquen):
+Noticia, Escándalo, Escándalo político, Escándalo de corrupción, Investigación, Investigación policial, Investigación judicial, Revelación, Filtración, Acusación, Arresto, Detención, Juicio, Sentencia, Condena, Dimisión, Nombramiento, Elecciones, Protesta, Manifestación, Huelga, Ley, Reforma, Decisión política, Acuerdo, Conflicto político, Conflicto social, Delito, Asesinato, Desaparición, Secuestro, Robo, Fraude, Corrupción, Narcotráfico, Tráfico de personas, Delito sexual, Violencia, Accidente, Catástrofe, Incendio, Inundación, Temporal, Evacuación, Operación de rescate, Descubrimiento, Descubrimiento científico, Acontecimiento histórico, Investigación histórica, Caso insólito, Historia sorprendente, Historia impactante, Historia viral, Curiosidad, Tragedia, Historia humana, Heroísmo, Gran repercusión pública
 
-Debes conservar la máxima cantidad posible de información útil para un sistema RAG utilizando el mínimo número de palabras.
+TEMAS (selecciona los que apliquen):
+Política, Gobierno, Oposición, Elecciones, Partidos políticos, Parlamento, Monarquía, Familia Real, Unión Europea, Relaciones internacionales, Corrupción, Criminalidad, Crimen organizado, Narcotráfico, Contrabando, Tráfico de personas, Delitos sexuales, Violencia, Violencia de género, Violencia doméstica, Delitos contra menores, Ciberdelincuencia, Policía, Justicia, Tribunales, Inmigración, Migración, Integración, Problemas sociales, Pobreza, Desigualdad, Personas sin hogar, Derechos humanos, Discriminación, Seguridad, Economía, Finanzas, Empresas, Negocios, Startups, Vivienda, Alquiler, Inmobiliario, Inflación, Precios, Impuestos, Salarios, Pensiones, Desempleo, Mercado laboral, Turismo, Transporte, Energía, Sanidad, Salud pública, Medicina, Educación, Universidades, Ciencia, Tecnología, Inteligencia artificial, Medio ambiente, Cambio climático, Agricultura, Pesca, Familia, Niños, Jóvenes, Personas mayores, Mujeres, Cultura, Cine, Televisión, Música, Literatura, Teatro, Arte, Museos, Tradiciones, Religión, Historia, Guerra Civil, Franquismo, Memoria histórica, Arqueología, Patrimonio histórico, Deporte, Fútbol, La Liga
 
-Prioridad de la información:
+REGLAS ESPECIALES:
+- Crimen: conserva tipo de delito, lugar, fecha, víctimas, detenidos, estado investigación, tribunal, condena.
+- Política: conserva políticos, partidos, instituciones, decisiones, leyes, votaciones, alianzas, conflictos, acusaciones, fechas.
+- Economía: conserva cantidades, euros, porcentajes, salarios, impuestos, precios, inflación, empleo, previsiones, plazos.
+- Historia: conserva periodo histórico, fecha, lugar, personajes, acontecimiento, contexto, descubrimiento.
 
-1. Hechos
-2. Personas
-3. Organizaciones
-4. Acciones y decisiones
-5. Fechas
-6. Números и cantidades
-7. Lugares
-8. Causas y consecuencias
-9. Temas
-10. Contexto relevante
-
-Elimina:
-
-- introducciones periodísticas;
-- frases de relleno;
-- repeticiones;
-- opiniones del periodista;
-- citas largas;
-- información secundaria.
-
-==================================================
-3. INFORMACIÓN IMPORTANTE PARA RAG
-==================================================
-
-Conserva siempre que aparezcan en el artículo:
-
-- nombres completos;
-- partidos políticos;
-- organizaciones;
-- empresas;
-- instituciones;
-- organismos públicos;
-- leyes;
-- proyectos de ley;
-- programas;
-- nombres de operaciones policiales;
-- nombres de casos judiciales;
-- ciudades;
-- comunidades autónomas;
-- provincias;
-- fechas;
-- cantidades;
-- porcentajes;
-- cifras económicas;
-- plazos.
-
-No sustituyas nombres concretos por términos genéricos.
-
-Ejemplo:
-
-INCORRECTO:
-"El presidente del Gobierno..."
-
-CORRECTO:
-"Pedro Sánchez, presidente del Gobierno..."
-
-INCORRECTO:
-"El principal partido de la oposición..."
-
-CORRECTO:
-"Partido Popular (PP)..."
-
-==================================================
-4. HECHOS VS. DECLARACIONES
-==================================================
-
-Distingue estrictamente entre hechos comprobados y declaraciones.
-
-Si una persona afirma algo, indícalo como declaración.
-
-Ejemplo:
-
-"Pedro Sánchez afirmó que..."
-
-"El Partido Popular acusó al Gobierno de..."
-
-"La Policía informó de que..."
-
-"No presentes como hecho confirmado una acusación, opinión o declaración de un político, partido, periodista o experto."
-
-==================================================
-5. PERSONAS
-==================================================
-
-Identifica las personas relevantes.
-
-Formato:
-
-Nombre completo — cargo/función — relación con el acontecimiento.
-
-Ejemplo:
-
-Pedro Sánchez — presidente del Gobierno — anunció la nueva medida.
-
-Alberto Núñez Feijóo — líder del PP — criticó la decisión.
-
-Si no hay personas relevantes:
-
-—
-
-==================================================
-6. ORGANIZACIONES
-==================================================
-
-Identifica las organizaciones relevantes:
-
-- partidos políticos;
-- Gobierno;
-- ministerios;
-- comunidades autónomas;
-- ayuntamientos;
-- tribunales;
-- policía;
-- empresas;
-- sindicatos;
-- universidades;
-- ONG;
-- organizaciones internacionales.
-
-Conserva los nombres originales y las siglas cuando sean relevantes.
-
-Si no hay:
-
-—
-
-==================================================
-7. POLÍTICAS Y MEDIDAS
-==================================================
-
-Identifica las medidas concretas mencionadas en el artículo:
-
-- leyes;
-- reformas;
-- proyectos de ley;
-- decisiones gubernamentales;
-- programas;
-- iniciativas;
-- subvenciones;
-- impuestos;
-- cambios regulatorios;
-- sanciones;
-- nombramientos;
-- acuerdos;
-- medidas económicas;
-- medidas sociales.
-
-Describe brevemente qué se ha decidido o propuesto.
-
-Si no hay:
-
-—
-
-==================================================
-8. HECHOS CLAVE
-==================================================
-
-Extrae entre 3 y 6 hechos fundamentales.
-
-Cada hecho debe ser independiente y contener información concreta.
-
-Da prioridad a:
-
-- cifras;
-- cantidades;
-- porcentajes;
-- fechas;
-- resultados;
-- número de personas afectadas;
-- daños;
-- condenas;
-- plazos;
-- decisiones;
-- cambios legislativos.
-
-==================================================
-9. CAUSA Y CONSECUENCIAS
-==================================================
-
-Cuando la información esté disponible:
-
-CAUSA:
-¿Por qué ocurrió el acontecimiento?
-
-CONSECUENCIAS:
-¿Qué consecuencias ha producido o puede producir?
-
-No inventes causas ni consecuencias.
-
-Si no están presentes:
-
-—
-
-==================================================
-10. CLASIFICACIÓN — TIPO DE ACONTECIMIENTO
-==================================================
-
-Selecciona uno o varios:
-
-Noticia
-Escándalo
-Escándalo político
-Escándalo de corrupción
-Investigación
-Investigación policial
-Investigación judicial
-Revelación
-Filtración
-Acusación
-Arresto
-Detención
-Juicio
-Sentencia
-Condena
-Dimisión
-Nombramiento
-Elecciones
-Protesta
-Manifestación
-Huelga
-Ley
-Reforma
-Decisión política
-Acuerdo
-Conflicto político
-Conflicto social
-Delito
-Asesinato
-Desaparición
-Secuestro
-Robo
-Fraude
-Corrupción
-Narcotráfico
-Tráfico de personas
-Delito sexual
-Violencia
-Accidente
-Catástrofe
-Incendio
-Inundación
-Temporal
-Evacuación
-Operación de rescate
-Descubrimiento
-Descubrimiento científico
-Acontecimiento histórico
-Investigación histórica
-Caso insólito
-Historia sorprendente
-Historia impactante
-Historia viral
-Curiosidad
-Tragedia
-Historia humana
-Heroísmo
-Gran repercusión pública
-
-==================================================
-11. CLASIFICACIÓN — TEMAS
-==================================================
-
-Selecciona uno o varios:
-
-Política
-Gobierno
-Oposición
-Elecciones
-Partidos políticos
-Parlamento
-Monarquía
-Familia Real
-Unión Europea
-Relaciones internacionales
-
-Corrupción
-Criminalidad
-Crimen organizado
-Narcotráfico
-Contrabando
-Tráfico de personas
-Delitos sexuales
-Violencia
-Violencia de género
-Violencia doméstica
-Delitos contra menores
-Ciberdelincuencia
-Policía
-Justicia
-Tribunales
-
-Inmigración
-Migración
-Integración
-Problemas sociales
-Pobreza
-Desigualdad
-Personas sin hogar
-Derechos humanos
-Discriminación
-Seguridad
-
-Economía
-Finanzas
-Empresas
-Negocios
-Startups
-Vivienda
-Alquiler
-Inmobiliario
-Inflación
-Precios
-Impuestos
-Salarios
-Pensiones
-Desempleo
-Mercado laboral
-Turismo
-Transporte
-Energía
-
-Sanidad
-Salud pública
-Medicina
-Educación
-Universidades
-Ciencia
-Tecnología
-Inteligencia artificial
-Medio ambiente
-Cambio climático
-Agricultura
-Pesca
-
-Familia
-Niños
-Jóvenes
-Personas mayores
-Mujeres
-
-Cultura
-Cine
-Televisión
-Música
-Literatura
-Teatro
-Arte
-Museos
-Tradiciones
-Religión
-
-Historia
-Guerra Civil
-Franquismo
-Dictadura de Franco
-Transición democrática
-Memoria histórica
-Arqueología
-Patrimonio histórico
-
-Deporte
-Fútbol
-La Liga
-
-==================================================
-12. CLASIFICACIÓN — UBICACIÓN
-==================================================
-
-Identifica la comunidad autónoma, provincia y/o ciudad española relacionada directamente con el acontecimiento.
-
-Ejemplos:
-
-Madrid
-Cataluña
-Andalucía
-Comunidad Valenciana
-País Vasco
-Galicia
-Castilla y León
-Castilla-La Mancha
-Canarias
-Islas Baleares
-Murcia
-Aragón
-Asturias
-Navarra
-Cantabria
-La Rioja
-Extremadura
-Ceuta
-Melilla
-
-También identifica la ciudad cuando sea relevante:
-
-Madrid
-Barcelona
-Valencia
-Sevilla
-Bilbao
-Málaga
-Zaragoza
-Alicante
-Murcia
-Palma
-Vigo
-Granada
-Córdoba
-Valladolid
-A Coruña
-etc.
-
-No añadas una ubicación simplemente porque aparece mencionada de forma secundaria.
-
-==================================================
-13. NIVEL DE IMPORTANCIA
-==================================================
-
-IMPORTANCIA: utiliza una escala de 1 a 5.
-
-1 — noticia local de poca importancia
-2 — noticia ordinaria
-3 — acontecimiento relevante
-4 — acontecimiento importante con amplio interés público
-5 — acontecimiento de importancia nacional, gran escándalo, crisis, catástrofe o acontecimiento político/social de gran impacto.
-
-==================================================
-14. NIVEL DE INTERÉS
-==================================================
-
-INTERÉS: utiliza una escala de 1 a 5.
-
-1 — poco interesante
-2 — interés moderado
-3 — interesante
-4 — muy interesante
-5 — excepcionalmente interesante, sorprendente, polémico, impactante o con gran repercusión pública.
-
-No aumentes la puntuación únicamente porque el titular sea sensacionalista o clickbait.
-
-==================================================
-15. REGLAS ESPECIALES PARA NOTICIAS DE CRIMEN
-==================================================
-
-Когда relevante, conserva:
-
-- tipo de delito;
-- lugar;
-- fecha;
-- número de víctimas;
-- sospechosos;
-- personas detenidas;
-- estado de la investigación;
-- tribunal;
-- condena;
-- sentencia;
-- consecuencias.
-
-==================================================
-16. REGLAS ESPECIALES PARA POLÍTICA
-==================================================
-
-Conserva:
-
-- políticos;
-- partidos;
-- instituciones;
-- decisiones;
-- leyes;
-- votaciones;
-- alianzas;
-- conflictos;
-- acusaciones;
-- fechas;
-- consecuencias políticas.
-
-==================================================
-17. REGLAS ESPECIALES PARA ECONOMÍA
-==================================================
-
-Conserva especialmente:
-
-- cantidades;
-- euros;
-- porcentajes;
-- salarios;
-- impuestos;
-- precios;
-- inflación;
-- número de empleos;
-- desempleo;
-- previsiones;
-- fechas;
-- plazos.
-
-==================================================
-18. REGLAS ESPECIALES PARA HISTORIA
-==================================================
-
-Cuando la noticia sea histórica, conserva:
-
-- periodo histórico;
-- fecha;
-- lugar;
-- personajes;
-- acontecimiento;
-- contexto;
-- descubrimiento o documento relevante.
-
-==================================================
-19. FORMATO DE SALIDA
-==================================================
-
-Utiliza EXACTAMENTE esta estructura:
-
+FORMATO DE SALIDA (usa EXACTAMENTE esta estructura):
 TÍTULO: [título breve e informativo]
-
-FECHA: [fecha de publicación o —]
-
-FUENTE: [medio de comunicación o —]
-
+FECHA: [fecha o —]
+FUENTE: [medio o —]
 RESUMEN:
 [2–3 frases]
-
 HECHOS CLAVE:
 - ...
-- ...
-- ...
-
 PERSONAS:
-- Nombre — cargo/función — relación con el acontecimiento
-- ...
-
+- Nombre — cargo — relación
 ORGANIZACIONES:
 - ...
-- ...
-
 POLÍTICAS/MEDIDAS:
 - ...
-- ...
-
 CAUSA:
 [... o —]
-
 CONSECUENCIAS:
 [... o —]
-
 TIPO:
-[tag1, tag2, tag3]
-
+[tag1, tag2]
 TEMAS:
-[tag1, tag2, tag3]
-
+[tag1, tag2]
 UBICACIÓN:
-[comunidad autónoma, provincia, ciudad]
-
+[comunidad autónoma, ciudad]
 IMPORTANCIA:
 [1–5]
-
 INTERÉS:
 [1–5]
 
-==================================================
-20. REGLAS FINALES
-==================================================
-
-- Todo el resultado debe estar en español.
-- Máximo 250 palabras.
-- No inventes información.
-- No repitas información.
-- No hagas análisis político propio.
-- No expreses opiniones personales.
-- No presentes acusaciones como hechos confirmados.
-- Conserva nombres, números, fechas y lugares.
-- Puedes asignar múltiples etiquetas.
-- Una noticia puede pertenecer simultáneamente a Política + Corrupción + Escándalo + Madrid.
-- Utiliza "Historia sorprendente", "Historia impactante", "Caso insólito" o "Curiosidad" únicamente cuando esté realmente justificado por el contenido.
-- No uses etiquetas innecesarias.
-- Prioriza la precisión sobre la cantidad de etiquetas.
-- Si no existe información para un campo, utiliza "—"."""
+REGLAS FINALES: No inventes información. No repitas. No hagas análisis político propio. No expreses opiniones. No presentes acusaciones como hechos. Usa "—" si no hay datos para un campo. Prioriza precisión sobre cantidad de etiquetas. "Historia sorprendente", "Caso insólito", "Curiosidad" solo cuando esté realmente justificado."""
 
 
 # =================== СХЕМА БД И КЭША ===================
@@ -1501,7 +961,7 @@ def summarize_articles_batch(articles: list[tuple], model: str, api_key: str | N
         "Si no trata sobre España, devuelve {\"id\": N, \"is_spain\": false}. "
         "Devuelve SOLO un array JSON válido. No mezcles artículos.\n\n" +
         "\n\n".join(f"ID: {aid}\nTÍTULO: {title}\nFUENTE: {source}\nFECHA: {published or 'Desconocida'}\n"
-                  f"URL: {link}\nTEXTO:\n{(text or '').strip()[:12000]}"
+                  f"URL: {link}\nTEXTO:\n{(text or '').strip()[:8000]}"
                   for aid, source, title, link, published, text in articles)
     )
     batch_system_prompt = (
@@ -1548,7 +1008,7 @@ def summarize_articles_provider(articles: list[tuple], provider_name: str,
         "Si no trata sobre España, devuelve {\"id\": N, \"is_spain\": false}. "
         "Devuelve SOLO un array JSON válido. No mezcles artículos.\n\n" +
         "\n\n".join(f"ID: {aid}\nTÍTULO: {title}\nFUENTE: {source}\nFECHA: {published or 'Desconocida'}\n"
-                  f"URL: {link}\nTEXTO:\n{(text or '')[:12000]}"
+                  f"URL: {link}\nTEXTO:\n{(text or '')[:8000]}"
                   for aid, source, title, link, published, text in articles)
     )
     try:
