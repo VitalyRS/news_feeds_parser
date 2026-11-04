@@ -55,6 +55,7 @@ from scorer import (
     DEFAULT_OUTPUT_FILE as SCORER_OUTPUT_FILE
 )
 from telegram_notifier import send_top_articles_to_telegram
+from clean_db import clean_db
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILE = os.path.join(SCRIPT_DIR, 'pipeline.log')
@@ -151,7 +152,9 @@ def run_pipeline(skip_scrape: bool = False,
                  re_summarize: bool = False,
                  re_export: bool = False,
                  drive_dry_run: bool = False,
-                 output_dir: str = DEFAULT_OUTPUT_DIR) -> dict:
+                 output_dir: str = DEFAULT_OUTPUT_DIR,
+                 skip_clean: bool = False,
+                 clean_keep_days: int = 3) -> dict:
     """Выполняет полный цикл пайплайна от сбора до NotebookLM, скоринга и Google Drive."""
     start_time = datetime.now()
     log.info("=" * 70)
@@ -179,6 +182,9 @@ def run_pipeline(skip_scrape: bool = False,
         "total_articles": 0,
         "total_with_text": 0,
         "total_with_summary": 0,
+        "cleaned_texts": 0,
+        "cleaned_summaries": 0,
+        "cleaned_scores": 0,
         "elapsed_seconds": 0.0
     }
 
@@ -355,6 +361,21 @@ def run_pipeline(skip_scrape: bool = False,
     else:
         log.info("\n⏩ === [ФАЗА 7/7] Редакционный скоринг пропущен (--skip-scoring) ===")
 
+    # -------------------------------------------------------------
+    # ФАЗА 8: Очистка отработанных текстов из базы (Вариант 1)
+    # -------------------------------------------------------------
+    if not skip_clean:
+        log.info("\n🧹 === [ФАЗА 8/8] Автоматическая очистка базы от экспортированного контента ===")
+        try:
+            clean_res = clean_db(db_path=DB_FILE, keep_days=clean_keep_days, vacuum=True)
+            summary["cleaned_texts"] = clean_res.get("cleaned_texts", 0)
+            summary["cleaned_summaries"] = clean_res.get("cleaned_summaries", 0)
+            summary["cleaned_scores"] = clean_res.get("cleaned_scores", 0)
+        except Exception as e:
+            log.warning("⚠️ Ошибка автоматической очистки базы: %s", e)
+    else:
+        log.info("\n⏩ === [ФАЗА 8/8] Очистка базы пропущена (--skip-clean) ===")
+
     elapsed = (datetime.now() - start_time).total_seconds()
     summary["elapsed_seconds"] = elapsed
 
@@ -374,6 +395,9 @@ def run_pipeline(skip_scrape: bool = False,
         log.info("   ☁️ Google Drive загружено:    %d, обновлено: %d", summary["drive_uploaded"], summary["drive_updated"])
     if not skip_scoring:
         log.info("   🎯 Оценено статей (скоринг):   %d", summary["scored_count"])
+    if not skip_clean:
+        log.info("   🧹 Очищено текстов в БД:       %d (саммари: %d, оценок: %d)",
+                 summary["cleaned_texts"], summary["cleaned_summaries"], summary["cleaned_scores"])
     log.info("   ------------------------------------------------------")
     log.info("   📚 Всего статей в базе данных: %d (с текстом: %d, с саммари: %d)",
              summary["total_articles"], summary["total_with_text"], summary["total_with_summary"])
@@ -410,6 +434,8 @@ def main():
     parser.add_argument('--scoring-workers', type=int, default=4, help="Число потоков для редакционного скоринга (по умолчанию 4)")
     parser.add_argument('--scoring-batch-size', type=int, default=5, help="Размер пачки статей для одного LLM-скоринга (по умолчанию 5)")
     parser.add_argument('--auto-tg', action='store_true', help="Автоматически отправить ТОП оцененных новостей в Telegram после скоринга")
+    parser.add_argument('--skip-clean', action='store_true', help="Пропустить автоматическую очистку базы от экспортированного контента")
+    parser.add_argument('--clean-keep-days', type=int, default=3, help="Сколько последних дней саммари сохранять в базе (по умолчанию 3)")
 
     args = parser.parse_args()
 
@@ -461,7 +487,9 @@ def main():
         re_summarize=args.re_summarize,
         re_export=args.re_export,
         drive_dry_run=args.drive_dry_run,
-        output_dir=args.output_dir
+        output_dir=args.output_dir,
+        skip_clean=args.skip_clean,
+        clean_keep_days=args.clean_keep_days
     )
 
     # После успешного инкрементального прогона сдвигаем точку отсчёта на момент

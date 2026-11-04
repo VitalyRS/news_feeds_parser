@@ -115,6 +115,9 @@ def tg_api(method: str, **kwargs) -> Optional[dict]:
         if resp.status_code == 200:
             return resp.json()
         else:
+            if "message is not modified" in resp.text:
+                log.debug("ℹ️ TG API: сообщение не изменено")
+                return None
             log.error("❌ TG API %s ошибка (%d): %s", method, resp.status_code, resp.text[:300])
             return None
     except Exception as e:
@@ -1660,7 +1663,9 @@ def polish_custom_topic_post_with_llm(
     raw_rag_text: str,
     topic: str,
     style_key: str = "standard",
-    extra_links: Optional[List[str]] = None
+    extra_links: Optional[List[str]] = None,
+    length_hint: str = "800-1500",
+    max_tokens: int = 1500
 ) -> str:
     """
     Прогоняет сырой RAG-ответ по произвольной теме через AnyModel LLM
@@ -1684,7 +1689,7 @@ def polish_custom_topic_post_with_llm(
 1. Пиши ТОЛЬКО на русском языке.
 2. КАТЕГОРИЧЕСКИ УДАЛИ все квадратные скобки вида [1], [2], [N], [source 1] — никаких технических меток цитирования в тексте быть не должно!
 3. Если есть ссылки на первоисточники или законы — органично включи их в текст или блок источников в конце.
-4. Длина поста — СТРОГО 800-1500 символов. Текст должен быть ёмким, без воды и клише, идеален для чтения с экрана смартфона.
+4. Длина поста — СТРОГО {length_hint} символов. Текст должен быть ёмким, без воды и клише, идеален для чтения с экрана смартфона.
 5. Используй продуманные эмодзи для структуры (📌, 💡, ⚠️, 📊, 🏠, 💰 и т.д.).
 6. В самом конце обязательно добавь 3-5 релевантных хэштегов (например: #испания #законы #новости #жизньвиспании).
 7. НЕ используй HTML теги. Выдавай чистый отформатированный текст с переносами строк и эмодзи, готовый к мгновенному копированию."""
@@ -1701,7 +1706,7 @@ def polish_custom_topic_post_with_llm(
 {links_text}
 
 Напиши готовый ТГ-пост в стиле «{style_cfg['title']}».
-Требования: ровно 800-1500 символов, без квадратных скобок цитирования, с чёткой структурой и хэштегами в конце."""
+Требования: ровно {length_hint} символов, без квадратных скобок цитирования, с чёткой структурой и хэштегами в конце."""
 
     endpoint = f"{ANYMODEL_BASE_URL}/chat/completions"
     headers = {
@@ -1715,11 +1720,11 @@ def polish_custom_topic_post_with_llm(
             {"role": "user", "content": user_prompt}
         ],
         "temperature": 0.65,
-        "max_tokens": 1500,
+        "max_tokens": max_tokens,
     }
 
     try:
-        resp = requests.post(endpoint, headers=headers, json=payload, timeout=35)
+        resp = requests.post(endpoint, headers=headers, json=payload, timeout=60)
         if resp.status_code != 200:
             log.warning("⚠️ AnyModel API ошибка (%d): %s", resp.status_code, resp.text[:200])
             return _basic_topic_cleanup(raw_rag_text, topic, extra_links)
@@ -2100,6 +2105,22 @@ def process_callback_query(callback_query: dict):
             handle_top_send(callback_query, int(count_str), date_key)
         return
 
+    # --- /toppromt ---
+    if data.startswith("tp_n:"):
+        handle_toppromt_select_period(callback_query, data[5:])
+        return
+
+    if data.startswith("tp_go:"):
+        parts = data[6:].split(":", 1)
+        if len(parts) == 2:
+            handle_toppromt_go(callback_query, parts[0], parts[1])
+        return
+
+    # --- Редакторские промпты ---
+    if data.startswith("ed_pr:"):
+        handle_editorial_select(callback_query, data[6:])
+        return
+
     # --- Прямой вопрос к RAG ---
     if data.startswith("ask_p:"):
         parts = data[6:].split(":")
@@ -2117,6 +2138,29 @@ def process_callback_query(callback_query: dict):
         if len(parts) == 2:
             session_id, nb_key = parts
             handle_ask_execute(callback_query, session_id, nb_key, period_key="month")
+        return
+
+    # --- Корзина новостей из промптов / toppromt ---
+    if data.startswith("bsk_t:"):
+        parts = data[6:].split(":")
+        if len(parts) == 2:
+            handle_basket_toggle(callback_query, parts[0], int(parts[1]))
+        return
+
+    if data.startswith("bsk_c:"):
+        session_id = data[6:]
+        handle_basket_clear(callback_query, session_id)
+        return
+
+    if data.startswith("bsk_g:"):
+        session_id = data[6:]
+        handle_basket_generate_prompt(callback_query, session_id)
+        return
+
+    if data.startswith("bsk_s:"):
+        parts = data[6:].split(":")
+        if len(parts) == 2:
+            handle_basket_generate_execute(callback_query, parts[0], parts[1])
         return
 
     # --- Генерация поста по теме ---
@@ -2423,7 +2467,7 @@ def _send_top_articles(chat_id: str, count: int, since_date: str, date_label: st
 
     articles = load_scored_articles_from_db(
         since_date=since_date,
-        top_n=count,
+        top_n=300,  # пул для News Diversity & Expansion (max_pool=300)
         min_score=0.0  # берём все, фильтрация по кол-ву
     )
 
@@ -2433,9 +2477,18 @@ def _send_top_articles(chat_id: str, count: int, since_date: str, date_label: st
                      f"Запустите скоринг: <code>python3 scorer.py --today</code>")
         return
 
-    # Сортируем и берём ТОП
+    # Сортируем (рейтинг не меняется) и отбираем ТОП с разнообразием событий
     articles.sort(key=lambda x: x.news_score, reverse=True)
-    selected = articles[:count]
+    try:
+        from news_diversification import diversify
+        div = diversify(articles, count)
+        selected = div.selected
+        log.info("🧩 Diversity: %d/%d, событий=%d, пул=%d",
+                 len(selected), count, div.n_events_selected, div.pool_size)
+        log.debug("\n%s", div.explain())
+    except Exception as e:
+        log.warning("⚠️ Diversity недоступен (%s) — обычный ТОП", e)
+        selected = articles[:count]
 
     # Заголовок
     send_telegram_message(
@@ -2537,6 +2590,794 @@ def handle_ask_question_input(chat_id: str, question: str):
     )
 
 
+# =================== /toppromt: топ по всем рубрикам ===================
+
+TOPPROMPT_PERIODS = {"today": "сегодня", "3days": "3 дня", "week": "неделя", "month": "месяц"}
+_TOPPROMPT_RUNNING: set = set()  # chat_id, для защиты от повторного запуска
+
+
+def handle_toppromt_command(chat_id: str, args_text: str):
+    """/toppromt → кнопки; /toppromt 10 week → сразу запуск."""
+    parts = args_text.split()
+    if not parts:
+        keyboard = [
+            [{"text": "5️⃣ ТОП-5", "callback_data": "tp_n:5"}, {"text": "🔟 ТОП-10", "callback_data": "tp_n:10"}],
+            [{"text": "ТОП-20", "callback_data": "tp_n:20"}, {"text": "ТОП-40", "callback_data": "tp_n:40"}],
+            [{"text": "❌ Отмена", "callback_data": "cancel"}],
+        ]
+        send_message(chat_id, "🏆 <b>ТОП по всем редакторским рубрикам</b>\n\n"
+                     "Сколько сюжетов вывести?", reply_markup={"inline_keyboard": keyboard})
+        return
+    try:
+        count = max(1, min(int(parts[0]), 100))
+    except ValueError:
+        send_message(chat_id, "❌ Формат: <code>/toppromt 10 week</code> (периоды: today, 3days, week, month)")
+        return
+    period = parts[1] if len(parts) > 1 and parts[1] in TOPPROMPT_PERIODS else "today"
+    _start_toppromt(chat_id, count, period)
+
+
+def handle_toppromt_select_period(callback_query: dict, count_str: str):
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    answer_callback_query(callback_query["id"], f"ТОП-{count_str}")
+    keyboard = [
+        [{"text": "📅 Сегодня", "callback_data": f"tp_go:{count_str}:today"},
+         {"text": "📅 3 дня", "callback_data": f"tp_go:{count_str}:3days"}],
+        [{"text": "📅 Неделя", "callback_data": f"tp_go:{count_str}:week"},
+         {"text": "📅 Месяц", "callback_data": f"tp_go:{count_str}:month"}],
+        [{"text": "❌ Отмена", "callback_data": "cancel"}],
+    ]
+    send_message(chat_id, f"🏆 <b>ТОП-{count_str} по всем рубрикам</b>\n\nЗа какой период?",
+                 reply_markup={"inline_keyboard": keyboard})
+
+
+def handle_toppromt_go(callback_query: dict, count_str: str, period: str):
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    answer_callback_query(callback_query["id"], "🚀 Запускаю...")
+    _start_toppromt(chat_id, int(count_str), period if period in TOPPROMPT_PERIODS else "today")
+
+
+def _start_toppromt(chat_id: str, count: int, period: str):
+    if chat_id in _TOPPROMPT_RUNNING:
+        send_message(chat_id, "⏳ Подборка уже готовится, подождите завершения.")
+        return
+    _TOPPROMPT_RUNNING.add(chat_id)
+    send_message(chat_id,
+                 f"⏳ <b>Готовлю ТОП-{count}</b> по всем рубрикам (период: {TOPPROMPT_PERIODS[period]}).\n"
+                 f"Это займёт около 2–5 минут, бот пришлёт результат сам.")
+
+    def _worker():
+        try:
+            _run_toppromt(chat_id, count, period)
+        except Exception as e:
+            log.exception("❌ /toppromt: %s", e)
+            send_message(chat_id, f"❌ Ошибка при сборке ТОПа: {e}")
+        finally:
+            _TOPPROMPT_RUNNING.discard(chat_id)
+
+    threading.Thread(target=_worker, daemon=True, name="TopPromptWorker").start()
+
+
+_SUBFIELD_PREFIXES = (
+    "пошаговый алгоритм", "алгоритм действий", "алгоритм", "что произошло", "почему это скандал",
+    "кто участвует", "где произошло", "когда произошло", "текущий статус",
+    "источники", "источник", "ссылки", "ссылка", "кого касается", "кто имеет право",
+    "какую проблему решает", "какие документы", "необходимые документы", "документы",
+    "сколько стоит", "стоимость", "сколько времени", "куда обращаться", "куда обратиться",
+    "ограничения", "подводные камни", "дата проверки", "дата последней проверки",
+    "дата события", "дата публикации", "автор", "что говорят", "потенциал для",
+    "почему интересно", "краткое содержание", "суть события", "описание", "программа",
+    "расписание", "билеты", "возрастные ограничения"
+)
+
+
+def _is_subfield_title(text: str) -> bool:
+    """Проверяет, является ли строка служебным подполем сюжета/инструкции (а не новым сюжетом)."""
+    t = text.lower().strip("*_ #:\t")
+    for p in _SUBFIELD_PREFIXES:
+        if t.startswith(p):
+            return True
+    return False
+
+
+def _clean_trailing_footer(text: str) -> str:
+    """Удаляет завершающий вопрос или служебный футер модели (например, '--- \\n 🍷 Хотите, чтобы я...')."""
+    m = re.search(r'\n\s*[-_*]{3,}\s*\n([^\n]+(?:\n[^\n]+)*)\Z', text)
+    if m:
+        ft = m.group(1).strip()
+        if len(ft) < 400 and (any(w in ft.lower() for w in ['хотите', 'обращайтесь', 'дайте знать', 'надеюсь', 'вопросы', 'подборк']) or ft.endswith('?')):
+            text = text[:m.start()].strip()
+    lines = text.strip().splitlines()
+    if lines and len(lines[-1]) < 250:
+        last = lines[-1].strip().lower()
+        if any(w in last for w in ['хотите, чтобы я', 'дайте знать', 'если вам потребуется', 'обращайтесь']) or (last.startswith('?') or last.endswith('?')):
+            text = '\n'.join(lines[:-1]).strip()
+    return text.strip()
+
+
+def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
+    """
+    Универсально и устойчиво парсит новости/сюжеты/локации из ответа NotebookLM:
+    1. Если ответ содержит JSON-массив -> парсит его.
+    2. Очищает служебные завершающие вопросы модели.
+    3. Если в тексте есть 3 и более разделителей --- -> они разделяют целые инструкции/статьи.
+    4. Если ответ дан нумерованным списком (1. Title / **1.** Title / **1. Title** / ### 1. Title / 1) Title),
+       при этом служебные подполя (Пошаговый алгоритм, Ссылки, Документы и т.д.) НЕ разбиваются на подпосты.
+    5. Если ответ разделен разделителями --- и нумерованный список не найден -> берёт разделители.
+    6. Если оформлено markdown-заголовками (### Title / ## Title) с фильтрацией подполей.
+    7. Если оформлено списком с жирными названиями (* **Title**: body / - **Title** — body).
+    8. Fallback: если ничего не распознано по шаблонам, делит текст на карточки по абзацам.
+    """
+    if not text:
+        return []
+    clean = re.sub(r'\[\d+\]', '', text)
+    clean = re.sub(r'\[source\s*\d+\]', '', clean, flags=re.IGNORECASE).strip()
+
+    # 1. Пробуем JSON
+    m = re.search(r'\[\s*\{.*\}\s*\]', clean, re.DOTALL)
+    if m:
+        try:
+            data = json.loads(m.group(0))
+            if isinstance(data, list) and data:
+                res = []
+                for d in data:
+                    if isinstance(d, dict) and (d.get("title") or d.get("name")):
+                        res.append({
+                            "title": str(d.get("title") or d.get("name") or "").strip("*_ #\t"),
+                            "summary": str(d.get("summary") or d.get("description") or "").strip(),
+                            "why": str(d.get("why", "")).strip(),
+                            "source": str(d.get("source", "")).strip(),
+                            "news_score": float(d.get("score")) if d.get("score") is not None else None
+                        })
+                if res:
+                    return res
+        except Exception:
+            pass
+
+    # Очищаем служебный футер модели в конце сообщения
+    clean = _clean_trailing_footer(clean)
+
+    # 2. Если в тексте 3 и более разделителей --- -> они разделяют целые инструкции или статьи
+    hr_chunks = [c.strip() for c in re.split(r'\n\s*[-_*]{3,}\s*\n|\n---\s*\n?', clean) if c.strip()]
+    hr_items = []
+    if len(hr_chunks) >= 3:
+        for i, chunk in enumerate(hr_chunks):
+            # Пропускаем чисто вступительный абзац без деталей
+            if i == 0 and len(chunk) < 500 and any(w in chunk.lower() for w in ['подборка', 'обзор', 'период', 'испани', 'список', 'материал', 'рубрик']):
+                continue
+            if i == len(hr_chunks) - 1 and len(chunk) < 300 and any(w in chunk.lower() for w in ['если вам потребуется', 'обращайтесь', 'дайте знать', 'напишите', 'помощь в подготовке']):
+                continue
+            clines = [l.strip() for l in chunk.splitlines() if l.strip()]
+            if not clines:
+                continue
+
+            raw_title = clines[0]
+            body_start_idx = 1
+            for idx_l, line in enumerate(clines):
+                c_line = re.sub(r'^(?:#{1,4}\s*)?(?:\*\*\s*)?(?:№\s*)?(?:\d+[.)\-:\s]+)?(?:\*\*)?(?:Заголовок[:\s*]*|Тема[:\s*]*)?', '', line, flags=re.IGNORECASE).strip('*_ #:\t')
+                if c_line and not _is_subfield_title(c_line):
+                    raw_title = line
+                    body_start_idx = idx_l + 1
+                    break
+
+            t = re.sub(r'^(?:#{1,4}\s*)?(?:\*\*\s*)?(?:№\s*)?(?:\d+[.)\-:\s]+)?(?:\*\*)?(?:Заголовок[:\s*]*|Тема[:\s*]*)?', '', raw_title, flags=re.IGNORECASE).strip('*_ #:\t')
+            b = '\n'.join(clines[body_start_idx:]).strip() if len(clines) > body_start_idx else ''
+            urls = re.findall(r'https?://[^\s)\]"\'>]+', chunk)
+            hr_items.append({
+                "title": t or raw_title[:60],
+                "summary": b,
+                "why": "",
+                "source": urls[0] if urls else "",
+                "news_score": None
+            })
+        if len(hr_items) >= 3:
+            return hr_items
+
+    lines = clean.splitlines()
+
+    # 3. Нумерованные пункты с фильтрацией подполей:
+    # 1. Title / **1.** Title / **1. Title** / ### 1. Title / 1) Title
+    num_pat = re.compile(r'^(?:#{1,4}\s*)?(?:\*\*\s*)?(?:№\s*)?(\d+)[.)\-:\s]+(?:\*\*)?\s*(.+)$')
+    sections = []
+    curr_title = None
+    curr_body = []
+
+    for line in lines:
+        match = num_pat.match(line.strip())
+        if match:
+            cand_title = match.group(2).strip("*_ #:\t")
+            if _is_subfield_title(cand_title) and curr_title is not None:
+                curr_body.append(line)
+            else:
+                if curr_title and curr_body:
+                    sections.append((curr_title, "\n".join(curr_body).strip()))
+                    curr_body = []
+                clean_t = re.sub(r'^(?:Заголовок[:\s*]*|Тема[:\s*]*)', '', cand_title, flags=re.IGNORECASE).strip('*_ #:\t')
+                curr_title = clean_t or cand_title
+        elif curr_title is not None:
+            curr_body.append(line)
+
+    if curr_title and curr_body:
+        sections.append((curr_title, "\n".join(curr_body).strip()))
+
+    if len(sections) >= 2:
+        items = []
+        for t, b in sections:
+            urls = re.findall(r'https?://[^\s)\]"\'>]+', b)
+            items.append({
+                "title": t,
+                "summary": b,
+                "why": "",
+                "source": urls[0] if urls else "",
+                "news_score": None
+            })
+        return items
+
+    # 4. Если нумерованный список не найден, но было хотя бы 2 блока по разделителям ---
+    if len(hr_items) >= 2:
+        return hr_items
+
+    # 5. Markdown-заголовки: ### Title или ## Title (с фильтрацией подполей)
+    header_pat = re.compile(r'^(?:#{2,4})\s+(.+)$')
+    h_sections = []
+    curr_h = None
+    curr_hb = []
+    for line in lines:
+        match = header_pat.match(line.strip())
+        if match:
+            cand_h = match.group(1).strip("*_ #:\t")
+            if _is_subfield_title(cand_h) and curr_h is not None:
+                curr_hb.append(line)
+            else:
+                if curr_h and curr_hb:
+                    h_sections.append((curr_h, "\n".join(curr_hb).strip()))
+                    curr_hb = []
+                clean_h = re.sub(r'^(?:Заголовок[:\s*]*|Тема[:\s*]*)', '', cand_h, flags=re.IGNORECASE).strip('*_ #:\t')
+                curr_h = clean_h or cand_h
+        elif curr_h is not None:
+            curr_hb.append(line)
+    if curr_h and curr_hb:
+        h_sections.append((curr_h, "\n".join(curr_hb).strip()))
+
+    if len(h_sections) >= 2:
+        items = []
+        for t, b in h_sections:
+            urls = re.findall(r'https?://[^\s)\]"\'>]+', b)
+            items.append({
+                "title": t,
+                "summary": b,
+                "why": "",
+                "source": urls[0] if urls else "",
+                "news_score": None
+            })
+        return items
+
+    # 6. Маркеры списков с жирными названиями: * **Заголовок** или - **Заголовок**
+    bullet_pat = re.compile(r'^[-*•]\s+\*\*(.+?)\*\*(?::\s*|\s*[-—]\s*|\s*)(.*)$')
+    b_items = []
+    for line in lines:
+        m = bullet_pat.match(line.strip())
+        if m:
+            cand_b = m.group(1).strip("*_ #:\t")
+            if not _is_subfield_title(cand_b):
+                b_items.append({
+                    "title": cand_b,
+                    "summary": m.group(2).strip(),
+                    "why": "",
+                    "source": "",
+                    "news_score": None
+                })
+    if len(b_items) >= 2:
+        return b_items
+
+    # 7. Если был ровно 1 нумерованный пункт (len(sections) == 1)
+    if len(sections) == 1:
+        t, b = sections[0]
+        urls = re.findall(r'https?://[^\s)\]"\'>]+', b)
+        return [{
+            "title": t,
+            "summary": b,
+            "why": "",
+            "source": urls[0] if urls else "",
+            "news_score": None
+        }]
+
+    # 8. Fallback: разделение на карточки по абзацам (2+ перевода строки)
+    raw_paras = [p.strip() for p in re.split(r'\n\s*\n+', clean) if len(p.strip()) > 30]
+    if raw_paras:
+        if len(raw_paras) > 1 and any(w in raw_paras[0].lower() for w in ['подборка', 'обзор', 'период', 'сводка']):
+            raw_paras = raw_paras[1:]
+        items = []
+        for p in raw_paras:
+            plines = [l.strip() for l in p.splitlines() if l.strip()]
+            t = plines[0].strip("*_ #:\t") if plines else "Новость"
+            if len(t) > 80:
+                t = t[:77] + "..."
+            b = "\n".join(plines[1:]).strip() if len(plines) > 1 else plines[0]
+            urls = re.findall(r'https?://[^\s)\]"\'>]+', p)
+            items.append({
+                "title": t,
+                "summary": b,
+                "why": "",
+                "source": urls[0] if urls else "",
+                "news_score": None
+            })
+        return items
+
+    return []
+
+
+def _parse_rag_json(text: str) -> list:
+    """Для обратной совместимости."""
+    return _parse_rag_news_items(text)
+
+
+def _send_interactive_news_basket(
+    chat_id: str,
+    items: List[Dict[str, Any]],
+    title: str,
+    period_title: str,
+    extra_note: str = ""
+):
+    """
+    Отправляет каждую новость отдельным сообщением с inline-кнопкой «➕ Добавить в пост».
+    В конце отправляет контрольное сообщение со счётчиком и кнопкой генерации общего ТГ-поста.
+    """
+    import html as _html
+    esc = _html.escape
+
+    session_id = uuid.uuid4().hex[:8]
+    session_data = {
+        "type": "digest_basket",
+        "chat_id": chat_id,
+        "title": title,
+        "period_title": period_title,
+        "items": items,
+        "selected": [],
+        "item_msg_ids": {},
+        "control_msg_id": None
+    }
+    save_query_session(session_id, session_data)
+
+    header = f"🏆 <b>{esc(title)}</b>\n📅 Период: <b>{esc(period_title)}</b>\n"
+    if extra_note:
+        header += f"<i>{esc(extra_note)}</i>\n"
+    header += f"📊 Найдено новостей: <b>{len(items)}</b>\n\n"
+    header += "👇 <i>Отмечайте нужные новости кнопками «➕ Добавить в пост», затем нажмите «Сгенерировать ТГ-пост» внизу:</i>"
+
+    send_message(chat_id, header, disable_web_page_preview=True)
+    time.sleep(0.3)
+
+    item_msg_ids = {}
+    for idx, it in enumerate(items):
+        t = it.get("title", f"Сюжет #{idx+1}").strip()
+        s = it.get("summary", "").strip()
+        w = it.get("why", "").strip()
+        src = it.get("source", "").strip()
+        sc = it.get("news_score")
+        rubrics = it.get("rubrics") or ([it["rubric"]] if "rubric" in it else [])
+
+        block = []
+        sc_badge = f" — ⭐ <b>{sc:.1f}</b>" if sc is not None else ""
+        block.append(f"<b>{idx+1}. {esc(t)}</b>{sc_badge}")
+        if s:
+            block.append(esc(s))
+        if w:
+            block.append(f"💡 <i>{esc(w)}</i>")
+        if rubrics:
+            from editorial_prompts import EDITORIAL_PROMPTS
+            rub_names = [EDITORIAL_PROMPTS[r]["title"].split(" ", 1)[-1] for r in rubrics if r in EDITORIAL_PROMPTS]
+            if rub_names:
+                block.append(f"🏷 {esc(', '.join(rub_names))}")
+        if src:
+            block.append(f"🔗 {esc(src)}")
+
+        card_text = "\n\n".join(block)
+        if len(card_text) > 3800:
+            card_text = card_text[:3800] + "..."
+
+        reply_markup = {
+            "inline_keyboard": [
+                [{"text": "➕ Добавить в пост", "callback_data": f"bsk_t:{session_id}:{idx}"}]
+            ]
+        }
+        res = send_message(chat_id, card_text, reply_markup=reply_markup, disable_web_page_preview=True)
+        if res and res.get("result"):
+            item_msg_ids[str(idx)] = res["result"]["message_id"]
+        time.sleep(0.25)
+
+    # Контрольное сообщение внизу со счётчиком
+    ctrl_text = (
+        f"📌 <b>Выбрано новостей для поста: 0</b>\n\n"
+        f"<i>Нажимайте «➕ Добавить в пост» под нужными новостями выше.</i>"
+    )
+    ctrl_markup = {
+        "inline_keyboard": [
+            [{"text": "📝 Сгенерировать ТГ-пост (0)", "callback_data": f"bsk_g:{session_id}"}],
+            [{"text": "🗑 Сбросить выбор", "callback_data": f"bsk_c:{session_id}"}]
+        ]
+    }
+    ctrl_res = send_message(chat_id, ctrl_text, reply_markup=ctrl_markup)
+    if ctrl_res and ctrl_res.get("result"):
+        session_data["control_msg_id"] = ctrl_res["result"]["message_id"]
+
+    session_data["item_msg_ids"] = item_msg_ids
+    save_query_session(session_id, session_data)
+
+
+def handle_basket_toggle(callback_query: dict, session_id: str, idx: int):
+    """Переключает статус выбора новости (добавить/убрать)."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    msg_id = callback_query["message"]["message_id"]
+
+    session = get_query_session(session_id)
+    if not session or "items" not in session:
+        answer_callback_query(callback_query["id"], "❌ Сессия устарела. Запустите выбор заново.", show_alert=True)
+        return
+
+    selected = set(session.get("selected", []))
+    items = session.get("items", [])
+    if idx < 0 or idx >= len(items):
+        answer_callback_query(callback_query["id"], "❌ Новость не найдена.")
+        return
+
+    item_title = items[idx].get("title", f"Новость #{idx+1}")
+    if idx in selected:
+        selected.remove(idx)
+        btn_text = "➕ Добавить в пост"
+        alert_text = f"❌ Убрано: {item_title[:30]}"
+    else:
+        selected.add(idx)
+        btn_text = "✅ В подборке"
+        alert_text = f"✅ Добавлено: {item_title[:30]}"
+
+    session["selected"] = sorted(list(selected))
+    save_query_session(session_id, session)
+
+    # 1. Обновляем кнопку на сообщении этой новости
+    new_markup = {
+        "inline_keyboard": [[{"text": btn_text, "callback_data": f"bsk_t:{session_id}:{idx}"}]]
+    }
+    try:
+        edit_message_reply_markup(chat_id, msg_id, reply_markup=new_markup)
+    except Exception as e:
+        log.warning("⚠️ edit_message_reply_markup error: %s", e)
+
+    # 2. Обновляем контрольную панель со счётчиком
+    ctrl_id = session.get("control_msg_id")
+    if ctrl_id:
+        count = len(selected)
+        ctrl_text = (
+            f"📌 <b>Выбрано новостей для поста: {count}</b>\n\n"
+            f"<i>Нажмите кнопку ниже, когда завершите выбор:</i>"
+        )
+        ctrl_markup = {
+            "inline_keyboard": [
+                [{"text": f"📝 Сгенерировать ТГ-пост ({count})", "callback_data": f"bsk_g:{session_id}"}],
+                [{"text": "🗑 Сбросить выбор", "callback_data": f"bsk_c:{session_id}"}]
+            ]
+        }
+        try:
+            edit_message_text(chat_id, ctrl_id, ctrl_text, reply_markup=ctrl_markup)
+        except Exception as e:
+            log.warning("⚠️ edit_message_text error: %s", e)
+
+    answer_callback_query(callback_query["id"], alert_text)
+
+
+def handle_basket_clear(callback_query: dict, session_id: str):
+    """Сбрасывает все выбранные новости."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    session = get_query_session(session_id)
+    if not session:
+        answer_callback_query(callback_query["id"], "❌ Сессия устарела.")
+        return
+
+    old_selected = list(session.get("selected", []))
+    session["selected"] = []
+    save_query_session(session_id, session)
+
+    item_msg_ids = session.get("item_msg_ids", {})
+    for idx in old_selected:
+        m_id = item_msg_ids.get(str(idx))
+        if m_id:
+            try:
+                edit_message_reply_markup(
+                    chat_id, m_id,
+                    reply_markup={"inline_keyboard": [[{"text": "➕ Добавить в пост", "callback_data": f"bsk_t:{session_id}:{idx}"}]]}
+                )
+            except Exception:
+                pass
+
+    ctrl_id = session.get("control_msg_id")
+    if ctrl_id:
+        ctrl_text = (
+            f"📌 <b>Выбрано новостей для поста: 0</b>\n\n"
+            f"<i>Выбор сброшен. Отметьте нужные новости кнопками выше:</i>"
+        )
+        ctrl_markup = {
+            "inline_keyboard": [
+                [{"text": "📝 Сгенерировать ТГ-пост (0)", "callback_data": f"bsk_g:{session_id}"}],
+                [{"text": "🗑 Сбросить выбор", "callback_data": f"bsk_c:{session_id}"}]
+            ]
+        }
+        try:
+            edit_message_text(chat_id, ctrl_id, ctrl_text, reply_markup=ctrl_markup)
+        except Exception:
+            pass
+
+    answer_callback_query(callback_query["id"], "🗑 Выбор сброшен")
+
+
+def handle_basket_generate_prompt(callback_query: dict, session_id: str):
+    """Предлагает выбрать стиль перед генерацией общего поста."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    session = get_query_session(session_id)
+    if not session or "items" not in session:
+        answer_callback_query(callback_query["id"], "❌ Сессия устарела. Запустите поиск заново.", show_alert=True)
+        return
+
+    selected = session.get("selected", [])
+    if not selected:
+        answer_callback_query(callback_query["id"], "⚠️ Сначала отметьте хотя бы одну новость кнопкой «➕ Добавить в пост»!", show_alert=True)
+        return
+
+    answer_callback_query(callback_query["id"], "🎨 Выберите стиль")
+
+    keyboard = []
+    for s_key, s_data in POST_STYLES.items():
+        keyboard.append([{"text": s_data['title'], "callback_data": f"bsk_s:{session_id}:{s_key}"}])
+    keyboard.append([{"text": "❌ Отмена", "callback_data": "cancel"}])
+
+    send_message(
+        chat_id,
+        f"📝 <b>Генерация общего ТГ-поста из {len(selected)} выбранных новостей</b>\n\n"
+        f"✍️ <b>Выберите стиль написания:</b>",
+        reply_markup={"inline_keyboard": keyboard}
+    )
+
+
+def handle_basket_generate_execute(callback_query: dict, session_id: str, style_key: str):
+    """Запускает генерацию единого ТГ-поста из отмеченных новостей."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    answer_callback_query(callback_query["id"], "🚀 Запускаю сборку поста...")
+
+    session = get_query_session(session_id)
+    if not session or "items" not in session:
+        send_message(chat_id, "❌ Сессия генерации истекла.")
+        return
+
+    selected_indices = session.get("selected", [])
+    if not selected_indices:
+        send_message(chat_id, "⚠️ Нет выбранных новостей для поста.")
+        return
+
+    items = session.get("items", [])
+    chosen_items = [items[i] for i in selected_indices if i < len(items)]
+    style_title = POST_STYLES.get(style_key, {}).get("title", style_key)
+
+    send_message(
+        chat_id,
+        f"⏳ <b>Пишу ТГ-пост на основе {len(chosen_items)} новостей...</b>\n"
+        f"🎨 Стиль: <b>{style_title}</b>\n\n"
+        f"Подождите 10-25 секунд..."
+    )
+
+    def _worker():
+        try:
+            _run_basket_post_generation(
+                chat_id,
+                session_id,
+                chosen_items,
+                style_key,
+                session.get("title", "Дайджест новостей")
+            )
+        except Exception as e:
+            log.exception("❌ Ошибка сборки поста из корзины: %s", e)
+            send_message(chat_id, f"❌ Ошибка при генерации поста: {e}")
+
+    threading.Thread(target=_worker, daemon=True, name="BasketPostWorker").start()
+
+
+def _run_basket_post_generation(
+    chat_id: str,
+    session_id: str,
+    chosen_items: List[Dict[str, Any]],
+    style_key: str,
+    basket_title: str
+):
+    """Синтезирует общий пост через AnyModel LLM на основе выбранных новостей."""
+    style_cfg = POST_STYLES.get(style_key, POST_STYLES["standard"])
+    style_title = style_cfg["title"]
+
+    materials = []
+    extra_links = []
+    for i, it in enumerate(chosen_items, 1):
+        t = it.get("title", "").strip()
+        s = it.get("summary", "").strip()
+        w = it.get("why", "").strip()
+        src = it.get("source", "").strip()
+        if src and src not in extra_links:
+            extra_links.append(src)
+        block = f"Сюжет {i}: {t}\n{s}"
+        if w:
+            block += f"\nКонтекст/почему важно: {w}"
+        if src:
+            block += f"\nИсточник: {src}"
+        materials.append(block)
+
+    raw_rag_text = "\n\n".join(materials)
+    titles_summary = ", ".join(it.get("title", "") for it in chosen_items[:3])
+    topic = f"{basket_title}: {titles_summary}"
+
+    if len(chosen_items) == 1:
+        length_hint = "800-1400"
+        max_tokens = 1500
+    elif len(chosen_items) <= 3:
+        length_hint = "1200-2000"
+        max_tokens = 2200
+    else:
+        length_hint = "1500-2800"
+        max_tokens = 3000
+
+    polished_post = polish_custom_topic_post_with_llm(
+        raw_rag_text=raw_rag_text,
+        topic=topic,
+        style_key=style_key,
+        extra_links=extra_links,
+        length_hint=length_hint,
+        max_tokens=max_tokens
+    )
+
+    send_message(
+        chat_id,
+        f"✅ <b>Готовый ТГ-пост на основе {len(chosen_items)} новостей ({style_title}):</b>\n"
+        f"<i>(скопируйте текст ниже)</i>",
+        disable_web_page_preview=True
+    )
+    send_long_message(chat_id, polished_post, parse_mode=None, disable_web_page_preview=True)
+
+    draft_id = save_post_draft(
+        polished_post,
+        title=f"{basket_title} ({len(chosen_items)} сюжетов)",
+        chat_id=chat_id
+    )
+    offer_channel_publication(chat_id, draft_id)
+
+
+def _run_toppromt(chat_id: str, count: int, period: str):
+    import html as _html
+    from editorial_prompts import EDITORIAL_PROMPTS, build_structured_prompt, news_keys
+
+    notebook_id = _resolve_notebook_id(_get_latest_notebook_key())
+    per_rubric = max(5, min(12, -(-count * 15 // 100) + 3))
+    items: List[Dict[str, Any]] = []
+    failed: List[str] = []
+
+    rubric_keys = news_keys()
+    for n, key in enumerate(rubric_keys, 1):
+        raw, _links = query_notebooklm_rag(notebook_id, build_structured_prompt(key, per_rubric),
+                                           period_key=period)
+        found = _parse_rag_json(raw or "")
+        log.info("🧭 toppromt рубрика %s (%d/%d): %d сюжетов", key, n, len(rubric_keys), len(found))
+        if not raw or (not found and "[]" not in (raw or "")):
+            failed.append(key)
+        for f in found:
+            try:
+                score = max(1.0, min(10.0, float(f.get("score", 5))))
+            except (TypeError, ValueError):
+                score = 5.0
+            items.append({
+                "title": str(f.get("title", "")).strip(),
+                "summary": str(f.get("summary", "")).strip(),
+                "why": str(f.get("why", "")).strip(),
+                "source": str(f.get("source", "")).strip(),
+                "rubric": key,
+                "news_score": score,
+            })
+
+    if not items:
+        send_message(chat_id, "❌ RAG не вернул сюжетов за этот период (или требуется <code>notebooklm login</code>).")
+        return
+
+    # --- Объединение: кластеризация одного события из разных рубрик ---
+    reps: List[Dict[str, Any]] = []
+    try:
+        from news_diversification import NewsDiversifier, DiversityConfig, diversify
+        items.sort(key=lambda x: x["news_score"], reverse=True)
+        engine = NewsDiversifier(DiversityConfig.for_target(count))
+        labels = engine.cluster_events(items)
+        groups: Dict[int, List[Dict[str, Any]]] = {}
+        for it, lb in zip(items, labels):
+            groups.setdefault(lb, []).append(it)
+        for grp in groups.values():
+            best = dict(grp[0])  # лучшая по score
+            rubrics = sorted({g["rubric"] for g in grp}, key=int)
+            best["rubrics"] = rubrics
+            # бонус: сюжет попал в несколько рубрик — значит важнее (базовая оценка не теряется)
+            best["merged_score"] = round(best["news_score"] + min(1.5, 0.5 * (len(rubrics) - 1)), 2)
+            best["news_score"] = best["merged_score"]
+            reps.append(best)
+        reps.sort(key=lambda x: x["news_score"], reverse=True)
+        # Тематическое разнообразие + добор, если нужно
+        div = diversify(reps, count, embedder=engine.embedder, max_per_event=1)
+        selected = div.selected
+        log.info("🧩 toppromt: %d сюжетов -> %d событий -> топ %d", len(items), len(reps), len(selected))
+    except Exception as e:
+        log.warning("⚠️ toppromt: объединение без кластеризации (%s)", e)
+        seen, selected = set(), []
+        for it in sorted(items, key=lambda x: x["news_score"], reverse=True):
+            k = re.sub(r'\W+', ' ', it["title"].lower()).strip()
+            if k not in seen:
+                seen.add(k)
+                it["rubrics"] = [it["rubric"]]
+                selected.append(it)
+        selected = selected[:count]
+
+    # --- Интерактивный вывод новостей карточками с кнопками добавления в пост ---
+    extra_note = f"Сюжетов собрано: {len(items)}, уникальных событий: {len(reps) or len(selected)}"
+    if failed:
+        extra_note += f" | Рубрики без ответа: {', '.join(failed)}"
+
+    _send_interactive_news_basket(
+        chat_id=chat_id,
+        items=selected,
+        title=f"ТОП-{len(selected)} по всем рубрикам",
+        period_title=TOPPROMPT_PERIODS.get(period, period),
+        extra_note=extra_note
+    )
+
+
+def handle_prompts_command(chat_id: str):
+    """Показывает 10 редакторских промптов кнопками."""
+    from editorial_prompts import EDITORIAL_PROMPTS
+    keyboard = [[{"text": p["title"], "callback_data": f"ed_pr:{k}"}]
+                for k, p in EDITORIAL_PROMPTS.items()]
+    keyboard.append([{"text": "❌ Отмена", "callback_data": "cancel"}])
+    send_message(
+        chat_id,
+        "🧭 <b>Редакторские промпты</b>\n\nВыберите рубрику, затем период — "
+        "RAG подготовит подборку уникальных сюжетов.",
+        reply_markup={"inline_keyboard": keyboard}
+    )
+
+
+def handle_editorial_select(callback_query: dict, key: str):
+    """Выбран редакторский промпт -> создаём RAG-сессию и предлагаем период."""
+    from editorial_prompts import EDITORIAL_PROMPTS, build_editorial_prompt
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    if key not in EDITORIAL_PROMPTS:
+        answer_callback_query(callback_query["id"], "❌ Неизвестный промпт")
+        return
+    answer_callback_query(callback_query["id"], "✅ Промпт выбран")
+
+    p = EDITORIAL_PROMPTS[key]
+    session_id = uuid.uuid4().hex[:8]
+    save_query_session(session_id, {
+        "type": "editorial",
+        "question": build_editorial_prompt(key),
+        "title": p["title"],
+        "chat_id": chat_id
+    })
+    keyboard = [
+        [
+            {"text": "📅 За сегодня", "callback_data": f"ask_p:{session_id}:today"},
+            {"text": "📅 За 3 дня", "callback_data": f"ask_p:{session_id}:3days"}
+        ],
+        [
+            {"text": "📅 За неделю", "callback_data": f"ask_p:{session_id}:week"},
+            {"text": "📅 За месяц", "callback_data": f"ask_p:{session_id}:month"}
+        ],
+        [{"text": "📓 Выбрать архивный месяц...", "callback_data": f"ask_p:{session_id}:archive"}],
+        [{"text": "❌ Отмена", "callback_data": "cancel"}]
+    ]
+    send_message(
+        chat_id,
+        f"{p['title']}\n<i>{p['goal']}</i>\n\nЗа какой период сделать сводку?",
+        reply_markup={"inline_keyboard": keyboard}
+    )
+
+
 def handle_ask_show_archive(callback_query: dict, session_id: str):
     """Показывает кнопки архивных месяцев блокнотов NotebookLM."""
     chat_id = str(callback_query["message"]["chat"]["id"])
@@ -2580,7 +3421,7 @@ def handle_ask_execute(
     notebook_id = _resolve_notebook_id(notebook_key)
 
     period_title = RAG_PERIODS.get(period_key, {}).get("title", f"Блокнот {notebook_key}")
-    q_preview = question[:70] + ("..." if len(question) > 70 else "")
+    q_preview = session.get("title") or (question[:70] + ("..." if len(question) > 70 else ""))
     send_message(
         chat_id,
         f"⏳ <b>Ищу ответ в NotebookLM RAG...</b>\n"
@@ -2603,6 +3444,26 @@ def handle_ask_execute(
     clean_answer = re.sub(r'\[\d+\]', '', raw_answer)
     clean_answer = re.sub(r'\[source\s*\d+\]', '', clean_answer, flags=re.IGNORECASE)
     clean_answer = re.sub(r'  +', ' ', clean_answer).strip()
+
+    # Если это сессия редакторского промпта — выдаём интерактивными карточками с кнопками выбора
+    if session.get("type") == "editorial":
+        items = _parse_rag_news_items(clean_answer)
+        if not items:
+            items = [{
+                "title": session.get("title", "Новость из подборки"),
+                "summary": clean_answer,
+                "why": "",
+                "source": extra_links[0] if extra_links else "",
+                "news_score": None
+            }]
+        log.info("🧩 Редакторская рубрика '%s': сформировано %d интерактивных карточек", session.get("title"), len(items))
+        _send_interactive_news_basket(
+            chat_id=chat_id,
+            items=items,
+            title=session.get("title", "Редакторская рубрика"),
+            period_title=period_title
+        )
+        return
 
     ans_header = f"💡 <b>Ответ NotebookLM RAG ({period_title}):</b>\n\n"
     response_text = ans_header + clean_answer
@@ -2822,6 +3683,8 @@ def run_polling():
             {"command": "ask", "description": "Задать вопрос RAG-системе (NotebookLM)"},
             {"command": "post", "description": "Сгенерировать ТГ-пост на свою тему"},
             {"command": "top", "description": "Показать ТОП новостей (кнопки или /top 20)"},
+            {"command": "prompts", "description": "редакторские рубрики (подборка из RAG)"},
+            {"command": "toppromt", "description": "ТОП-N по всем рубрикам вместе"},
             {"command": "queue", "description": "Очередь публикаций в канал @iberia_news"},
             {"command": "fav", "description": "Избранные посты (отложенные на потом)"},
             {"command": "help", "description": "Справка и список команд"},
@@ -2942,6 +3805,8 @@ def _handle_text_command(chat_id: str, text: str):
                      "🤖 <b>News Intelligence Bot — Справка</b>\n\n"
                      "Я помогаю работать с новостями Испании, отвечать на вопросы через RAG и генерировать готовые Telegram-посты.\n\n"
                      "📌 <b>Основные команды:</b>\n"
+                     "• <code>/toppromt [N] [период]</code> — ТОП-N сюжетов, объединённый из всех рубрик\n"
+                     "• <code>/prompts</code> — редакторские рубрики (подборка за день/3 дня/неделю/месяц)\n"
                      "• <code>/ask [вопрос]</code> — задать вопрос напрямую RAG-системе (NotebookLM)\n"
                      "• <code>/post [тема]</code> — сгенерировать ТГ-пост на вашу тему с фактами из RAG\n"
                      "• <code>/top</code> — интерактивный выбор новостей кнопками (кол-во + период)\n"
@@ -2955,6 +3820,15 @@ def _handle_text_command(chat_id: str, text: str):
                      "💡 <b>Способы создания постов:</b>\n"
                      "1. <b>По любой вашей теме:</b> напишите <code>/post</code> или <code>/post Тема поста</code>, выберите стиль и блокнот.\n"
                      "2. <b>По найденным новостям:</b> нажмите кнопку <b>«📝 Сгенерировать ТГ-пост»</b> под любой новостью из <code>/top</code>.")
+        return
+
+    # 2b. Редакторские промпты (/toppromt должен проверяться раньше /prompts)
+    if text_clean.startswith("/toppromt"):
+        handle_toppromt_command(chat_id, text_clean[len("/toppromt"):].strip())
+        return
+
+    if text_clean.startswith("/prompts"):
+        handle_prompts_command(chat_id)
         return
 
     # 3. Вопрос к RAG
