@@ -294,6 +294,7 @@ SCORING_SYSTEM_PROMPT = """Ты — опытный главный редакто
 - audience: ["resident", "immigrant", "potential_immigrant", "family", "tourist", "general"]
 - locality: "national" | "regional" | "city" | "local"
 - formats: ["news", "breaking", "explainer", "how_to", "numbers", "comparison", "guide", "poll", "opinion", "interesting_fact"]
+- editorial_angles: ровно 3 принципиально разных, контрастных угла подачи для Telegram-поста (1: выгода/деньги/практика, 2: закон/процедура/системные последствия, 3: парадокс/эмоция/спор). Запрещено перефразировать одно и то же разными словами!
 
 Формат ответа — ТОЛЬКО чистый валидный JSON следующей структуры:
 {

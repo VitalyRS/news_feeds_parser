@@ -187,6 +187,7 @@ def send_long_message(chat_id: str, text: str, parse_mode: Optional[str] = "HTML
     Отправляет сообщение в Telegram, безопасно разбивая на части,
     если длина превышает лимит Telegram (4096 символов).
     При ошибке parse_mode пробует отправить чистым текстом.
+    Возвращает dict ответа Telegram API для последнего отправленного сообщения.
     """
     max_chunk = 3800
     if len(text) <= max_chunk:
@@ -194,10 +195,10 @@ def send_long_message(chat_id: str, text: str, parse_mode: Optional[str] = "HTML
                             reply_markup=reply_markup,
                             disable_web_page_preview=disable_web_page_preview)
         if not resp and parse_mode:
-            send_message(chat_id, text, parse_mode=None,
-                         reply_markup=reply_markup,
-                         disable_web_page_preview=disable_web_page_preview)
-        return
+            resp = send_message(chat_id, text, parse_mode=None,
+                                reply_markup=reply_markup,
+                                disable_web_page_preview=disable_web_page_preview)
+        return resp
 
     chunks = []
     lines = text.split("\n")
@@ -217,16 +218,19 @@ def send_long_message(chat_id: str, text: str, parse_mode: Optional[str] = "HTML
     if current_chunk.strip():
         chunks.append(current_chunk.strip())
 
+    last_resp = None
     for idx, ch in enumerate(chunks):
         markup = reply_markup if (idx == len(chunks) - 1) else None
         resp = send_message(chat_id, ch, parse_mode=parse_mode,
                             reply_markup=markup,
                             disable_web_page_preview=disable_web_page_preview)
         if not resp and parse_mode:
-            send_message(chat_id, ch, parse_mode=None,
-                         reply_markup=markup,
-                         disable_web_page_preview=disable_web_page_preview)
+            resp = send_message(chat_id, ch, parse_mode=None,
+                                reply_markup=markup,
+                                disable_web_page_preview=disable_web_page_preview)
+        last_resp = resp
         time.sleep(0.3)
+    return last_resp
 
 
 def escape_html(text: str) -> str:
@@ -277,22 +281,162 @@ def save_queue_data(data: Dict[str, Any]):
         log.error("❌ Ошибка сохранения %s: %s", POST_QUEUE_FILE, e)
 
 
-def save_post_draft(text: str, title: str = "", chat_id: str = "") -> str:
+def parse_headline_options(text: str) -> tuple[List[Dict[str, Any]], str]:
+    """
+    Извлекает список вариантов заголовков из блока 💡 ВАРИАНТЫ ЗАГОЛОВКА: в начале поста.
+    Возвращает (список_опций, тело_поста).
+    """
+    m = re.search(r'^(.*?)\n\s*[-_*=]{3,}\s*\n(.*)$', text or "", flags=re.DOTALL)
+    if not m:
+        head_block = (text or "")[:1500]
+        body = text or ""
+    else:
+        head_block, body = m.group(1), m.group(2)
+
+    options = []
+    pat = re.compile(r'^(?:([1-4])️⃣|([1-4])[.)\]])\s*(?:[*_]*\[?([^\]:\n]+)\]?[*_]*[:\-—\s]*)?\s*(.+)$')
+    for line in head_block.splitlines():
+        line_s = line.strip()
+        if not line_s:
+            continue
+        m_opt = pat.match(line_s)
+        if m_opt:
+            num = int(m_opt.group(1) or m_opt.group(2))
+            cat = (m_opt.group(3) or '').strip('*_[] :—')
+            title = (m_opt.group(4) or '').strip('*_\"\' ')
+            short_cat = cat.split('/')[0].strip() if cat else f'Вариант {num}'
+            if len(short_cat) > 14:
+                short_cat = short_cat[:14]
+            options.append({
+                'idx': num,
+                'category': cat,
+                'short_category': short_cat,
+                'title': title
+            })
+    return options, body
+
+
+def apply_chosen_headline(text: str, chosen_title: str) -> str:
+    """
+    Заменяет заголовок в теле поста (первую строку после блока вариантов заголовков)
+    на выбранный пользователем, сохраняя вводный тематический эмодзи и выделение **жирным**.
+    """
+    m = re.search(r'^(.*?)\n\s*[-_*=]{3,}\s*\n(.*)$', text or "", flags=re.DOTALL)
+    if m:
+        head_block = m.group(1)
+        body = m.group(2)
+    else:
+        head_block = ''
+        body = text or ""
+
+    lines = body.strip().splitlines()
+    if not lines:
+        return text or ""
+
+    first_line = lines[0].strip()
+    emoji_match = re.match(r'^([\U00010000-\U0010ffff\u2600-\u27bf\u2300-\u23ff\u2b50\u203c-\u3299]+)\s*', first_line)
+    leading_emoji = emoji_match.group(0) if emoji_match else ''
+    if leading_emoji and not leading_emoji.endswith(' '):
+        leading_emoji += ' '
+
+    clean_title = chosen_title.strip('*_# ')
+    new_first_line = f'{leading_emoji}**{clean_title}**'
+    lines[0] = new_first_line
+    new_body = '\n'.join(lines)
+
+    if head_block:
+        return f'{head_block}\n---\n{new_body}'
+    return new_body
+
+
+def extract_current_body_headline(text: str) -> str:
+    """Извлекает текущий заголовок (первую непустую строку тела поста без эмодзи и **)."""
+    _, body = parse_headline_options(text)
+    lines = [ln.strip() for ln in body.strip().splitlines() if ln.strip()]
+    if not lines:
+        return ""
+    first_line = lines[0]
+    first_line = re.sub(
+        r'^[\U00010000-\U0010ffff\u2600-\u27bf\u2300-\u23ff\u2b50\u203c-\u3299\ufe0f]+\s*',
+        '',
+        first_line
+    )
+    return first_line.strip('*_# «»"\'')
+
+
+def sync_initial_headline(text: str) -> tuple[str, List[Dict[str, Any]], int]:
+    """
+    Синхронизирует заголовок в теле поста с одним из сгенерированных вариантов (1..4):
+    - Если первая строка поста уже совпадает с одним из вариантов 1..4 -> выбирает его индекс.
+    - Если модель написала в теле поста другой заголовок, не совпадающий с 1..4 ->
+      применяет вариант 1️⃣, чтобы заголовок в посте всегда был одним из сгенерированных вариантов.
+    Возвращает (синхронизированный_текст, options, selected_idx).
+    """
+    options, _ = parse_headline_options(text)
+    if not options:
+        return text, [], 1
+
+    curr_h = extract_current_body_headline(text)
+    norm_curr = re.sub(r'\W+', '', curr_h.lower())
+
+    matched_opt = None
+    if norm_curr:
+        for opt in options:
+            norm_opt = re.sub(r'\W+', '', opt.get("title", "").lower())
+            if norm_opt and (norm_opt == norm_curr or norm_opt in norm_curr or norm_curr in norm_opt):
+                matched_opt = opt
+                break
+
+    if matched_opt is None:
+        matched_opt = options[0]
+
+    synced_text = apply_chosen_headline(text, matched_opt["title"])
+    return synced_text, options, matched_opt["idx"]
+
+
+def save_post_draft(
+    text: str,
+    title: str = "",
+    chat_id: str = "",
+    draft_id: Optional[str] = None,
+    headline_options: Optional[List[Dict[str, Any]]] = None,
+    selected_headline_idx: Optional[int] = None,
+    post_msg_id: Optional[int] = None
+) -> str:
     """
     Сохраняет сгенерированный пост как черновик для привязки к inline-кнопкам.
+    Автоматически извлекает варианты заголовков и синхронизирует активный заголовок.
     Очищает старые черновики (>48ч). Возвращает draft_id.
     """
-    draft_id = uuid.uuid4().hex[:8]
+    if not draft_id:
+        draft_id = uuid.uuid4().hex[:8]
     now = datetime.now(timezone.utc)
+
+    synced_text, parsed_options, detected_idx = sync_initial_headline(text)
+    text = synced_text
+    if headline_options is None:
+        headline_options = parsed_options
+
     with QUEUE_LOCK:
         data = load_queue_data()
         drafts = data.setdefault("drafts", {})
+        existing = drafts.get(draft_id, {})
+        sel_idx = (
+            selected_headline_idx
+            if selected_headline_idx is not None
+            else existing.get("selected_headline_idx", detected_idx)
+        )
+        p_mid = post_msg_id if post_msg_id is not None else existing.get("post_msg_id")
+
         drafts[draft_id] = {
             "id": draft_id,
             "text": text,
-            "title": title[:100],
-            "chat_id": str(chat_id),
-            "created_at": now.isoformat()
+            "title": (title or existing.get("title", ""))[:100],
+            "chat_id": str(chat_id or existing.get("chat_id", "")),
+            "created_at": existing.get("created_at", now.isoformat()),
+            "headline_options": headline_options if headline_options else existing.get("headline_options", []),
+            "selected_headline_idx": sel_idx,
+            "post_msg_id": p_mid
         }
         # Чистим черновики старше 48 часов
         cleaned_drafts = {}
@@ -305,24 +449,71 @@ def save_post_draft(text: str, title: str = "", chat_id: str = "") -> str:
                 pass
         data["drafts"] = cleaned_drafts
         save_queue_data(data)
-    log.info("📝 Сохранён черновик поста [%s] для канала (чат: %s)", draft_id, chat_id)
+    log.info("📝 Сохранён черновик поста [%s] (заголовков: %d, активный: %d, чат: %s, post_msg_id: %s)",
+             draft_id, len(headline_options or []), sel_idx, chat_id, p_mid)
     return draft_id
+
+
+def clean_rag_citations(text: str) -> str:
+    """
+    Удаляет технические сноски и метки цитирования NotebookLM:
+    [1], [1, 2], [10-12], [4, 13-15], [1–4], [source 1], [[suspicious link removed]] и т.п.,
+    а также убирает лишние пробелы перед знаками препинания (" ." -> ".").
+    """
+    if not text:
+        return ""
+    cleaned = re.sub(r'\[\s*\d+(?:\s*[-–—,]\s*\d+)*\s*\]', '', text)
+    cleaned = re.sub(r'\[source\s*\d+[^\]]*\]', '', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'\[+suspicious link removed\]+', '', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'[ \t]+([.,;:!?])', r'\1', cleaned)
+    cleaned = re.sub(r'(?<=\S)[ \t]{2,}', ' ', cleaned)
+    return cleaned.strip()
+
+
+def clean_asterisks_formatting(text: str) -> str:
+    """
+    Удаляет одиночные звёздочки (*), которые ломают вёрстку в Telegram,
+    но строго сохраняет двойные звёздочки **жирный текст**.
+    1. Заменяет горизонтальные разделители *** на ---
+    2. Убирает тройные звёздочки: ***жирный*** -> **жирный**
+    3. Списки с одиночной звёздочкой в начале строк: '* пункт' -> '• пункт'
+    4. Одиночные звёздочки курсива: *курсив* -> курсив (без звёздочек)
+    5. Любые одиночные блуждающие звёздочки удаляет.
+    """
+    if not text:
+        return ""
+    # Разделители *** на отдельной строке
+    text = re.sub(r'^(?:[ \t]*)\*{3,}(?:[ \t]*)$', '---', text, flags=re.MULTILINE)
+    # ***жирный*** -> **жирный**
+    text = re.sub(r'\*\*\*(.+?)\*\*\*', r'**\1**', text, flags=re.DOTALL)
+    # Списки вида '* пункт' -> '• пункт'
+    text = re.sub(r'^(?:[ \t]*)\*(?:[ \t]+)', '• ', text, flags=re.MULTILINE)
+    # Одиночные звёздочки курсива: *курсив* -> курсив (не трогая **)
+    text = re.sub(r'(?<!\*)\*([^\*\n]+?)\*(?!\*)', r'\1', text)
+    # Любые оставшиеся одиночные звёздочки
+    text = re.sub(r'(?<!\*)\*(?!\*)', '', text)
+    # Убираем множественные пробелы
+    text = re.sub(r'[ \t]{2,}', ' ', text)
+    return text.strip()
 
 
 def markdown_to_telegram_html(text: str) -> str:
     """
     Конвертирует стандартный Markdown от LLM в валидный HTML для Telegram Bot API:
     - **жирный** или __жирный__ -> <b>жирный</b>
-    - *курсив* или _курсив_     -> <i>курсив</i>
     - [текст](url)              -> <a href="url">текст</a>
     - `код`                     -> <code>код</code>
     - ```код```                 -> <pre>код</pre>
     - # Заголовок               -> <b>Заголовок</b>
     - ~~зачеркнутый~~           -> <s>зачеркнутый</s>
+    Одиночные звездочки (*) удаляются, чтобы не ломать верстку в Telegram.
     Экранирует сырые спецсимволы &, <, > перед разметкой.
     """
     if not text:
         return ""
+
+    # 0. Очищаем одиночные звездочки (сохраняя **)
+    text = clean_asterisks_formatting(text)
 
     # 1. Экранируем спецсимволы HTML
     res = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -344,11 +535,23 @@ def markdown_to_telegram_html(text: str) -> str:
     # 6. Зачёркнутый: ~~текст~~
     res = re.sub(r'~~(.+?)~~', r'<s>\1</s>', res, flags=re.DOTALL)
 
-    # 7. Курсив: *текст* или _текст_ (с безопасными границами, не ломая URLs)
-    res = re.sub(r'(?<!\*)\*([^\*\n]+?)\*(?!\*)', r'<i>\1</i>', res)
+    # 7. Курсив через нижнее подчёркивание: _текст_
     res = re.sub(r'(?<![a-zA-Z0-9_])_([^_]+?)_(?![a-zA-Z0-9_])', r'<i>\1</i>', res)
 
     return res
+
+
+def strip_headline_options_block(text: str) -> str:
+    """Удаляет служебный черновой блок вариантов заголовка перед публикацией в канал."""
+    if not text:
+        return ""
+    pattern = r'^(?:\s*💡?\s*[*_#\s]*ВАРИАНТЫ\s+ЗАГОЛОВК[^\n]*\n(?:[^\n]*\n)*?\s*[-_*=]{3,}\s*\n+)'
+    cleaned = re.sub(pattern, '', text, flags=re.IGNORECASE)
+    if cleaned != text:
+        return cleaned.strip()
+    pattern2 = r'^(?:\s*💡?\s*[*_#\s]*ВАРИАНТЫ\s+ЗАГОЛОВК[^\n]*\n(?:[^\n]*\n){2,6}\s*\n+)'
+    cleaned2 = re.sub(pattern2, '', text, flags=re.IGNORECASE)
+    return cleaned2.strip() if cleaned2.strip() else text
 
 
 def publish_post_to_channel(text: str) -> bool:
@@ -357,6 +560,7 @@ def publish_post_to_channel(text: str) -> bool:
     Конвертирует Markdown-разметку (**, *, ссылки) в нативный Telegram HTML.
     При сбое HTML безопасно отправляет чистым текстом (со снятыми звездочками).
     """
+    text = strip_headline_options_block(text)
     channel_id = TELEGRAM_CHANNEL
     log.info("📢 Публикую пост в канал %s (длина: %d симв.)", channel_id, len(text))
 
@@ -652,10 +856,13 @@ def queue_worker_thread_func():
         time.sleep(30)
 
 
-def offer_channel_publication(chat_id: str, draft_id: str):
-    """Отправляет пользователю интерактивное меню публикации сгенерированного поста."""
+def build_publication_menu(draft_id: str) -> tuple[str, dict]:
+    """
+    Формирует текст и inline-клавиатуру для меню публикации с интерактивными кнопками выбора заголовка.
+    """
     with QUEUE_LOCK:
         data = load_queue_data()
+        draft = data.get("drafts", {}).get(draft_id, {})
         next_time = calculate_next_publish_time(data)
 
     now = datetime.now(timezone.utc)
@@ -667,31 +874,148 @@ def offer_channel_publication(chat_id: str, draft_id: str):
         mins = (diff_sec % 3600) // 60
         time_hint = f"через {hours}ч {mins}м"
 
-    keyboard = {
-        "inline_keyboard": [
-            [
-                {"text": "📅 В очередь (раз в 8ч)", "callback_data": f"pub_q:{draft_id}"},
-                {"text": "⚡ Срочно (сейчас)", "callback_data": f"pub_now:{draft_id}"}
-            ],
-            [
-                {"text": "⭐ В избранное (на потом)", "callback_data": f"pub_fav:{draft_id}"},
-                {"text": "❌ Не публиковать", "callback_data": f"pub_c:{draft_id}"}
-            ]
-        ]
-    }
+    options = draft.get("headline_options", [])
+    selected_idx = draft.get("selected_headline_idx", 1)
+
+    keyboard = []
+
+    # Кнопки выбора заголовка (по 1 кнопке в ряд с реальным текстом каждого сгенерированного заголовка)
+    if options:
+        for opt in options:
+            idx = opt["idx"]
+            short_cat = opt.get("short_category", f"Вариант {idx}")
+            title_t = opt.get("title", "")
+            short_t = title_t if len(title_t) <= 38 else title_t[:35] + "…"
+            is_active = (idx == selected_idx)
+            prefix = f"✅ {idx}️⃣ [{short_cat}]" if is_active else f"{idx}️⃣ [{short_cat}]"
+            btn_text = f"{prefix}: {short_t}"
+            keyboard.append([{"text": btn_text, "callback_data": f"hl:{draft_id}:{idx}"}])
+
+    # Кнопки публикации и действий
+    keyboard.append([
+        {"text": "📅 В очередь (раз в 8ч)", "callback_data": f"pub_q:{draft_id}"},
+        {"text": "⚡ Срочно (сейчас)", "callback_data": f"pub_now:{draft_id}"}
+    ])
+    keyboard.append([
+        {"text": "⭐ В избранное (на потом)", "callback_data": f"pub_fav:{draft_id}"},
+        {"text": "❌ Не публиковать", "callback_data": f"pub_c:{draft_id}"}
+    ])
+
     channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
     link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
 
-    send_message(
-        chat_id,
-        f"📢 <b>Опубликовать этот пост в канале {link_html}?</b>\n\n"
+    # Извлекаем чистый текст поста (без блока вариантов заголовков)
+    clean_post_text = strip_headline_options_block(draft.get("text", "")).strip()
+    clean_post_html = markdown_to_telegram_html(clean_post_text)
+
+    curr_opt = next((o for o in options if o.get("idx") == selected_idx), None)
+    cat_lbl = f" [{curr_opt.get('category')}]" if (curr_opt and curr_opt.get("category")) else ""
+    active_headline = (curr_opt.get("title") if curr_opt else "") or extract_current_body_headline(draft.get("text", ""))
+
+    lines = []
+    if options:
+        lines.append(f"📌 <b>Настоящий (активный) заголовок поста ({selected_idx}️⃣{cat_lbl}):</b>")
+        lines.append(f"<b>«{escape_html(active_headline)}»</b>\n")
+        lines.append("🎯 <b>Все сгенерированные варианты заголовков:</b>")
+        for opt in options:
+            idx = opt["idx"]
+            cat = opt.get("category", "")
+            title_text = opt.get("title", "")
+            cat_badge = f" [{cat}]" if cat else ""
+            if idx == selected_idx:
+                lines.append(f"👉 <b>{idx}️⃣{cat_badge}: {escape_html(title_text)}</b> <i>(выбран)</i>")
+            else:
+                lines.append(f"{idx}️⃣<b>{cat_badge}:</b> {escape_html(title_text)}")
+        lines.append("")
+        lines.append(f"📝 <b>Итоговый текст поста для {link_html}:</b>")
+    else:
+        if active_headline:
+            lines.append(f"📌 <b>Заголовок поста:</b> <b>«{escape_html(active_headline)}»</b>\n")
+        lines.append(f"📝 <b>Текст для публикации в канале {link_html}:</b>")
+    lines.append("─────────────────────────")
+
+    footer_text = (
+        f"─────────────────────────\n"
+        f"📢 <b>Опубликовать этот пост в канале {link_html}?</b>\n"
         f"• 📅 <b>В очередь:</b> выйдет <i>{time_hint}</i> (шаг {PUBLISH_INTERVAL_HOURS}ч)\n"
         f"• ⚡ <b>Срочно:</b> мгновенная публикация прямо сейчас\n"
-        f"• ⭐ <b>В избранное:</b> отложить пост на потом (без таймера)\n"
-        f"• ❌ <b>Не публиковать:</b> оставить только в личке",
-        reply_markup=keyboard,
+        f"• ⭐ <b>В избранное:</b> отложить на потом | ❌ <b>Не публиковать</b>"
+    )
+    if options:
+        footer_text += "\n<i>(нажмите кнопку с нужным заголовком 1️⃣–4️⃣ ниже, чтобы заменить его в посте)</i>"
+
+    available_chars = 4050 - sum(len(l) for l in lines) - len(footer_text) - 30
+    if len(clean_post_html) > available_chars:
+        cut_text = clean_post_text[:max(200, available_chars - 60)]
+        p = max(cut_text.rfind('.\n'), cut_text.rfind('. '), cut_text.rfind('\n\n'))
+        if p > int(available_chars * 0.5):
+            cut_text = cut_text[:p + 1]
+        post_preview = markdown_to_telegram_html(cut_text) + "\n\n<i>... [полный текст поста в сообщении выше ⬆️]</i>"
+    else:
+        post_preview = clean_post_html
+
+    lines.append(post_preview)
+    lines.append(footer_text)
+
+    text_msg = "\n".join(lines)
+    return text_msg, {"inline_keyboard": keyboard}
+
+
+def offer_channel_publication(chat_id: str, draft_id: str):
+    """Отправляет пользователю интерактивное меню публикации сгенерированного поста."""
+    text_msg, reply_markup = build_publication_menu(draft_id)
+    send_message(
+        chat_id,
+        text_msg,
+        reply_markup=reply_markup,
         disable_web_page_preview=True
     )
+
+
+def handle_headline_selection(callback_query: dict, draft_id: str, opt_idx: int):
+    """Обрабатывает выбор заголовка по inline-кнопке [1️⃣], [2️⃣], [3️⃣], [4️⃣]."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    menu_message_id = callback_query["message"]["message_id"]
+
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        draft = data.get("drafts", {}).get(draft_id)
+        if not draft:
+            answer_callback_query(callback_query["id"], "❌ Черновик устарел или не найден.", show_alert=True)
+            return
+
+        options = draft.get("headline_options", [])
+        chosen_opt = next((o for o in options if o.get("idx") == opt_idx), None)
+        if not chosen_opt:
+            answer_callback_query(callback_query["id"], f"❌ Вариант {opt_idx} не найден.", show_alert=True)
+            return
+
+        chosen_title = chosen_opt.get("title", "")
+        new_text = apply_chosen_headline(draft["text"], chosen_title)
+        draft["text"] = new_text
+        draft["selected_headline_idx"] = opt_idx
+        draft["title"] = chosen_title[:100]
+        post_msg_id = draft.get("post_msg_id")
+        save_queue_data(data)
+
+    # 1. Обновляем отдельное сообщение с текстом черновика в чате (если известно post_msg_id)
+    if post_msg_id:
+        try:
+            clean_updated = strip_headline_options_block(new_text)
+            html_updated = markdown_to_telegram_html(clean_updated)
+            cut_html = html_updated if len(html_updated) <= 4090 else html_updated[:4085] + "…"
+            edit_message_text(chat_id, post_msg_id, cut_html, parse_mode="HTML", disable_web_page_preview=True)
+        except Exception as e:
+            log.warning("⚠️ Не удалось обновить текст черновика в сообщении %s: %s", post_msg_id, e)
+
+    # 2. Обновляем интерактивное меню
+    text_msg, reply_markup = build_publication_menu(draft_id)
+    try:
+        edit_message_text(chat_id, menu_message_id, text_msg, reply_markup=reply_markup, disable_web_page_preview=True)
+    except Exception as e:
+        log.warning("⚠️ Не удалось обновить меню публикации: %s", e)
+
+    answer_callback_query(callback_query["id"], f"✅ Выбран заголовок {opt_idx}!")
 
 
 def handle_publish_queue(callback_query: dict, draft_id: str):
@@ -1225,8 +1549,8 @@ def handle_favorites_command(chat_id: str):
         keyboard_buttons.append([
             {"text": f"📅 В очередь #{idx}", "callback_data": f"fav_q:{f_id}"},
             {"text": f"⚡ Срочно #{idx}", "callback_data": f"fav_now:{f_id}"},
-            {"text": f"👁 Текст", "callback_data": f"fav_show:{f_id}"},
-            {"text": f"🗑", "callback_data": f"fav_del:{f_id}"}
+            {"text": "👁 Текст", "callback_data": f"fav_show:{f_id}"},
+            {"text": "🗑", "callback_data": f"fav_del:{f_id}"}
         ])
 
     send_message(
@@ -1467,16 +1791,52 @@ async def _query_rag_async(
 
             # Извлекаем ссылки или названия источников из references
             cited_links = []
+            ref_url_map: Dict[int, str] = {}
             if hasattr(result, "references") and result.references:
-                for ref in result.references:
-                    # Если в тексте цитаты или атрибутах есть URL
+                for idx_ref, ref in enumerate(result.references, 1):
                     cited_text = getattr(ref, "cited_text", "") or ""
-                    found_urls = re.findall(r'https?://[^\s)\]"\'>]+', cited_text)
-                    for u in found_urls:
-                        if u not in cited_links:
-                            cited_links.append(u)
+                    cit_num = getattr(ref, "citation_number", None) or idx_ref
+                    # Сначала ищем явный Original URL из разметки корпуса
+                    orig_urls = re.findall(
+                        r'Original\s+URL[:\s*]*\[?(https?://[^\s)\]"\'>]+)',
+                        cited_text,
+                        flags=re.IGNORECASE
+                    )
+                    if not orig_urls:
+                        raw_urls = re.findall(r'https?://[^\s)\]"\'>]+', cited_text)
+                        orig_urls = [
+                            re.sub(r'Original$', '', u).rstrip('.,;)')
+                            for u in raw_urls
+                            if not re.search(r'(/rss/?(?:Original)?$|/feed/?$|\.xml$|\.rss$)', u, re.IGNORECASE)
+                        ]
+                    for u in orig_urls:
+                        clean_u = re.sub(r'Original$', '', u).rstrip('.,;)')
+                        if clean_u and not re.search(r'(/rss/?$|/feed/?$|\.xml$|\.rss$)', clean_u, re.IGNORECASE):
+                            if cit_num not in ref_url_map:
+                                ref_url_map[int(cit_num)] = clean_u
+                            if clean_u not in cited_links:
+                                cited_links.append(clean_u)
 
-            return result.answer, cited_links
+            answer_text = result.answer
+            # Если в ответе есть строки "- Источники: ... [N]" без прямой http-ссылки, подставляем точный URL из ref_url_map
+            if ref_url_map and answer_text:
+                out_lines = []
+                for ln in answer_text.splitlines():
+                    if ("источник" in ln.lower() or "ссылк" in ln.lower()) and "http" not in ln:
+                        c_nums = [int(n) for n in re.findall(r'\[\s*(\d+)', ln)]
+                        if not c_nums:
+                            for m_br in re.finditer(r'\[([0-9,\s\-–—]+)\]', ln):
+                                c_nums.extend(int(x) for x in re.findall(r'\d+', m_br.group(1)))
+                        matched_urls = []
+                        for cn in c_nums:
+                            if cn in ref_url_map and ref_url_map[cn] not in matched_urls:
+                                matched_urls.append(ref_url_map[cn])
+                        if matched_urls:
+                            ln = ln.rstrip(" .") + f" ({matched_urls[0]})"
+                    out_lines.append(ln)
+                answer_text = "\n".join(out_lines)
+
+            return answer_text, cited_links
     except Exception as e:
         log.error("❌ Ошибка RAG-запроса к NotebookLM: %s", e)
         return None, []
@@ -1517,6 +1877,84 @@ POST_STYLES = {
 
 
 # =================== ПОСТ-ОБРАБОТКА ЧЕРЕЗ ANYMODEL LLM ===================
+
+
+def ensure_post_integrity(post_text: str, links: Optional[List[str]] = None, max_chars: int = 3500) -> str:
+    """
+    1. Очищает одиночные звёздочки (*), оставляя только **жирный шрифт**.
+    2. Гарантирует наличие оригинальных ссылок на первоисточники в тексте поста.
+       Если модель опустила ссылку, функция аккуратно вставляет блок '🔗 Источник: URL' перед хэштегами.
+    3. Ограничивает объем знаков САМОГО ТЕЛА ПОСТА (без учета служебного блока вариантов заголовка),
+       никогда не обрезая на цифрах нумерованного списка ('📌 4.').
+    """
+    if not post_text:
+        return ""
+
+    # 0. Очищаем одиночные звёздочки (*), сохраняя **жирный**
+    post_text = clean_asterisks_formatting(post_text)
+
+    # Отделяем служебный блок вариантов заголовка (💡 ВАРИАНТЫ ЗАГОЛОВКА: ... ---) от тела поста,
+    # чтобы он НЕ съедал лимит символов max_chars и не приводил к обрезанию 4-й и 5-й новостей!
+    m_split = re.search(r'^(.*?)\n\s*[-_*=]{3,}\s*\n(.*)$', post_text, flags=re.DOTALL)
+    if m_split and "ВАРИАНТ" in m_split.group(1).upper():
+        head_block = m_split.group(1).strip()
+        body_text = m_split.group(2).strip()
+    else:
+        head_block = ""
+        body_text = post_text.strip()
+
+    # 1. Извлекаем и фильтруем ссылки (отбрасываем битые /rss/Original)
+    valid_links = []
+    if links:
+        for lk in links:
+            if isinstance(lk, str) and lk.strip().startswith("http"):
+                clean_lk = re.sub(r'Original$', '', lk.strip()).rstrip(").,;")
+                if (
+                    clean_lk
+                    and not re.search(r'(/rss/?$|/feed/?$|\.xml$|\.rss$)', clean_lk, re.IGNORECASE)
+                    and clean_lk not in valid_links
+                ):
+                    valid_links.append(clean_lk)
+
+    missing = [lk for lk in valid_links if lk not in body_text]
+    if missing:
+        if len(missing) == 1:
+            lbl = f"\n\n🔗 Источник: {missing[0]}"
+        else:
+            lbl = "\n\n🔗 Источники:\n" + "\n".join(f"• {lk}" for lk in missing[:len(valid_links)])
+
+        # Вставляем перед хэштегами (#...) или в конец
+        tag_match = re.search(r'(\n+(?:#[\w\d_]+\s*)+)$', body_text)
+        if tag_match:
+            pos = tag_match.start(1)
+            body_text = body_text[:pos].rstrip() + lbl + "\n\n" + body_text[pos:].lstrip()
+        else:
+            body_text = body_text.rstrip() + lbl
+
+    # 2. Жесткое ограничение объема знаков ТОЛЬКО для тела поста (body_text)
+    if len(body_text) > max_chars:
+        tag_match = re.search(r'(\n+(?:🔗[^\n]*\n*)*(?:#[\w\d_]+\s*)+)$', body_text)
+        footer = tag_match.group(1) if tag_match else ""
+        main_body = body_text[:len(body_text) - len(footer)]
+        allowed_body_len = max_chars - len(footer) - 10
+        if allowed_body_len > 300:
+            cut = main_body[:allowed_body_len]
+            # Ищем конец настоящего предложения (НЕ точку после цифры '📌 4.')
+            sent_ends = [m.end() for m in re.finditer(r'(?<!\d)[.!?](?=\s|\n|$)', cut)]
+            if sent_ends and sent_ends[-1] > int(allowed_body_len * 0.6):
+                cut = cut[:sent_ends[-1]]
+            # На случай если в конце остался пустой заголовок пункта вида '📌 4.' — убираем его
+            cut = re.sub(r'\n+(?:📌\s*)?\d+[.)]\s*$', '', cut.rstrip())
+            body_text = cut.rstrip() + "\n\n" + footer.lstrip()
+        else:
+            body_text = body_text[:max_chars].rstrip()
+
+    # Дополнительно очищаем случайно оборванный пустой пункт перед хэштегами (например, '📌 4.\n#испания')
+    body_text = re.sub(r'\n+(?:📌\s*)?\d+[.)]\s*(?=\n+#)', '\n', body_text)
+
+    if head_block:
+        return f"{head_block}\n---\n{body_text.strip()}"
+    return body_text.strip()
 
 
 def polish_post_with_llm(
@@ -1567,14 +2005,33 @@ def polish_post_with_llm(
 {style_instruction}
 {angle_instruction}
 
-СТРОГИЕ ПРАВИЛА:
+СТРОГИЕ ПРАВИЛА И СТРУКТУРА:
 1. Пиши ТОЛЬКО на русском языке.
-2. КАТЕГОРИЧЕСКИ УДАЛИ все квадратные скобки вида [1], [2], [N], [source 1] — это технические маркеры цитирования RAG. Никаких скобок в тексте!
-3. ОБЯЗАТЕЛЬНО сохрани и органично добавь в пост оригинальные ссылки на первоисточники (список дан ниже). Ссылки должны быть кликабельными URL в конце поста или в контексте текста.
-4. Длина поста — СТРОГО 800-1500 символов. Никаких огромных простыней! Текст должен помещаться ровно в 1 сообщение Telegram.
-5. Используй продуманные эмодзи для структуры (📌, 💡, ⚠️, 📊, 🏠, 💰 и т.д.).
-6. В самом конце обязательно добавь 3-5 релевантных хэштегов.
-7. НЕ используй HTML теги. Выдавай чистый отформатированный текст с переносами строк и эмодзи, готовый к мгновенному копированию."""
+2. ОБЯЗАТЕЛЬНЫЙ БЛОК ВАРИАНТОВ ЗАГОЛОВКА В НАЧАЛЕ:
+   Сообщение ДОЛЖНО начинаться строго с блока 3–4 принципиально РАЗНЫХ, КОНТРАСТНЫХ вариантов заголовка на выбор редактора, затем разделитель '---', а затем сам готовый пост:
+
+💡 ВАРИАНТЫ ЗАГОЛОВКА:
+1️⃣ [Фактический]: краткий новостной заголовок, суть события, конкретные цифры/даты/факты (без кликбейта).
+2️⃣ [Цепляющий / Виральный]: фокус на парадоксе, неожиданности, сильной эмоции, контрасте или интригующем крючке.
+3️⃣ [Практический / Польза]: формат «Как...», «Что изменится для...», акцент на выгоде, рисках или защите кошелька экспата.
+4️⃣ [Вопрос / Дискуссия]: острый, вовлекающий вопрос к читателям для комментариев и репостов.
+
+---
+
+[Далее — готовый текст поста, который начинается с одного из этих заголовков с тематическим эмодзи]
+
+3. КАТЕГОРИЧЕСКИЙ ЗАПРЕТ НА ПОХОЖИЕ ЗАГОЛОВКИ:
+   Варианты заголовков ОБЯЗАНЫ быть принципиально разными по структуре, тону, длине и подаче!
+   Категорически запрещено переставлять слова, менять синонимы или давать 4 вариации одной мысли (например, недопустимо: «Новый закон об аренде», «В Испании приняли закон об аренде», «Что говорит закон об аренде»).
+   Каждый вариант обязан бить в совершенно другой интерес читателя (факты vs эмоция vs польза vs спор)!
+
+4. КАТЕГОРИЧЕСКИ УДАЛИ все квадратные скобки вида [1], [2], [N], [source 1] — это технические маркеры цитирования RAG. Никаких скобок в тексте!
+5. ОБЯЗАТЕЛЬНО сохрани и органично добавь в пост оригинальные ссылки на первоисточники (список дан ниже). Ссылки должны быть кликабельными URL в конце поста или в контексте текста.
+6. Длина основного текста поста — СТРОГО 800-1500 символов. Текст должен помещаться ровно в 1 сообщение Telegram.
+7. Используй продуманные эмодзи для структуры (📌, 💡, ⚠️, 📊, 🏠, 💰 и т.д.).
+8. В самом конце обязательно добавь 3-5 релевантных хэштегов.
+9. НЕ используй HTML теги. Выдавай чистый отформатированный текст с переносами строк и эмодзи, готовый к мгновенному копированию.
+10. КАТЕГОРИЧЕСКИЙ ЗАПРЕТ НА ОДИНОЧНЫЕ ЗВЁЗДОЧКИ (*): Запрещено использовать одиночные звёздочки (*). Списки оформляй только через эмодзи или дефис. Для выделения важного разрешено использовать ТОЛЬКО двойные звёздочки **жирный текст** (никаких одиночных звёздочек для списков или курсива!)."""
 
     user_prompt = f"""Сырой текст от RAG-системы:
 ---
@@ -1589,7 +2046,10 @@ def polish_post_with_llm(
 - Рекомендуемые хэштеги: {hashtags}
 
 Напиши готовый ТГ-пост в стиле «{style_cfg['title']}».
-Требования: ровно 800-1500 символов, без квадратных скобок, с ссылками на источники в конце."""
+Требования:
+1. В самом верху дай 4 КОНТРАСТНЫХ, не похожих друг на друга варианта заголовка (Фактический, Цепляющий, Практический, Вопрос/Дискуссия).
+2. Разделитель '---'.
+3. Полный готовый текст поста (ровно 800-1500 символов, без квадратных скобок, со ссылками на источники в конце)."""
 
     endpoint = f"{ANYMODEL_BASE_URL}/chat/completions"
     headers = {
@@ -1603,7 +2063,7 @@ def polish_post_with_llm(
             {"role": "user", "content": user_prompt}
         ],
         "temperature": 0.65,
-        "max_tokens": 1500,
+        "max_tokens": 2000,
     }
 
     try:
@@ -1620,7 +2080,9 @@ def polish_post_with_llm(
         polished = choices[0].get("message", {}).get("content", "")
         if polished:
             # Двойная страховка: убираем любые оставшиеся квадратные скобки с цифрами
-            polished = re.sub(r'\[\d+\]', '', polished)
+            polished = clean_rag_citations(polished)
+            # Гарантируем обязательные ссылки на оригинал и строгий лимит объема знаков
+            polished = ensure_post_integrity(polished, all_links, max_chars=1600)
             log.info("✅ Пост отполирован через AnyModel (%d символов, стиль: %s)", len(polished), style_key)
             return polished.strip()
 
@@ -1633,9 +2095,7 @@ def polish_post_with_llm(
 def _basic_cleanup(text: str, article_context: Dict[str, Any], extra_links: Optional[List[str]] = None) -> str:
     """Базовая чистка текста без LLM (fallback)."""
     # Удаляем [N] цитирования
-    cleaned = re.sub(r'\[\d+\]', '', text)
-    cleaned = re.sub(r'\[source\s*\d+\]', '', cleaned, flags=re.IGNORECASE)
-    cleaned = re.sub(r'  +', ' ', cleaned)
+    cleaned = clean_rag_citations(text)
 
     # Добавляем ссылки на оригиналы
     url = article_context.get("url", "")
@@ -1656,7 +2116,7 @@ def _basic_cleanup(text: str, article_context: Dict[str, Any], extra_links: Opti
         hashtags = " ".join(f"#{c}" for c in categories[:5])
         cleaned += f"\n\n{hashtags}"
 
-    return cleaned.strip()
+    return ensure_post_integrity(cleaned.strip(), all_links, max_chars=1600)
 
 
 def polish_custom_topic_post_with_llm(
@@ -1665,7 +2125,9 @@ def polish_custom_topic_post_with_llm(
     style_key: str = "standard",
     extra_links: Optional[List[str]] = None,
     length_hint: str = "800-1500",
-    max_tokens: int = 1500
+    max_tokens: int = 1500,
+    item_count: int = 1,
+    max_chars: int = 3800
 ) -> str:
     """
     Прогоняет сырой RAG-ответ по произвольной теме через AnyModel LLM
@@ -1673,7 +2135,7 @@ def polish_custom_topic_post_with_llm(
     """
     if not ANYMODEL_KEY:
         log.warning("⚠️ ANYMODEL_KEY не задан. Возвращаю RAG-текст без пост-обработки.")
-        return _basic_topic_cleanup(raw_rag_text, topic, extra_links)
+        return _basic_topic_cleanup(raw_rag_text, topic, extra_links, max_chars=max_chars)
 
     style_cfg = POST_STYLES.get(style_key, POST_STYLES["standard"])
     style_instruction = style_cfg["prompt"]
@@ -1685,14 +2147,49 @@ def polish_custom_topic_post_with_llm(
 
 {style_instruction}
 
-СТРОГИЕ ПРАВИЛА:
+СТРОГИЕ ПРАВИЛА И СТРУКТУРА:
 1. Пиши ТОЛЬКО на русском языке.
-2. КАТЕГОРИЧЕСКИ УДАЛИ все квадратные скобки вида [1], [2], [N], [source 1] — никаких технических меток цитирования в тексте быть не должно!
-3. Если есть ссылки на первоисточники или законы — органично включи их в текст или блок источников в конце.
-4. Длина поста — СТРОГО {length_hint} символов. Текст должен быть ёмким, без воды и клише, идеален для чтения с экрана смартфона.
-5. Используй продуманные эмодзи для структуры (📌, 💡, ⚠️, 📊, 🏠, 💰 и т.д.).
-6. В самом конце обязательно добавь 3-5 релевантных хэштегов (например: #испания #законы #новости #жизньвиспании).
-7. НЕ используй HTML теги. Выдавай чистый отформатированный текст с переносами строк и эмодзи, готовый к мгновенному копированию."""
+2. ОБЯЗАТЕЛЬНЫЙ БЛОК ВАРИАНТОВ ЗАГОЛОВКА В НАЧАЛЕ:
+   Сообщение ДОЛЖНО начинаться строго с блока 3–4 принципиально РАЗНЫХ, КОНТРАСТНЫХ вариантов заголовка на выбор редактора, затем разделитель '---', а затем сам готовый пост:
+
+💡 ВАРИАНТЫ ЗАГОЛОВКА:
+1️⃣ [Фактический]: краткий информационный заголовок, суть события, конкретные цифры/даты/факты (без кликбейта).
+2️⃣ [Цепляющий / Виральный]: фокус на парадоксе, неожиданности, сильной эмоции, контрасте или интригующем крючке.
+3️⃣ [Практический / Польза]: формат «Как...», «Что изменится для...», акцент на выгоде, рисках или защите кошелька экспата.
+4️⃣ [Вопрос / Дискуссия]: острый, вовлекающий вопрос к читателям для комментариев и репостов.
+
+---
+
+[Далее — готовый текст поста, который начинается с одного из этих заголовков с тематическим эмодзи]
+
+3. КАТЕГОРИЧЕСКИЙ ЗАПРЕТ НА ПОХОЖИЕ ЗАГОЛОВКИ:
+   Варианты заголовков ОБЯЗАНЫ быть принципиально разными по структуре, тону, длине и подаче!
+   Категорически запрещено переставлять слова, менять синонимы или давать 4 похожие вариации одной мысли. Каждый вариант обязан бить в совершенно другой интерес аудитории (факты vs эмоция vs польза vs спор)!
+
+4. КАТЕГОРИЧЕСКИ УДАЛИ все квадратные скобки вида [1], [2], [N], [source 1] — никаких технических меток цитирования в тексте быть не должно!
+5. Если есть ссылки на первоисточники или законы — органично включи их в текст или блок источников в конце.
+6. Длина основного текста поста — СТРОГО {length_hint} символов. Текст должен быть ёмким, без воды и клише, идеален для чтения с экрана смартфона.
+7. Используй продуманные эмодзи для структуры (📌, 💡, ⚠️, 📊, 🏠, 💰 и т.д.).
+8. В самом конце обязательно добавь 3-5 релевантных хэштегов (например: #испания #законы #новости #жизньвиспании).
+9. НЕ используй HTML теги. Выдавай чистый отформатированный текст с переносами строк и эмодзи, готовый к мгновенному копированию.
+10. КАТЕГОРИЧЕСКИЙ ЗАПРЕТ НА ОДИНОЧНЫЕ ЗВЁЗДОЧКИ (*): Запрещено использовать одиночные звёздочки (*). Списки оформляй только через эмодзи или дефис. Для выделения важного разрешено использовать ТОЛЬКО двойные звёздочки **жирный текст** (никаких одиночных звёздочек для списков или курсива!)."""
+
+    if item_count > 1:
+        per_item_chars = max(250, min(450, 2400 // item_count))
+        system_prompt += f"""\n11. ОБЯЗАТЕЛЬНОЕ ВКЛЮЧЕНИЕ ВСЕХ {item_count} СЮЖЕТОВ БЕЗ ПРОПУСКОВ:
+Во входных материалах передано РОВНО {item_count} выбранных новостных сюжетов (от Сюжета 1 до Сюжета {item_count}).
+Ты ОБЯЗАН включить в основной текст поста КАЖДЫЙ из этих {item_count} сюжетов отдельным нумерованным пунктом!
+Формат:
+📌 1. **[Название 1-го сюжета]**
+Кратко суть события, цифры, ключевые детали (ёмко, 2–4 предложения, ~{per_item_chars} символов).
+📌 2. **[Название 2-го сюжета]**
+Кратко суть события...
+...
+📌 {item_count}. **[Название {item_count}-го сюжета]**
+Кратко суть события...
+Категорически ЗАПРЕЩЕНО игнорировать, объединять, обрывать или отбрасывать любые из {item_count} сюжетов!
+В посте должно быть ровно {item_count} полных пунктов (от 📌 1. до 📌 {item_count}. включительно).
+Пиши каждый пункт лаконично и по сути, чтобы все {item_count} пунктов гарантированно поместились целиком!"""
 
     user_prompt = f"""Тема поста, сформулированная автором:
 «{topic}»
@@ -1706,7 +2203,15 @@ def polish_custom_topic_post_with_llm(
 {links_text}
 
 Напиши готовый ТГ-пост в стиле «{style_cfg['title']}».
-Требования: ровно {length_hint} символов, без квадратных скобок цитирования, с чёткой структурой и хэштегами в конце."""
+Требования:
+1. В самом верху дай 4 КОНТРАСТНЫХ, не похожих друг на друга варианта заголовка (Фактический, Цепляющий, Практический, Вопрос/Дискуссия).
+2. Разделитель '---'.
+3. Полный готовый текст поста (длиной ориентировочно {length_hint} символов, без квадратных скобок цитирования, с чёткой структурой и хэштегами в конце)."""
+
+    if item_count > 1:
+        user_prompt += f"""
+4. ВНИМАНИЕ: Во входном материале передано ровно {item_count} сюжетов.
+Твой пост ОБЯЗАН содержать РОВНО {item_count} нумерованных пунктов (от 1 до {item_count}), подробно раскрывающих КАЖДЫЙ из этих {item_count} сюжетов. Ни один сюжет не должен быть упущен!"""
 
     endpoint = f"{ANYMODEL_BASE_URL}/chat/completions"
     headers = {
@@ -1720,23 +2225,25 @@ def polish_custom_topic_post_with_llm(
             {"role": "user", "content": user_prompt}
         ],
         "temperature": 0.65,
-        "max_tokens": max_tokens,
+        "max_tokens": max_tokens + 500,
     }
 
     try:
         resp = requests.post(endpoint, headers=headers, json=payload, timeout=60)
         if resp.status_code != 200:
             log.warning("⚠️ AnyModel API ошибка (%d): %s", resp.status_code, resp.text[:200])
-            return _basic_topic_cleanup(raw_rag_text, topic, extra_links)
+            return _basic_topic_cleanup(raw_rag_text, topic, extra_links, max_chars=max_chars)
 
         data = resp.json()
         choices = data.get("choices", [])
         if not choices:
-            return _basic_topic_cleanup(raw_rag_text, topic, extra_links)
+            return _basic_topic_cleanup(raw_rag_text, topic, extra_links, max_chars=max_chars)
 
         polished = choices[0].get("message", {}).get("content", "")
         if polished:
-            polished = re.sub(r'\[\d+\]', '', polished)
+            polished = clean_rag_citations(polished)
+            # Гарантируем обязательные ссылки на оригинал и строгий лимит объема знаков
+            polished = ensure_post_integrity(polished, extra_links, max_chars=max_chars)
             log.info("✅ Пост по теме '%s' отполирован через AnyModel (%d симв, стиль: %s)",
                      topic[:30], len(polished), style_key)
             return polished.strip()
@@ -1744,20 +2251,18 @@ def polish_custom_topic_post_with_llm(
     except Exception as e:
         log.warning("⚠️ Ошибка AnyModel пост-обработки: %s", e)
 
-    return _basic_topic_cleanup(raw_rag_text, topic, extra_links)
+    return _basic_topic_cleanup(raw_rag_text, topic, extra_links, max_chars=max_chars)
 
 
-def _basic_topic_cleanup(text: str, topic: str, extra_links: Optional[List[str]] = None) -> str:
+def _basic_topic_cleanup(text: str, topic: str, extra_links: Optional[List[str]] = None, max_chars: int = 3800) -> str:
     """Базовая чистка для поста по теме без LLM."""
-    cleaned = re.sub(r'\[\d+\]', '', text or "")
-    cleaned = re.sub(r'\[source\s*\d+\]', '', cleaned, flags=re.IGNORECASE)
-    cleaned = re.sub(r'  +', ' ', cleaned).strip()
+    cleaned = clean_rag_citations(text or "")
 
     res = f"📌 {topic}\n\n{cleaned}"
     if extra_links:
-        res += "\n\n🔗 Источники:\n" + "\n".join(f"• {lk}" for lk in extra_links[:5])
+        res += "\n\n🔗 Источники:\n" + "\n".join(f"• {lk}" for lk in extra_links[:10])
     res += "\n\n#испания #новости"
-    return res
+    return ensure_post_integrity(res.strip(), extra_links, max_chars=max_chars)
 
 
 # =================== ПОСТРОЕНИЕ RAG-ПРОМПТА ===================
@@ -2018,6 +2523,7 @@ def handle_rag_generate(
         chosen_angle=chosen_angle,
         extra_links=extra_links
     )
+    polished_post, _, _ = sync_initial_headline(polished_post)
 
     # Шаг 3: Отправляем готовый пост
     send_message(chat_id,
@@ -2025,17 +2531,23 @@ def handle_rag_generate(
                  f"<i>(скопируйте текст ниже)</i>",
                  disable_web_page_preview=True)
 
-    # Отправляем пост чистым текстом (для копирования)
-    tg_api("sendMessage",
-           chat_id=chat_id,
-           text=polished_post,
-           disable_web_page_preview=True)
+    # Отправляем пост отформатированным текстом (без сырых **)
+    clean_for_copy = strip_headline_options_block(polished_post)
+    post_resp = send_long_message(
+        chat_id,
+        markdown_to_telegram_html(clean_for_copy),
+        parse_mode="HTML",
+        disable_web_page_preview=True
+    )
+    post_msg_id = None
+    if post_resp and isinstance(post_resp, dict) and "result" in post_resp:
+        post_msg_id = post_resp["result"].get("message_id")
 
     log.info("✅ ТГ-пост сгенерирован для статьи '%s' (длина: %d симв, стиль: %s)",
              title, len(polished_post), style_key)
 
     # Предлагаем публикацию в канал @iberia_news (в очередь 8ч или срочно)
-    draft_id = save_post_draft(polished_post, title=title, chat_id=chat_id)
+    draft_id = save_post_draft(polished_post, title=title, chat_id=chat_id, post_msg_id=post_msg_id)
     offer_channel_publication(chat_id, draft_id)
 
 
@@ -2141,6 +2653,18 @@ def process_callback_query(callback_query: dict):
         return
 
     # --- Корзина новостей из промптов / toppromt ---
+    if data.startswith("bsk_one:"):
+        parts = data[8:].split(":")
+        if len(parts) == 2:
+            handle_basket_single_item_prompt(callback_query, parts[0], int(parts[1]))
+        return
+
+    if data.startswith("bsk_one_s:"):
+        parts = data[10:].split(":")
+        if len(parts) == 3:
+            handle_basket_single_item_execute(callback_query, parts[0], int(parts[1]), parts[2])
+        return
+
     if data.startswith("bsk_t:"):
         parts = data[6:].split(":")
         if len(parts) == 2:
@@ -2187,6 +2711,17 @@ def process_callback_query(callback_query: dict):
         if len(parts) == 3:
             session_id, style_key, nb_key = parts
             handle_post_execute(callback_query, session_id, style_key, nb_key, period_key="month")
+        return
+
+    # --- Выбор варианта заголовка поста ---
+    if data.startswith("hl:"):
+        parts = data[3:].split(":")
+        if len(parts) == 2:
+            draft_id, opt_idx_str = parts
+            try:
+                handle_headline_selection(callback_query, draft_id, int(opt_idx_str))
+            except Exception as e:
+                log.error("❌ Ошибка handle_headline_selection: %s", e)
         return
 
     # --- Публикация в канал @iberia_news ---
@@ -2458,7 +2993,6 @@ def _send_top_articles(chat_id: str, count: int, since_date: str, date_label: st
         send_telegram_message_with_buttons,
         send_telegram_message,
         _save_article_context,
-        escape_html
     )
 
     send_message(chat_id,
@@ -2695,14 +3229,40 @@ def _clean_trailing_footer(text: str) -> str:
     return text.strip()
 
 
-def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
+def _split_inline_title_and_body(raw_after_num: str) -> tuple[str, str]:
+    """
+    Если после номера следует жирный заголовок и через двоеточие/тире сразу идёт текст описания
+    (например: '**Заголовок сюжета**: Подробное описание...'), разделяет их на (title, inline_body).
+    """
+    s = raw_after_num.strip()
+    m = re.match(r'^\*\*(.+?)\*\*\s*(?:[:—–]\s+|\s+-\s+)(.+)$', s)
+    if m:
+        t_part = m.group(1).strip("*_ #:\t")
+        b_part = m.group(2).strip()
+        if t_part and not _is_subfield_title(t_part):
+            return t_part, b_part
+    # Вариант когда открывающие ** были перед номером: '**1. Заголовок** — описание'
+    m2 = re.match(r'^([^\*]+?)\*\*\s*(?:[:—–]\s+|\s+-\s+)(.+)$', s)
+    if m2:
+        t_part = m2.group(1).strip("*_ #:\t")
+        b_part = m2.group(2).strip()
+        if t_part and not _is_subfield_title(t_part):
+            return t_part, b_part
+    clean_t = re.sub(r'^(?:Заголовок[:\s*]*|Тема[:\s*]*)', '', s, flags=re.IGNORECASE).strip('*_ #:\t')
+    return (clean_t or s.strip('*_ #:\t')), ""
+
+
+def _parse_rag_news_items(text: str, fallback_links: Optional[List[str]] = None) -> List[Dict[str, Any]]:
     """
     Универсально и устойчиво парсит новости/сюжеты/локации из ответа NotebookLM:
     1. Если ответ содержит JSON-массив -> парсит его.
-    2. Очищает служебные завершающие вопросы модели.
+    2. Очищает технические сноски [1, 2], [10-12] и служебные завершающие вопросы модели.
     3. Если в тексте есть 3 и более разделителей --- -> они разделяют целые инструкции/статьи.
     4. Если ответ дан нумерованным списком (1. Title / **1.** Title / **1. Title** / ### 1. Title / 1) Title),
-       при этом служебные подполя (Пошаговый алгоритм, Ссылки, Документы и т.д.) НЕ разбиваются на подпосты.
+       при этом:
+       - даты ("5 ноября 2026...") и возрасты/числа через дефис ("31-летний...") НЕ считаются нумерацией;
+       - служебные подполя и внутренние пошаговые списки (Пошаговый алгоритм: 1. ..., 2. ..., 3. ...)
+         остаются внутри карточки своего сюжета и НЕ разбивают её на фейковые карточки.
     5. Если ответ разделен разделителями --- и нумерованный список не найден -> берёт разделители.
     6. Если оформлено markdown-заголовками (### Title / ## Title) с фильтрацией подполей.
     7. Если оформлено списком с жирными названиями (* **Title**: body / - **Title** — body).
@@ -2710,8 +3270,8 @@ def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
     """
     if not text:
         return []
-    clean = re.sub(r'\[\d+\]', '', text)
-    clean = re.sub(r'\[source\s*\d+\]', '', clean, flags=re.IGNORECASE).strip()
+    clean = clean_rag_citations(text)
+    fb_src = fallback_links[0] if fallback_links else ""
 
     # 1. Пробуем JSON
     m = re.search(r'\[\s*\{.*\}\s*\]', clean, re.DOTALL)
@@ -2723,10 +3283,10 @@ def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
                 for d in data:
                     if isinstance(d, dict) and (d.get("title") or d.get("name")):
                         res.append({
-                            "title": str(d.get("title") or d.get("name") or "").strip("*_ #\t"),
-                            "summary": str(d.get("summary") or d.get("description") or "").strip(),
-                            "why": str(d.get("why", "")).strip(),
-                            "source": str(d.get("source", "")).strip(),
+                            "title": clean_rag_citations(str(d.get("title") or d.get("name") or "")).strip("*_ #\t"),
+                            "summary": clean_rag_citations(str(d.get("summary") or d.get("description") or "")).strip(),
+                            "why": clean_rag_citations(str(d.get("why", ""))).strip(),
+                            "source": str(d.get("source", "")).strip() or fb_src,
                             "news_score": float(d.get("score")) if d.get("score") is not None else None
                         })
                 if res:
@@ -2736,6 +3296,12 @@ def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
 
     # Очищаем служебный футер модели в конце сообщения
     clean = _clean_trailing_footer(clean)
+
+    # Строгий паттерн префикса нумерации заголовка (только '1.', '1)', '№ 1', но НЕ '5 ноября' и НЕ '31-летний')
+    title_prefix_re = re.compile(
+        r'^(?:#{1,4}\s*)?(?:\*\*\s*)?(?:№\s*\d+\s*[:.)\-—\s]+|\d+\s*[.)]\s*)?(?:\*\*\s*)?(?:Заголовок[:\s*]*|Тема[:\s*]*)?',
+        flags=re.IGNORECASE
+    )
 
     # 2. Если в тексте 3 и более разделителей --- -> они разделяют целые инструкции или статьи
     hr_chunks = [c.strip() for c in re.split(r'\n\s*[-_*]{3,}\s*\n|\n---\s*\n?', clean) if c.strip()]
@@ -2754,15 +3320,21 @@ def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
             raw_title = clines[0]
             body_start_idx = 1
             for idx_l, line in enumerate(clines):
-                c_line = re.sub(r'^(?:#{1,4}\s*)?(?:\*\*\s*)?(?:№\s*)?(?:\d+[.)\-:\s]+)?(?:\*\*)?(?:Заголовок[:\s*]*|Тема[:\s*]*)?', '', line, flags=re.IGNORECASE).strip('*_ #:\t')
+                c_line = title_prefix_re.sub('', line).strip('*_ #:\t')
                 if c_line and not _is_subfield_title(c_line):
                     raw_title = line
                     body_start_idx = idx_l + 1
                     break
 
-            t = re.sub(r'^(?:#{1,4}\s*)?(?:\*\*\s*)?(?:№\s*)?(?:\d+[.)\-:\s]+)?(?:\*\*)?(?:Заголовок[:\s*]*|Тема[:\s*]*)?', '', raw_title, flags=re.IGNORECASE).strip('*_ #:\t')
-            b = '\n'.join(clines[body_start_idx:]).strip() if len(clines) > body_start_idx else ''
-            urls = re.findall(r'https?://[^\s)\]"\'>]+', chunk)
+            rest_after_prefix = title_prefix_re.sub('', raw_title).strip()
+            t, inline_b = _split_inline_title_and_body(rest_after_prefix)
+            body_lines = ([inline_b] if inline_b else []) + clines[body_start_idx:]
+            b = '\n'.join(body_lines).strip()
+            urls = [
+                re.sub(r'Original$', '', u).rstrip('.,;)')
+                for u in re.findall(r'https?://[^\s)\]"\'>]+', chunk)
+                if not re.search(r'(/rss/?(?:Original)?$|/feed/?$|\.xml$|\.rss$)', u, re.IGNORECASE)
+            ]
             hr_items.append({
                 "title": t or raw_title[:60],
                 "summary": b,
@@ -2775,35 +3347,98 @@ def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
 
     lines = clean.splitlines()
 
-    # 3. Нумерованные пункты с фильтрацией подполей:
-    # 1. Title / **1.** Title / **1. Title** / ### 1. Title / 1) Title
-    num_pat = re.compile(r'^(?:#{1,4}\s*)?(?:\*\*\s*)?(?:№\s*)?(\d+)[.)\-:\s]+(?:\*\*)?\s*(.+)$')
+    # 3. Нумерованные пункты с защитой от дат ("5 ноября"), возрастов ("31-летний") и внутренних подшагов ("Пошаговый алгоритм: 1. ..."):
+    # Разрешаем только точку или скобку после цифры (1. / 1)), либо явный знак № (№ 1).
+    num_pat = re.compile(r'^(?:#{1,4}\s*)?(?:\*\*\s*)?(?:№\s*(\d+)\s*[:.)\-—\s]+|(\d+)\s*[.)])\s*(.+)$')
+    emph_pat = re.compile(r'^(?:#{1,4}\s*|\*\*\s*(?:№\s*)?\d+|(?:№\s*)?\d+\s*[.)]\s*\*\*)')
+
+    # Проверяем, использует ли документ жирное/заголовочное выделение для основных пунктов (1. **Title** / ### 1. Title)
+    emphasized_count = 0
+    for ln in lines:
+        sln = ln.strip()
+        m_check = num_pat.match(sln)
+        if m_check and emph_pat.match(sln):
+            cand_check = m_check.group(3).strip("*_ #:\t")
+            if not _is_subfield_title(cand_check):
+                emphasized_count += 1
+    require_emphasis = (emphasized_count >= 2)
+
     sections = []
     curr_title = None
-    curr_body = []
+    curr_body: List[str] = []
+    in_sublist = False
 
     for line in lines:
-        match = num_pat.match(line.strip())
-        if match:
-            cand_title = match.group(2).strip("*_ #:\t")
-            if _is_subfield_title(cand_title) and curr_title is not None:
-                curr_body.append(line)
-            else:
-                if curr_title and curr_body:
-                    sections.append((curr_title, "\n".join(curr_body).strip()))
-                    curr_body = []
-                clean_t = re.sub(r'^(?:Заголовок[:\s*]*|Тема[:\s*]*)', '', cand_title, flags=re.IGNORECASE).strip('*_ #:\t')
-                curr_title = clean_t or cand_title
-        elif curr_title is not None:
-            curr_body.append(line)
+        sline = line.strip()
+        if not sline:
+            if curr_title is not None:
+                curr_body.append("")
+            continue
 
-    if curr_title and curr_body:
+        indent = len(line) - len(line.lstrip(' \t'))
+        match = num_pat.match(sline)
+        if match:
+            num_val = int(match.group(1) or match.group(2))
+            rest = match.group(3).strip()
+            cand_title = rest.strip("*_ #:\t")
+            has_emphasis = bool(emph_pat.match(sline))
+
+            # Проверяем, не находимся ли мы сразу после заголовка подполя (например, "- **Пошаговый алгоритм**:")
+            prev_non_empty = ""
+            for prev_l in reversed(curr_body):
+                if prev_l.strip():
+                    prev_non_empty = prev_l.strip()
+                    break
+            after_colon_or_subfield = (
+                prev_non_empty.endswith(":")
+                or _is_subfield_title(prev_non_empty.lstrip("-*• \t"))
+            )
+
+            is_substep = False
+            if curr_title is not None:
+                if _is_subfield_title(cand_title):
+                    is_substep = True
+                elif require_emphasis and not has_emphasis:
+                    # Основные пункты выделены жирным/заголовком, а эта строка — обычный шаг алгоритма
+                    is_substep = True
+                elif indent >= 2 and not has_emphasis:
+                    is_substep = True
+                elif in_sublist and not has_emphasis:
+                    is_substep = True
+                elif after_colon_or_subfield and (num_val == 1 or not has_emphasis):
+                    is_substep = True
+                elif len([x for x in curr_body if x.strip()]) == 0 and not has_emphasis:
+                    # Строка сразу под заголовком без жирного выделения — это текст описания, а не перезапись заголовка
+                    is_substep = True
+
+            if is_substep:
+                in_sublist = True
+                curr_body.append(sline)
+            else:
+                if curr_title is not None:
+                    sections.append((curr_title, "\n".join(curr_body).strip()))
+                curr_body = []
+                in_sublist = False
+                t_part, inline_b = _split_inline_title_and_body(rest)
+                curr_title = t_part or cand_title
+                if inline_b:
+                    curr_body.append(inline_b)
+        elif curr_title is not None:
+            if sline.startswith(("-", "*", "•")):
+                in_sublist = False
+            curr_body.append(sline)
+
+    if curr_title is not None:
         sections.append((curr_title, "\n".join(curr_body).strip()))
 
     if len(sections) >= 2:
         items = []
         for t, b in sections:
-            urls = re.findall(r'https?://[^\s)\]"\'>]+', b)
+            urls = [
+                re.sub(r'Original$', '', u).rstrip('.,;)')
+                for u in re.findall(r'https?://[^\s)\]"\'>]+', b)
+                if not re.search(r'(/rss/?(?:Original)?$|/feed/?$|\.xml$|\.rss$)', u, re.IGNORECASE)
+            ]
             items.append({
                 "title": t,
                 "summary": b,
@@ -2827,16 +3462,16 @@ def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
         if match:
             cand_h = match.group(1).strip("*_ #:\t")
             if _is_subfield_title(cand_h) and curr_h is not None:
-                curr_hb.append(line)
+                curr_hb.append(line.strip())
             else:
-                if curr_h and curr_hb:
+                if curr_h is not None:
                     h_sections.append((curr_h, "\n".join(curr_hb).strip()))
                     curr_hb = []
                 clean_h = re.sub(r'^(?:Заголовок[:\s*]*|Тема[:\s*]*)', '', cand_h, flags=re.IGNORECASE).strip('*_ #:\t')
                 curr_h = clean_h or cand_h
         elif curr_h is not None:
-            curr_hb.append(line)
-    if curr_h and curr_hb:
+            curr_hb.append(line.strip())
+    if curr_h is not None:
         h_sections.append((curr_h, "\n".join(curr_hb).strip()))
 
     if len(h_sections) >= 2:
@@ -2847,7 +3482,7 @@ def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
                 "title": t,
                 "summary": b,
                 "why": "",
-                "source": urls[0] if urls else "",
+                "source": urls[0] if urls else fb_src,
                 "news_score": None
             })
         return items
@@ -2855,18 +3490,39 @@ def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
     # 6. Маркеры списков с жирными названиями: * **Заголовок** или - **Заголовок**
     bullet_pat = re.compile(r'^[-*•]\s+\*\*(.+?)\*\*(?::\s*|\s*[-—]\s*|\s*)(.*)$')
     b_items = []
+    curr_b_title = None
+    curr_b_body: List[str] = []
     for line in lines:
-        m = bullet_pat.match(line.strip())
+        sline = line.strip()
+        m = bullet_pat.match(sline)
         if m:
             cand_b = m.group(1).strip("*_ #:\t")
             if not _is_subfield_title(cand_b):
-                b_items.append({
-                    "title": cand_b,
-                    "summary": m.group(2).strip(),
-                    "why": "",
-                    "source": "",
-                    "news_score": None
-                })
+                if curr_b_title is not None:
+                    full_b = "\n".join(curr_b_body).strip()
+                    urls = re.findall(r'https?://[^\s)\]"\'>]+', full_b)
+                    b_items.append({
+                        "title": curr_b_title,
+                        "summary": full_b,
+                        "why": "",
+                        "source": urls[0] if urls else fb_src,
+                        "news_score": None
+                    })
+                curr_b_title = cand_b
+                curr_b_body = [m.group(2).strip()] if m.group(2).strip() else []
+                continue
+        if curr_b_title is not None and sline:
+            curr_b_body.append(sline)
+    if curr_b_title is not None:
+        full_b = "\n".join(curr_b_body).strip()
+        urls = re.findall(r'https?://[^\s)\]"\'>]+', full_b)
+        b_items.append({
+            "title": curr_b_title,
+            "summary": full_b,
+            "why": "",
+            "source": urls[0] if urls else fb_src,
+            "news_score": None
+        })
     if len(b_items) >= 2:
         return b_items
 
@@ -2878,7 +3534,7 @@ def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
             "title": t,
             "summary": b,
             "why": "",
-            "source": urls[0] if urls else "",
+            "source": urls[0] if urls else fb_src,
             "news_score": None
         }]
 
@@ -2899,7 +3555,7 @@ def _parse_rag_news_items(text: str) -> List[Dict[str, Any]]:
                 "title": t,
                 "summary": b,
                 "why": "",
-                "source": urls[0] if urls else "",
+                "source": urls[0] if urls else fb_src,
                 "news_score": None
             })
         return items
@@ -2950,9 +3606,10 @@ def _send_interactive_news_basket(
 
     item_msg_ids = {}
     for idx, it in enumerate(items):
-        t = it.get("title", f"Сюжет #{idx+1}").strip()
-        s = it.get("summary", "").strip()
-        w = it.get("why", "").strip()
+        raw_t = it.get("title", f"Сюжет #{idx+1}").strip()
+        t = clean_rag_citations(raw_t).replace("**", "").strip("*_ #\t") or f"Сюжет #{idx+1}"
+        s = clean_rag_citations(it.get("summary", "").strip())
+        w = clean_rag_citations(it.get("why", "").strip()).replace("**", "")
         src = it.get("source", "").strip()
         sc = it.get("news_score")
         rubrics = it.get("rubrics") or ([it["rubric"]] if "rubric" in it else [])
@@ -2961,7 +3618,7 @@ def _send_interactive_news_basket(
         sc_badge = f" — ⭐ <b>{sc:.1f}</b>" if sc is not None else ""
         block.append(f"<b>{idx+1}. {esc(t)}</b>{sc_badge}")
         if s:
-            block.append(esc(s))
+            block.append(markdown_to_telegram_html(s))
         if w:
             block.append(f"💡 <i>{esc(w)}</i>")
         if rubrics:
@@ -2969,7 +3626,7 @@ def _send_interactive_news_basket(
             rub_names = [EDITORIAL_PROMPTS[r]["title"].split(" ", 1)[-1] for r in rubrics if r in EDITORIAL_PROMPTS]
             if rub_names:
                 block.append(f"🏷 {esc(', '.join(rub_names))}")
-        if src:
+        if src and (not s or src not in s):
             block.append(f"🔗 {esc(src)}")
 
         card_text = "\n\n".join(block)
@@ -2978,7 +3635,8 @@ def _send_interactive_news_basket(
 
         reply_markup = {
             "inline_keyboard": [
-                [{"text": "➕ Добавить в пост", "callback_data": f"bsk_t:{session_id}:{idx}"}]
+                [{"text": "📝 Сгенерировать ТГ-пост", "callback_data": f"bsk_one:{session_id}:{idx}"}],
+                [{"text": "➕ Добавить в сборный дайджест", "callback_data": f"bsk_t:{session_id}:{idx}"}]
             ]
         }
         res = send_message(chat_id, card_text, reply_markup=reply_markup, disable_web_page_preview=True)
@@ -2988,12 +3646,13 @@ def _send_interactive_news_basket(
 
     # Контрольное сообщение внизу со счётчиком
     ctrl_text = (
-        f"📌 <b>Выбрано новостей для поста: 0</b>\n\n"
-        f"<i>Нажимайте «➕ Добавить в пост» под нужными новостями выше.</i>"
+        "📌 <b>Сборный дайджест: выбрано 0 новостей</b>\n\n"
+        "<i>• Нажимайте «📝 Сгенерировать ТГ-пост» под любой новостью для отдельного поста.\n"
+        "• Или отмечайте новости кнопкой «➕ Добавить в сборный дайджест» и соберите единый пост ниже:</i>"
     )
     ctrl_markup = {
         "inline_keyboard": [
-            [{"text": "📝 Сгенерировать ТГ-пост (0)", "callback_data": f"bsk_g:{session_id}"}],
+            [{"text": "📝 Сгенерировать общий дайджест (0)", "callback_data": f"bsk_g:{session_id}"}],
             [{"text": "🗑 Сбросить выбор", "callback_data": f"bsk_c:{session_id}"}]
         ]
     }
@@ -3024,11 +3683,11 @@ def handle_basket_toggle(callback_query: dict, session_id: str, idx: int):
     item_title = items[idx].get("title", f"Новость #{idx+1}")
     if idx in selected:
         selected.remove(idx)
-        btn_text = "➕ Добавить в пост"
+        btn_text = "➕ Добавить в сборный дайджест"
         alert_text = f"❌ Убрано: {item_title[:30]}"
     else:
         selected.add(idx)
-        btn_text = "✅ В подборке"
+        btn_text = "✅ В сборном дайджесте (убрать)"
         alert_text = f"✅ Добавлено: {item_title[:30]}"
 
     session["selected"] = sorted(list(selected))
@@ -3036,7 +3695,10 @@ def handle_basket_toggle(callback_query: dict, session_id: str, idx: int):
 
     # 1. Обновляем кнопку на сообщении этой новости
     new_markup = {
-        "inline_keyboard": [[{"text": btn_text, "callback_data": f"bsk_t:{session_id}:{idx}"}]]
+        "inline_keyboard": [
+            [{"text": "📝 Сгенерировать ТГ-пост", "callback_data": f"bsk_one:{session_id}:{idx}"}],
+            [{"text": btn_text, "callback_data": f"bsk_t:{session_id}:{idx}"}]
+        ]
     }
     try:
         edit_message_reply_markup(chat_id, msg_id, reply_markup=new_markup)
@@ -3048,12 +3710,13 @@ def handle_basket_toggle(callback_query: dict, session_id: str, idx: int):
     if ctrl_id:
         count = len(selected)
         ctrl_text = (
-            f"📌 <b>Выбрано новостей для поста: {count}</b>\n\n"
-            f"<i>Нажмите кнопку ниже, когда завершите выбор:</i>"
+            f"📌 <b>Сборный дайджест: выбрано {count}</b>\n\n"
+            f"<i>• Нажимайте «📝 Сгенерировать ТГ-пост» под любой новостью для отдельного поста.\n"
+            f"• Нажмите кнопку ниже, когда завершите сборку общего дайджеста:</i>"
         )
         ctrl_markup = {
             "inline_keyboard": [
-                [{"text": f"📝 Сгенерировать ТГ-пост ({count})", "callback_data": f"bsk_g:{session_id}"}],
+                [{"text": f"📝 Сгенерировать общий дайджест ({count})", "callback_data": f"bsk_g:{session_id}"}],
                 [{"text": "🗑 Сбросить выбор", "callback_data": f"bsk_c:{session_id}"}]
             ]
         }
@@ -3084,7 +3747,12 @@ def handle_basket_clear(callback_query: dict, session_id: str):
             try:
                 edit_message_reply_markup(
                     chat_id, m_id,
-                    reply_markup={"inline_keyboard": [[{"text": "➕ Добавить в пост", "callback_data": f"bsk_t:{session_id}:{idx}"}]]}
+                    reply_markup={
+                        "inline_keyboard": [
+                            [{"text": "📝 Сгенерировать ТГ-пост", "callback_data": f"bsk_one:{session_id}:{idx}"}],
+                            [{"text": "➕ Добавить в сборный дайджест", "callback_data": f"bsk_t:{session_id}:{idx}"}]
+                        ]
+                    }
                 )
             except Exception:
                 pass
@@ -3092,12 +3760,12 @@ def handle_basket_clear(callback_query: dict, session_id: str):
     ctrl_id = session.get("control_msg_id")
     if ctrl_id:
         ctrl_text = (
-            f"📌 <b>Выбрано новостей для поста: 0</b>\n\n"
-            f"<i>Выбор сброшен. Отметьте нужные новости кнопками выше:</i>"
+            "📌 <b>Сборный дайджест: выбрано 0</b>\n\n"
+            "<i>Выбор сброшен. Отмечайте нужные новости кнопками выше:</i>"
         )
         ctrl_markup = {
             "inline_keyboard": [
-                [{"text": "📝 Сгенерировать ТГ-пост (0)", "callback_data": f"bsk_g:{session_id}"}],
+                [{"text": "📝 Сгенерировать общий дайджест (0)", "callback_data": f"bsk_g:{session_id}"}],
                 [{"text": "🗑 Сбросить выбор", "callback_data": f"bsk_c:{session_id}"}]
             ]
         }
@@ -3107,6 +3775,113 @@ def handle_basket_clear(callback_query: dict, session_id: str):
             pass
 
     answer_callback_query(callback_query["id"], "🗑 Выбор сброшен")
+
+
+def handle_basket_single_item_prompt(callback_query: dict, session_id: str, idx: int):
+    """Предлагает выбрать стиль для генерации отдельного ТГ-поста по конкретной новости."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    session = get_query_session(session_id)
+    if not session or "items" not in session or idx >= len(session["items"]):
+        answer_callback_query(callback_query["id"], "❌ Новость не найдена или сессия истекла", show_alert=True)
+        return
+
+    item = session["items"][idx]
+    title = item.get("title", f"Новость #{idx+1}")[:60]
+    answer_callback_query(callback_query["id"], "🎨 Выберите стиль")
+
+    keyboard = []
+    for s_key, s_data in POST_STYLES.items():
+        keyboard.append([{"text": s_data['title'], "callback_data": f"bsk_one_s:{session_id}:{idx}:{s_key}"}])
+    keyboard.append([{"text": "❌ Отмена", "callback_data": "cancel"}])
+
+    send_message(
+        chat_id,
+        f"📝 <b>Генерация отдельного ТГ-поста:</b>\n"
+        f"📰 <i>{title}...</i>\n\n"
+        f"✍️ <b>Выберите стиль написания:</b>",
+        reply_markup={"inline_keyboard": keyboard}
+    )
+
+
+def handle_basket_single_item_execute(callback_query: dict, session_id: str, idx: int, style_key: str):
+    """Запускает генерацию готового ТГ-поста по одной конкретной новости."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    answer_callback_query(callback_query["id"], "🚀 Генерирую пост...")
+
+    session = get_query_session(session_id)
+    if not session or "items" not in session or idx >= len(session["items"]):
+        send_message(chat_id, "❌ Новость не найдена или сессия истекла.")
+        return
+
+    item = session["items"][idx]
+    title = item.get("title", f"Новость #{idx+1}")
+    summary = item.get("summary", "")
+    why = item.get("why", "")
+    source = item.get("source", "")
+
+    # Извлекаем все ссылки на первоисточники
+    links = []
+    if source and source.strip().startswith("http"):
+        links.append(source.strip())
+    for u in re.findall(r'https?://[^\s)\]"\'>]+', f"{source} {summary} {why}"):
+        clean_u = u.rstrip(").,;")
+        if clean_u not in links:
+            links.append(clean_u)
+
+    style_cfg = POST_STYLES.get(style_key, POST_STYLES["standard"])
+    style_title = style_cfg["title"]
+
+    send_message(
+        chat_id,
+        f"⏳ <b>Пишу ТГ-пост по новости...</b>\n"
+        f"📰 <i>{title[:60]}...</i>\n"
+        f"🎨 Стиль: <b>{style_title}</b>\n\n"
+        f"Пожалуйста, подождите (5–15 сек)...",
+        disable_web_page_preview=True
+    )
+
+    def _worker():
+        try:
+            raw_text = f"Тема: {title}\n\nФакты и детали:\n{summary}"
+            if why:
+                raw_text += f"\n\nЗначимость: {why}"
+
+            polished = polish_custom_topic_post_with_llm(
+                raw_rag_text=raw_text,
+                topic=title,
+                style_key=style_key,
+                extra_links=links,
+                length_hint="800-1400",
+                max_tokens=1500
+            )
+            polished, _, _ = sync_initial_headline(polished)
+
+            send_message(
+                chat_id,
+                f"✅ <b>Готовый ТГ-пост ({style_title}):</b>\n"
+                f"<i>(скопируйте текст ниже)</i>",
+                disable_web_page_preview=True
+            )
+            clean_for_copy = strip_headline_options_block(polished)
+            post_resp = send_long_message(
+                chat_id,
+                markdown_to_telegram_html(clean_for_copy),
+                parse_mode="HTML",
+                disable_web_page_preview=True
+            )
+            post_msg_id = None
+            if post_resp and isinstance(post_resp, dict) and "result" in post_resp:
+                post_msg_id = post_resp["result"].get("message_id")
+
+            log.info("✅ ТГ-пост по новости '%s' сгенерирован (длина: %d)", title[:40], len(polished))
+
+            draft_id = save_post_draft(polished, title=title[:60], chat_id=chat_id, post_msg_id=post_msg_id)
+            offer_channel_publication(chat_id, draft_id)
+        except Exception as e:
+            log.exception("❌ Ошибка генерации отдельного ТГ-поста: %s", e)
+            send_message(chat_id, f"❌ Ошибка при генерации поста: {e}")
+
+    threading.Thread(target=_worker, daemon=True, name="SingleNewsPostWorker").start()
 
 
 def handle_basket_generate_prompt(callback_query: dict, session_id: str):
@@ -3189,6 +3964,7 @@ def _run_basket_post_generation(
     """Синтезирует общий пост через AnyModel LLM на основе выбранных новостей."""
     style_cfg = POST_STYLES.get(style_key, POST_STYLES["standard"])
     style_title = style_cfg["title"]
+    item_count = len(chosen_items)
 
     materials = []
     extra_links = []
@@ -3196,29 +3972,40 @@ def _run_basket_post_generation(
         t = it.get("title", "").strip()
         s = it.get("summary", "").strip()
         w = it.get("why", "").strip()
-        src = it.get("source", "").strip()
+        raw_src = it.get("source", "").strip()
+        src = re.sub(r'Original$', '', raw_src).rstrip('.,;)')
+        if re.search(r'(/rss/?$|/feed/?$|\.xml$|\.rss$)', src, re.IGNORECASE):
+            src = ""
         if src and src not in extra_links:
             extra_links.append(src)
-        block = f"Сюжет {i}: {t}\n{s}"
+        block = f"СЮЖЕТ {i} из {item_count}: {t}\nСуть события и факты:\n{s}"
         if w:
-            block += f"\nКонтекст/почему важно: {w}"
+            block += f"\nКонтекст / почему важно: {w}"
         if src:
-            block += f"\nИсточник: {src}"
+            block += f"\nПервоисточник / ссылка: {src}"
         materials.append(block)
 
     raw_rag_text = "\n\n".join(materials)
-    titles_summary = ", ".join(it.get("title", "") for it in chosen_items[:3])
-    topic = f"{basket_title}: {titles_summary}"
+    topic = f"{basket_title} (Обзор всех {item_count} сюжетов)"
 
-    if len(chosen_items) == 1:
+    if item_count == 1:
         length_hint = "800-1400"
         max_tokens = 1500
-    elif len(chosen_items) <= 3:
-        length_hint = "1200-2000"
+        max_chars = 1800
+    elif item_count == 2:
+        length_hint = "1200-1800"
         max_tokens = 2200
+        max_chars = 2400
+    elif item_count == 3:
+        length_hint = "1500-2200"
+        max_tokens = 2800
+        max_chars = 3000
     else:
-        length_hint = "1500-2800"
-        max_tokens = 3000
+        min_len = min(1800, item_count * 320)
+        max_len = min(2800, item_count * 460)
+        length_hint = f"{min_len}-{max_len}"
+        max_tokens = 3800
+        max_chars = 3500
 
     polished_post = polish_custom_topic_post_with_llm(
         raw_rag_text=raw_rag_text,
@@ -3226,28 +4013,40 @@ def _run_basket_post_generation(
         style_key=style_key,
         extra_links=extra_links,
         length_hint=length_hint,
-        max_tokens=max_tokens
+        max_tokens=max_tokens,
+        item_count=item_count,
+        max_chars=max_chars
     )
+    polished_post, _, _ = sync_initial_headline(polished_post)
 
+    clean_post_for_copy = strip_headline_options_block(polished_post)
     send_message(
         chat_id,
-        f"✅ <b>Готовый ТГ-пост на основе {len(chosen_items)} новостей ({style_title}):</b>\n"
+        f"✅ <b>Готовый ТГ-пост на основе {item_count} новостей ({style_title}):</b>\n"
         f"<i>(скопируйте текст ниже)</i>",
         disable_web_page_preview=True
     )
-    send_long_message(chat_id, polished_post, parse_mode=None, disable_web_page_preview=True)
+    post_resp = send_long_message(
+        chat_id,
+        markdown_to_telegram_html(clean_post_for_copy),
+        parse_mode="HTML",
+        disable_web_page_preview=True
+    )
+    post_msg_id = None
+    if post_resp and isinstance(post_resp, dict) and "result" in post_resp:
+        post_msg_id = post_resp["result"].get("message_id")
 
     draft_id = save_post_draft(
         polished_post,
-        title=f"{basket_title} ({len(chosen_items)} сюжетов)",
-        chat_id=chat_id
+        title=f"{basket_title} ({item_count} сюжетов)",
+        chat_id=chat_id,
+        post_msg_id=post_msg_id
     )
     offer_channel_publication(chat_id, draft_id)
 
 
 def _run_toppromt(chat_id: str, count: int, period: str):
-    import html as _html
-    from editorial_prompts import EDITORIAL_PROMPTS, build_structured_prompt, news_keys
+    from editorial_prompts import build_structured_prompt, news_keys
 
     notebook_id = _resolve_notebook_id(_get_latest_notebook_key())
     per_rubric = max(5, min(12, -(-count * 15 // 100) + 3))
@@ -3258,13 +4057,14 @@ def _run_toppromt(chat_id: str, count: int, period: str):
     for n, key in enumerate(rubric_keys, 1):
         raw, _links = query_notebooklm_rag(notebook_id, build_structured_prompt(key, per_rubric),
                                            period_key=period)
-        found = _parse_rag_json(raw or "")
+        found = _parse_rag_news_items(raw or "", fallback_links=_links)
         log.info("🧭 toppromt рубрика %s (%d/%d): %d сюжетов", key, n, len(rubric_keys), len(found))
         if not raw or (not found and "[]" not in (raw or "")):
             failed.append(key)
         for f in found:
+            raw_sc = f.get("news_score") if f.get("news_score") is not None else f.get("score", 5)
             try:
-                score = max(1.0, min(10.0, float(f.get("score", 5))))
+                score = max(1.0, min(10.0, float(raw_sc)))
             except (TypeError, ValueError):
                 score = 5.0
             items.append({
@@ -3440,14 +4240,12 @@ def handle_ask_execute(
         )
         return
 
-    # Очищаем технические скобки [1], [2]
-    clean_answer = re.sub(r'\[\d+\]', '', raw_answer)
-    clean_answer = re.sub(r'\[source\s*\d+\]', '', clean_answer, flags=re.IGNORECASE)
-    clean_answer = re.sub(r'  +', ' ', clean_answer).strip()
+    # Очищаем технические скобки [1], [1, 2], [10-12]
+    clean_answer = clean_rag_citations(raw_answer)
 
     # Если это сессия редакторского промпта — выдаём интерактивными карточками с кнопками выбора
     if session.get("type") == "editorial":
-        items = _parse_rag_news_items(clean_answer)
+        items = _parse_rag_news_items(raw_answer, fallback_links=extra_links)
         if not items:
             items = [{
                 "title": session.get("title", "Новость из подборки"),
@@ -3466,10 +4264,11 @@ def handle_ask_execute(
         return
 
     ans_header = f"💡 <b>Ответ NotebookLM RAG ({period_title}):</b>\n\n"
-    response_text = ans_header + clean_answer
+    response_text = ans_header + markdown_to_telegram_html(clean_answer)
 
     if extra_links:
-        response_text += "\n\n🔗 <b>Найденные источники:</b>\n" + "\n".join(f"• {lk}" for lk in extra_links[:10])
+        import html as _html
+        response_text += "\n\n🔗 <b>Найденные источники:</b>\n" + "\n".join(f"• {_html.escape(lk)}" for lk in extra_links[:10])
 
     send_long_message(chat_id, response_text, parse_mode="HTML")
 
@@ -3645,6 +4444,7 @@ def handle_post_execute(
         style_key=style_key,
         extra_links=extra_links
     )
+    polished_post, _, _ = sync_initial_headline(polished_post)
 
     send_message(
         chat_id,
@@ -3653,14 +4453,23 @@ def handle_post_execute(
         disable_web_page_preview=True
     )
 
-    # Отправляем чистый текст для копирования
-    send_long_message(chat_id, polished_post, parse_mode=None, disable_web_page_preview=True)
+    # Отправляем отформатированный текст поста для копирования (без сырых **)
+    clean_for_copy = strip_headline_options_block(polished_post)
+    post_resp = send_long_message(
+        chat_id,
+        markdown_to_telegram_html(clean_for_copy),
+        parse_mode="HTML",
+        disable_web_page_preview=True
+    )
+    post_msg_id = None
+    if post_resp and isinstance(post_resp, dict) and "result" in post_resp:
+        post_msg_id = post_resp["result"].get("message_id")
 
     log.info("✅ ТГ-пост по теме '%s' успешно сгенерирован (стиль: %s, длина: %d)",
              topic[:40], style_key, len(polished_post))
 
     # Предлагаем публикацию в канал @iberia_news (в очередь 8ч или срочно)
-    draft_id = save_post_draft(polished_post, title=topic[:60], chat_id=chat_id)
+    draft_id = save_post_draft(polished_post, title=topic[:60], chat_id=chat_id, post_msg_id=post_msg_id)
     offer_channel_publication(chat_id, draft_id)
 
 

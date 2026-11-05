@@ -55,7 +55,7 @@ EDITORIAL_QUALITY_FILTER = """
 
 2. **Заголовок новости**
 ...
-Строго нумеруй каждый отдельный сюжет (1., 2., 3.)!"""
+Строго нумеруй цифрами (1., 2., 3.) ТОЛЬКО сами основные сюжеты! Все внутренние подпункты, детали или шаги внутри одного сюжета оформляй строго через дефис (-), без цифр!"""
 
 
 # NotebookLM отклоняет слишком длинные вопросы (status 3). Оставляем запас на
@@ -88,7 +88,7 @@ EVENTS_QUALITY_FILTER = """
 
 2. **Название места / мероприятия**
 ...
-Обязательно используй нумерацию 1., 2., 3., чтобы каждый объект был отдельным пунктом!"""
+Обязательно используй нумерацию 1., 2., 3. ТОЛЬКО для самих основных объектов/мероприятий, а внутренние поля и детали оформляй строго через дефис (-), без цифр!"""
 
 # key -> {title (для кнопки), goal, body, kind: "news" (по умолчанию) | "events"}
 EDITORIAL_PROMPTS: Dict[str, Dict[str, str]] = {
@@ -533,7 +533,7 @@ EDITORIAL_PROMPTS: Dict[str, Dict[str, str]] = {
 
 2. **Заголовок**
 ...
-Выбери до 10 наиболее полезных тем. Строго нумеруй только сами темы (1., 2., 3.), а внутренние шаги оформляй через дефис (-) или маркер (*)!""",
+Выбери до 10 наиболее полезных тем. Строго нумеруй цифрами (1., 2., 3.) ТОЛЬКО сами основные темы, а внутренние шаги алгоритма и подпункты оформляй строго через дефис (-), без цифр!""",
     },
     "13": {
         "kind": "events",
@@ -560,14 +560,14 @@ EDITORIAL_PROMPTS: Dict[str, Dict[str, str]] = {
 Ищи как бесплатные, так и платные варианты.
 
 Для каждого мероприятия укажи:
-1. Название.
-2. Что интересного ждёт детей.
-3. Возрастные ограничения.
-4. Даты и время.
-5. Стоимость билетов.
-6. Место проведения и адрес.
-7. Нужно ли предварительно регистрироваться.
-8. Официальную ссылку.
+- Название.
+- Что интересного ждёт детей.
+- Возрастные ограничения.
+- Даты и время.
+- Стоимость билетов.
+- Место проведения и адрес.
+- Нужно ли предварительно регистрироваться.
+- Официальную ссылку.
 
 Приоритет отдавай необычным мероприятиям, которые родители захотят посетить всей семьёй.""",
     },
@@ -902,13 +902,16 @@ score — твоя оценка ценности сюжета по критер�
 def _compose(key: str, with_format: bool, k: int = 0) -> str:
     """Собирает промпт; если он длиннее MAX_PROMPT_CHARS — берёт short_body и компактный фильтр."""
     p = EDITORIAL_PROMPTS[key]
-    if p.get("kind") == "events":
-        return p["body"] + EVENTS_QUALITY_FILTER
     n = k or p.get("max_items", 10)
+    json_tail = "" if with_format else STRUCTURED_OUTPUT_INSTRUCTION.format(k=n)
+    if p.get("kind") == "events":
+        if with_format:
+            return p["body"] + EVENTS_QUALITY_FILTER
+        ev_filter = EVENTS_QUALITY_FILTER.rsplit("\n\nОФОРМЛЕНИЕ ОТВЕТА:", 1)[0]
+        return p["body"] + ev_filter + json_tail
     tail = (p.get("format", "") if with_format else "")
     full_filter = EDITORIAL_QUALITY_FILTER.rsplit("\n\nВерни до 10", 1)[0] if not with_format else \
         EDITORIAL_QUALITY_FILTER.replace("до 10 наиболее", f"до {p.get('max_items', 10)} наиболее")
-    json_tail = "" if with_format else STRUCTURED_OUTPUT_INSTRUCTION.format(k=k)
     text = AUDIENCE_NOTE + p["body"] + tail + full_filter + json_tail
     if len(text) > MAX_PROMPT_CHARS and p.get("short_body"):
         text = p["short_body"] + tail + COMPACT_QUALITY_FILTER.format(n=n) + json_tail
