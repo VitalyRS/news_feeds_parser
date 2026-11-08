@@ -93,11 +93,68 @@ ANYMODEL_KEY = os.environ.get("ANYMODEL_KEY")
 ANYMODEL_BASE_URL = os.environ.get("ANYMODEL_BASE_URL", "https://anymodel.org/v1").rstrip("/")
 ANYMODEL_MODEL = os.environ.get("ANYMODEL_MODEL", "ag/gemini-2.5-flash")
 
-# Канал для публикаций и интервал очереди
+# Каналы для публикаций и интервал очереди
 TELEGRAM_CHANNEL = os.environ.get("TELEGRAM_CHANNEL", "@iberia_news").strip()
 if not TELEGRAM_CHANNEL.startswith("@") and not TELEGRAM_CHANNEL.startswith("-100"):
     TELEGRAM_CHANNEL = f"@{TELEGRAM_CHANNEL}"
+
+TELEGRAM_SECONDARY_CHANNEL = os.environ.get("TELEGRAM_SECONDARY_CHANNEL", "@noticia666").strip()
+if TELEGRAM_SECONDARY_CHANNEL and not TELEGRAM_SECONDARY_CHANNEL.startswith("@") and not TELEGRAM_SECONDARY_CHANNEL.startswith("-100"):
+    TELEGRAM_SECONDARY_CHANNEL = f"@{TELEGRAM_SECONDARY_CHANNEL}"
+
 PUBLISH_INTERVAL_HOURS = int(os.environ.get("PUBLISH_INTERVAL_HOURS", "8"))
+
+# 6 категорий публикации для маршрутизации (cat1 - cat6)
+POST_CATEGORIES: Dict[str, Dict[str, str]] = {
+    "cat1": {
+        "code": "cat1",
+        "num": "1",
+        "emoji": "📰",
+        "title": "1. 📰 Новости Испании",
+        "btn": "1. 📰 Новости (cat1)",
+        "desc": "Главные события Испании: политика, экономика, происшествия, общество, скандалы, Россия в СМИ Испании."
+    },
+    "cat2": {
+        "code": "cat2",
+        "num": "2",
+        "emoji": "📑",
+        "title": "2. 📑 Документы и гражданство",
+        "btn": "2. 📑 Документы (cat2)",
+        "desc": "ВНЖ, визы, NIE/TIE, продление документов, гражданство, налоги, соцвопросы и админпроцедуры."
+    },
+    "cat3": {
+        "code": "cat3",
+        "num": "3",
+        "emoji": "💡",
+        "title": "3. 💡 Гайды, советы и лайфхаки",
+        "btn": "3. 💡 Гайды (cat3)",
+        "desc": "Практические инструкции: банки, связь, транспорт, покупки, экономия, сервисы и бытовые вопросы."
+    },
+    "cat4": {
+        "code": "cat4",
+        "num": "4",
+        "emoji": "🇪🇸",
+        "title": "4. 🇪🇸 Учим испанский",
+        "btn": "4. 🇪🇸 Испанский (cat4)",
+        "desc": "Изучение испанского языка: слова, грамматика, разговорная практика, подготовка к DELE A2 и CCSE."
+    },
+    "cat5": {
+        "code": "cat5",
+        "num": "5",
+        "emoji": "📍",
+        "title": "5. 📍 Куда сходить и путешествия",
+        "btn": "5. 📍 Куда сходить (cat5)",
+        "desc": "Интересные места, рестораны, концерты, выставки, праздники, бесплатные мероприятия, маршруты и поездки."
+    },
+    "cat6": {
+        "code": "cat6",
+        "num": "6",
+        "emoji": "👨‍👩‍👧",
+        "title": "6. 👨‍👩‍👧 Семья и здоровье",
+        "btn": "6. 👨‍👩‍👧 Семья/Здоровье (cat6)",
+        "desc": "Медицина, врачи, страховки, школы, детские сады, кружки, спорт, семейный отдых и воспитание детей."
+    },
+}
 
 # Максимальная глубина выбора ноутбуков (месяцев назад)
 MAX_NOTEBOOK_MONTHS = 4
@@ -364,19 +421,133 @@ def extract_current_body_headline(text: str) -> str:
     return first_line.strip('*_# «»"\'')
 
 
-def sync_initial_headline(text: str) -> tuple[str, List[Dict[str, Any]], int]:
-    """
-    Синхронизирует заголовок в теле поста с одним из сгенерированных вариантов (1..4):
-    - Если первая строка поста уже совпадает с одним из вариантов 1..4 -> выбирает его индекс.
-    - Если модель написала в теле поста другой заголовок, не совпадающий с 1..4 ->
-      применяет вариант 1️⃣, чтобы заголовок в посте всегда был одним из сгенерированных вариантов.
-    Возвращает (синхронизированный_текст, options, selected_idx).
-    """
-    options, _ = parse_headline_options(text)
-    if not options:
-        return text, [], 1
+def strip_category_footer(text: str) -> str:
+    """Удаляет служебную подпись категории вида '#dai breaking cat3', 'breaking cat3' или 'cat1' в самом конце текста."""
+    if not text:
+        return ""
+    cleaned = re.sub(
+        r'(?:\n|\s)+(?:(?:#dai\s+)?(?:breaking\s+)?cat[1-6](?:\s+#dai)?|#dai)\s*$',
+        '',
+        text.rstrip(),
+        flags=re.IGNORECASE
+    )
+    return cleaned.rstrip()
 
-    curr_h = extract_current_body_headline(text)
+
+def extract_category_from_text(text: str) -> Optional[str]:
+    """Извлекает код категории (cat1..cat6) из конца текста, если он уже проставлен."""
+    if not text:
+        return None
+    m = re.search(
+        r'(?:^|\s)(?:#dai\s+)?(?:breaking\s+)?(cat[1-6])(?:\s+#dai)?\s*$',
+        text.rstrip(),
+        flags=re.IGNORECASE
+    )
+    return m.group(1).lower() if m else None
+
+
+def apply_category_footer(text: str, category_code: str, is_breaking: bool = False) -> str:
+    """
+    Добавляет в самый конец текста служебную строку для вторичного канала (@noticia666):
+    - '#dai breaking cat3' если is_breaking=True
+    - '#dai cat3' если is_breaking=False
+    """
+    if not text:
+        return ""
+    cat = category_code if category_code in POST_CATEGORIES else "cat1"
+    base = strip_category_footer(text)
+    suffix = f"#dai breaking {cat}" if is_breaking else f"#dai {cat}"
+    return f"{base}\n\n{suffix}"
+
+
+def detect_post_category(text: str, title: str = "") -> str:
+    """
+    Автоматически определяет категорию поста (cat1..cat6) по рубрике, заголовку и содержанию текста.
+    """
+    combined = f"{title}\n{strip_headline_options_block(text)}".lower()
+    t_low = (title or "").lower()
+
+    # 1. Быстрые подсказки по названию рубрики
+    if any(w in t_low for w in ["инструкции", "как сделать", "лайфхак"]):
+        return "cat3"
+    if any(w in t_low for w in ["детям и семьям"]):
+        return "cat6"
+    if any(w in t_low for w in [
+        "для пар", "культура и классическая", "бесплатные мероприятия",
+        "праздники и фестивали", "шоу и представления", "необычные места",
+        "афиша на выходные", "куда поехать", "гастрономия и вино"
+    ]):
+        return "cat5"
+    if any(w in t_low for w in ["законы, налоги и документы"]):
+        return "cat2"
+
+    # 2. Подсчёт весов по ключевым маркерам для cat1..cat6
+    scores: Dict[str, int] = {"cat1": 1, "cat2": 0, "cat3": 0, "cat4": 0, "cat5": 0, "cat6": 0}
+
+    kw_map = {
+        "cat4": [
+            ("dele", 5), ("ccse", 5), ("учим испанский", 5), ("испанский язык", 4),
+            ("грамматик", 4), ("лексик", 4), ("словарный запас", 4), ("глагол", 3),
+            ("произношени", 3), ("разговорная практика", 4), ("фразы на испанском", 4)
+        ],
+        "cat2": [
+            ("внж", 4), ("виз", 3), ("nie", 4), ("tie", 4), ("гражданств", 4),
+            ("extranjería", 4), ("экстранхери", 4), ("empadronamiento", 4), ("прописк", 3),
+            ("налог", 3), ("irpf", 4), ("деклараци", 3), ("резидент", 3), ("легализац", 4),
+            ("arraigo", 4), ("оседлост", 4), ("cita previa", 3), ("autónomo", 3),
+            ("аутономо", 3), ("seguridad social", 3), ("пенси", 2), ("пособи", 2), ("субсиди", 2)
+        ],
+        "cat3": [
+            ("пошаговый алгоритм", 4), ("инструкци", 3), ("лайфхак", 4), ("гайд", 4),
+            ("как сэкономить", 4), ("как выбрать", 3), ("как открыть счет", 4), ("банковский счет", 3),
+            ("тариф", 3), ("электроэнерги", 3), ("счет за свет", 4), ("оператор связи", 3),
+            ("проездной", 3), ("abono", 3), ("обмен прав", 4), ("водительские права", 3),
+            ("certificado digital", 4), ("электронная подпись", 4), ("cl@ve", 4),
+            ("возврат товара", 4), ("права потребителей", 3), ("как не потерять", 3), ("как защититься", 3)
+        ],
+        "cat5": [
+            ("куда сходить", 4), ("куда поехать", 4), ("афиша", 4), ("фестивал", 4),
+            ("концерт", 3), ("выставк", 3), ("музе", 3), ("театр", 3), ("маршрут", 4),
+            ("экскурси", 4), ("ресторан", 3), ("гастроном", 3), ("дегустац", 4),
+            ("ярмарк", 3), ("праздник", 3), ("выходные", 2), ("вход свободн", 4),
+            ("бесплатн", 2), ("замок", 3), ("путешеств", 3), ("достопримечательност", 4)
+        ],
+        "cat6": [
+            ("медицин", 4), ("врач", 3), ("больниц", 3), ("госпитал", 3), ("поликлиник", 4),
+            ("страховк", 3), ("здоровь", 3), ("лекарств", 3), ("аптек", 3), ("педиатр", 4),
+            ("школ", 3), ("школьник", 3), ("colegio", 3), ("детский сад", 4), ("guardería", 4),
+            ("кружк", 3), ("воспитани", 4), ("семейн", 2), ("беременнос", 4), ("роды", 3), ("вакцин", 3)
+        ],
+        "cat1": [
+            ("политик", 3), ("правительств", 3), ("парламент", 3), ("суд ", 3), ("полици", 3),
+            ("задержан", 3), ("арест", 3), ("преступлен", 3), ("мошеннич", 3), ("афер", 3),
+            ("скандал", 3), ("происшестви", 3), ("забастовк", 3), ("протест", 3),
+            ("экономик", 2), ("инфляци", 2), ("росси", 4), ("русск", 3), ("испанские сми", 3)
+        ],
+    }
+
+    for cat_code, kw_list in kw_map.items():
+        for kw, weight in kw_list:
+            if kw in combined:
+                scores[cat_code] += weight
+
+    best_cat = max(scores.items(), key=lambda x: x[1])[0]
+    if scores[best_cat] <= 2:
+        return "cat1"
+    return best_cat
+
+
+def sync_initial_headline(text: str, title_hint: str = "") -> tuple[str, List[Dict[str, Any]], int]:
+    """
+    Синхронизирует заголовок в теле поста с одним из сгенерированных вариантов (1..4).
+    Возвращает (синхронизированный_чистый_текст, options, selected_idx).
+    """
+    clean_base = strip_category_footer(text)
+    options, _ = parse_headline_options(clean_base)
+    if not options:
+        return clean_base, [], 1
+
+    curr_h = extract_current_body_headline(clean_base)
     norm_curr = re.sub(r'\W+', '', curr_h.lower())
 
     matched_opt = None
@@ -390,8 +561,8 @@ def sync_initial_headline(text: str) -> tuple[str, List[Dict[str, Any]], int]:
     if matched_opt is None:
         matched_opt = options[0]
 
-    synced_text = apply_chosen_headline(text, matched_opt["title"])
-    return synced_text, options, matched_opt["idx"]
+    synced_text = apply_chosen_headline(clean_base, matched_opt["title"])
+    return strip_category_footer(synced_text), options, matched_opt["idx"]
 
 
 def save_post_draft(
@@ -401,18 +572,21 @@ def save_post_draft(
     draft_id: Optional[str] = None,
     headline_options: Optional[List[Dict[str, Any]]] = None,
     selected_headline_idx: Optional[int] = None,
-    post_msg_id: Optional[int] = None
+    post_msg_id: Optional[int] = None,
+    category: Optional[str] = None
 ) -> str:
     """
     Сохраняет сгенерированный пост как черновик для привязки к inline-кнопкам.
-    Автоматически извлекает варианты заголовков и синхронизирует активный заголовок.
+    Автоматически извлекает варианты заголовков, синхронизирует активный заголовок
+    и определяет категорию публикации (cat1..cat6) для второго канала (@noticia666).
     Очищает старые черновики (>48ч). Возвращает draft_id.
     """
     if not draft_id:
         draft_id = uuid.uuid4().hex[:8]
     now = datetime.now(timezone.utc)
 
-    synced_text, parsed_options, detected_idx = sync_initial_headline(text)
+    raw_extracted_cat = extract_category_from_text(text)
+    synced_text, parsed_options, detected_idx = sync_initial_headline(text, title_hint=title)
     text = synced_text
     if headline_options is None:
         headline_options = parsed_options
@@ -427,15 +601,22 @@ def save_post_draft(
             else existing.get("selected_headline_idx", detected_idx)
         )
         p_mid = post_msg_id if post_msg_id is not None else existing.get("post_msg_id")
+        cat_code = (
+            category
+            or existing.get("category")
+            or raw_extracted_cat
+            or detect_post_category(text, title)
+        )
 
         drafts[draft_id] = {
             "id": draft_id,
-            "text": text,
+            "text": strip_category_footer(text),
             "title": (title or existing.get("title", ""))[:100],
             "chat_id": str(chat_id or existing.get("chat_id", "")),
             "created_at": existing.get("created_at", now.isoformat()),
             "headline_options": headline_options if headline_options else existing.get("headline_options", []),
             "selected_headline_idx": sel_idx,
+            "category": cat_code,
             "post_msg_id": p_mid
         }
         # Чистим черновики старше 48 часов
@@ -449,8 +630,8 @@ def save_post_draft(
                 pass
         data["drafts"] = cleaned_drafts
         save_queue_data(data)
-    log.info("📝 Сохранён черновик поста [%s] (заголовков: %d, активный: %d, чат: %s, post_msg_id: %s)",
-             draft_id, len(headline_options or []), sel_idx, chat_id, p_mid)
+    log.info("📝 Сохранён черновик поста [%s] (заголовков: %d, активный: %d, категория: %s, чат: %s, post_msg_id: %s)",
+             draft_id, len(headline_options or []), sel_idx, cat_code, chat_id, p_mid)
     return draft_id
 
 
@@ -554,16 +735,9 @@ def strip_headline_options_block(text: str) -> str:
     return cleaned2.strip() if cleaned2.strip() else text
 
 
-def publish_post_to_channel(text: str) -> bool:
-    """
-    Публикует пост в целевой Telegram-канал (TELEGRAM_CHANNEL).
-    Конвертирует Markdown-разметку (**, *, ссылки) в нативный Telegram HTML.
-    При сбое HTML безопасно отправляет чистым текстом (со снятыми звездочками).
-    """
-    text = strip_headline_options_block(text)
-    channel_id = TELEGRAM_CHANNEL
+def _send_post_to_single_channel(channel_id: str, text: str) -> bool:
+    """Отправляет отформатированный пост в один указанный Telegram-канал."""
     log.info("📢 Публикую пост в канал %s (длина: %d симв.)", channel_id, len(text))
-
     html_text = markdown_to_telegram_html(text)
 
     if len(html_text) > 3800:
@@ -579,7 +753,7 @@ def publish_post_to_channel(text: str) -> bool:
         return True
 
     # Fallback: если Telegram API отклонил HTML, пробуем отправить со снятыми звёздочками
-    log.warning("⚠️ Не удалось отправить пост с parse_mode='HTML', пробую fallback без звездочек...")
+    log.warning("⚠️ Не удалось отправить пост в %s с parse_mode='HTML', пробую fallback без звездочек...", channel_id)
     clean_text = text.replace("**", "").replace("__", "")
     resp = tg_api("sendMessage",
                   chat_id=channel_id,
@@ -587,6 +761,43 @@ def publish_post_to_channel(text: str) -> bool:
                   parse_mode=None,
                   disable_web_page_preview=False)
     return bool(resp and resp.get("ok"))
+
+
+def publish_post_to_channel(text: str, category: Optional[str] = None, is_breaking: bool = False) -> bool:
+    """
+    Публикует пост в оба целевых Telegram-канала:
+    1) TELEGRAM_CHANNEL (@iberia_news) — ЧИСТЫЙ пост (без breaking, без cat1..cat6, без #dai).
+    2) TELEGRAM_SECONDARY_CHANNEL (@noticia666) — пост со служебным подвалом:
+       '#dai cat1..cat6' (обычный) или '#dai breaking cat1..cat6' (срочный).
+    """
+    raw_body = strip_headline_options_block(text)
+    cat_code = category or extract_category_from_text(raw_body) or detect_post_category(raw_body)
+    clean_primary_text = strip_category_footer(raw_body)
+
+    # 1. В @iberia_news публикуем чистый текст (без breaking, cat1..cat6 и #dai)
+    primary_ok = _send_post_to_single_channel(TELEGRAM_CHANNEL, clean_primary_text)
+
+    # 2. В @noticia666 публикуем текст с обязательным #dai и catX (плюс breaking, если срочно)
+    if TELEGRAM_SECONDARY_CHANNEL and TELEGRAM_SECONDARY_CHANNEL != TELEGRAM_CHANNEL:
+        secondary_text = apply_category_footer(clean_primary_text, cat_code, is_breaking=is_breaking)
+        secondary_ok = _send_post_to_single_channel(TELEGRAM_SECONDARY_CHANNEL, secondary_text)
+        if not secondary_ok:
+            log.warning("⚠️ Не удалось опубликовать пост во второй канал %s", TELEGRAM_SECONDARY_CHANNEL)
+
+    return primary_ok
+
+
+def format_channels_html() -> str:
+    """Возвращает HTML-ссылки на оба канала для информационных сообщений."""
+    parts = []
+    for ch in (TELEGRAM_CHANNEL, TELEGRAM_SECONDARY_CHANNEL):
+        if not ch:
+            continue
+        if ch.startswith("@"):
+            parts.append(f"<a href='https://t.me/{ch.lstrip('@')}'>{ch}</a>")
+        else:
+            parts.append(f"<b>{ch}</b>")
+    return " и ".join(dict.fromkeys(parts))
 
 
 def calculate_next_publish_time(data: Dict[str, Any]) -> datetime:
@@ -630,7 +841,9 @@ def calculate_next_publish_time(data: Dict[str, Any]) -> datetime:
 
 def publish_draft_urgent(draft_id: str) -> tuple[bool, str]:
     """
-    Публикует черновик поста немедленно в канал.
+    Публикует черновик поста немедленно в оба канала:
+    - в @iberia_news — чистый текст;
+    - в @noticia666 — с добавлением '#dai breaking catX'.
     Сдвигает очередь регулярных постов, чтобы выдержать интервал 8ч.
     """
     with QUEUE_LOCK:
@@ -638,11 +851,12 @@ def publish_draft_urgent(draft_id: str) -> tuple[bool, str]:
         draft = data.get("drafts", {}).get(draft_id)
         if not draft:
             return False, "Черновик поста не найден или срок его действия истёк."
-        text = draft["text"]
+        text = strip_category_footer(draft["text"])
         title = draft.get("title", "")
         chat_id = draft.get("chat_id", "")
+        cat_code = draft.get("category") or extract_category_from_text(draft["text"]) or detect_post_category(text, title)
 
-    success = publish_post_to_channel(text)
+    success = publish_post_to_channel(text, category=cat_code, is_breaking=True)
     if not success:
         return False, f"Ошибка отправки в канал {TELEGRAM_CHANNEL}. Убедитесь, что бот является администратором канала с правом публикации."
 
@@ -656,6 +870,7 @@ def publish_draft_urgent(draft_id: str) -> tuple[bool, str]:
             "id": draft_id,
             "title": title,
             "text": text,
+            "category": cat_code,
             "status": "published",
             "is_urgent": True,
             "created_at": draft.get("created_at", now_iso),
@@ -683,8 +898,9 @@ def publish_draft_urgent(draft_id: str) -> tuple[bool, str]:
         data.get("drafts", {}).pop(draft_id, None)
         save_queue_data(data)
 
-    log.info("⚡ Срочный пост [%s] опубликован в канал %s", draft_id, TELEGRAM_CHANNEL)
-    return True, f"Пост опубликован в {TELEGRAM_CHANNEL}"
+    log.info("⚡ Срочный пост [%s] (#dai breaking %s) опубликован в каналы %s, %s",
+             draft_id, cat_code, TELEGRAM_CHANNEL, TELEGRAM_SECONDARY_CHANNEL)
+    return True, f"Пост опубликован в {TELEGRAM_CHANNEL} и {TELEGRAM_SECONDARY_CHANNEL}"
 
 
 def add_draft_to_queue(draft_id: str) -> tuple[bool, str, Optional[datetime]]:
@@ -697,11 +913,16 @@ def add_draft_to_queue(draft_id: str) -> tuple[bool, str, Optional[datetime]]:
 
         next_time = calculate_next_publish_time(data)
         now = datetime.now(timezone.utc)
+        raw_text = draft["text"]
+        title = draft.get("title", "")
+        cat_code = draft.get("category") or extract_category_from_text(raw_text) or detect_post_category(raw_text, title)
+        final_text = strip_category_footer(raw_text)
 
         data.setdefault("queue", []).append({
             "id": draft_id,
-            "title": draft.get("title", ""),
-            "text": draft["text"],
+            "title": title,
+            "text": final_text,
+            "category": cat_code,
             "status": "pending",
             "is_urgent": False,
             "created_at": draft.get("created_at", now.isoformat()),
@@ -712,7 +933,7 @@ def add_draft_to_queue(draft_id: str) -> tuple[bool, str, Optional[datetime]]:
         data.get("drafts", {}).pop(draft_id, None)
         save_queue_data(data)
 
-    log.info("🕒 Пост [%s] поставлен в очередь на %s", draft_id, next_time.isoformat())
+    log.info("🕒 Пост [%s] (%s) поставлен в очередь на %s", draft_id, cat_code, next_time.isoformat())
     return True, "Пост добавлен в очередь", next_time
 
 
@@ -727,8 +948,9 @@ def publish_queued_now(post_id: str) -> tuple[bool, str]:
                 break
         if not target:
             return False, "Пост не найден в очереди или уже был опубликован."
+        cat_code = target.get("category") or extract_category_from_text(target["text"]) or detect_post_category(target["text"], target.get("title", ""))
 
-    success = publish_post_to_channel(target["text"])
+    success = publish_post_to_channel(target["text"], category=cat_code, is_breaking=True)
     if not success:
         return False, f"Ошибка отправки в канал {TELEGRAM_CHANNEL}"
 
@@ -742,6 +964,8 @@ def publish_queued_now(post_id: str) -> tuple[bool, str]:
                 p["status"] = "published"
                 p["published_at"] = now_iso
                 p["is_urgent"] = True
+                p["category"] = cat_code
+                p["text"] = strip_category_footer(p["text"])
                 break
         data["last_published_at"] = now_iso
 
@@ -762,8 +986,9 @@ def publish_queued_now(post_id: str) -> tuple[bool, str]:
 
         save_queue_data(data)
 
-    log.info("⚡ Пост из очереди [%s] досрочно опубликован в канал %s", post_id, TELEGRAM_CHANNEL)
-    return True, f"Пост опубликован в {TELEGRAM_CHANNEL}"
+    log.info("⚡ Пост из очереди [%s] (#dai breaking %s) досрочно опубликован в каналы %s, %s",
+             post_id, cat_code, TELEGRAM_CHANNEL, TELEGRAM_SECONDARY_CHANNEL)
+    return True, f"Пост опубликован в {TELEGRAM_CHANNEL} и {TELEGRAM_SECONDARY_CHANNEL}"
 
 
 def remove_from_queue(post_id: str) -> bool:
@@ -808,9 +1033,11 @@ def check_and_publish_next_due():
     post_text = due_post["text"]
     title = due_post.get("title", "")
     author_chat = due_post.get("chat_id")
+    cat_code = due_post.get("category") or extract_category_from_text(post_text) or detect_post_category(post_text, title)
 
-    log.info("⏰ Наступило время публикации поста [%s] в канал %s", post_id, TELEGRAM_CHANNEL)
-    success = publish_post_to_channel(post_text)
+    log.info("⏰ Наступило время публикации поста [%s] (#dai %s) в каналы %s, %s",
+             post_id, cat_code, TELEGRAM_CHANNEL, TELEGRAM_SECONDARY_CHANNEL)
+    success = publish_post_to_channel(post_text, category=cat_code, is_breaking=False)
 
     now_iso = datetime.now(timezone.utc).isoformat()
     with QUEUE_LOCK:
@@ -820,6 +1047,7 @@ def check_and_publish_next_due():
                 if success:
                     p["status"] = "published"
                     p["published_at"] = now_iso
+                    p["category"] = cat_code
                     data["last_published_at"] = now_iso
                     log.info("✅ Пост [%s] успешно опубликован по расписанию!", post_id)
                 else:
@@ -832,11 +1060,10 @@ def check_and_publish_next_due():
     if success and author_chat:
         try:
             preview = title or (post_text[:60] + "...")
-            channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
-            link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
+            channels_html = format_channels_html()
             send_message(
                 author_chat,
-                f"📢 <b>Пост из очереди опубликован в канале {link_html}!</b>\n\n"
+                f"📢 <b>Пост из очереди опубликован в каналах {channels_html}!</b>\n\n"
                 f"📰 <i>«{escape_html(preview)}»</i>",
                 disable_web_page_preview=True
             )
@@ -858,7 +1085,7 @@ def queue_worker_thread_func():
 
 def build_publication_menu(draft_id: str) -> tuple[str, dict]:
     """
-    Формирует текст и inline-клавиатуру для меню публикации с интерактивными кнопками выбора заголовка.
+    Формирует текст и inline-клавиатуру для меню публикации с интерактивными кнопками выбора заголовка и категории.
     """
     with QUEUE_LOCK:
         data = load_queue_data()
@@ -876,10 +1103,16 @@ def build_publication_menu(draft_id: str) -> tuple[str, dict]:
 
     options = draft.get("headline_options", [])
     selected_idx = draft.get("selected_headline_idx", 1)
+    raw_text = draft.get("text", "")
+    selected_cat = (
+        draft.get("category")
+        or extract_category_from_text(raw_text)
+        or detect_post_category(raw_text, draft.get("title", ""))
+    )
 
     keyboard = []
 
-    # Кнопки выбора заголовка (по 1 кнопке в ряд с реальным текстом каждого сгенерированного заголовка)
+    # 1. Кнопки выбора заголовка (по 1 кнопке в ряд с реальным текстом каждого сгенерированного заголовка)
     if options:
         for opt in options:
             idx = opt["idx"]
@@ -891,26 +1124,39 @@ def build_publication_menu(draft_id: str) -> tuple[str, dict]:
             btn_text = f"{prefix}: {short_t}"
             keyboard.append([{"text": btn_text, "callback_data": f"hl:{draft_id}:{idx}"}])
 
-    # Кнопки публикации и действий
+    # 2. Кнопки выбора категории (cat1..cat6, по 2 кнопки в ряд — 3 ряда)
+    cat_codes = ["cat1", "cat2", "cat3", "cat4", "cat5", "cat6"]
+    for i in range(0, len(cat_codes), 2):
+        row = []
+        for c_code in cat_codes[i:i + 2]:
+            c_info = POST_CATEGORIES[c_code]
+            is_cat_active = (c_code == selected_cat)
+            btn_base = c_info.get("btn", c_code)
+            c_label = f"✅ {btn_base}" if is_cat_active else btn_base
+            row.append({"text": c_label, "callback_data": f"cat:{draft_id}:{c_code}"})
+        keyboard.append(row)
+
+    # 3. Кнопки публикации и действий
     keyboard.append([
-        {"text": "📅 В очередь (раз в 8ч)", "callback_data": f"pub_q:{draft_id}"},
-        {"text": "⚡ Срочно (сейчас)", "callback_data": f"pub_now:{draft_id}"}
+        {"text": f"📅 В очередь (#dai {selected_cat})", "callback_data": f"pub_q:{draft_id}"},
+        {"text": f"⚡ Срочно (#dai breaking {selected_cat})", "callback_data": f"pub_now:{draft_id}"}
     ])
     keyboard.append([
         {"text": "⭐ В избранное (на потом)", "callback_data": f"pub_fav:{draft_id}"},
         {"text": "❌ Не публиковать", "callback_data": f"pub_c:{draft_id}"}
     ])
 
-    channel_link = f"https://t.me/{TELEGRAM_CHANNEL.lstrip('@')}" if TELEGRAM_CHANNEL.startswith("@") else ""
-    link_html = f"<a href='{channel_link}'>{TELEGRAM_CHANNEL}</a>" if channel_link else f"<b>{TELEGRAM_CHANNEL}</b>"
+    channels_html = format_channels_html()
+    cat_meta = POST_CATEGORIES.get(selected_cat, POST_CATEGORIES["cat1"])
+    cat_title = cat_meta.get("title") or cat_meta.get("label") or selected_cat
 
-    # Извлекаем чистый текст поста (без блока вариантов заголовков)
-    clean_post_text = strip_headline_options_block(draft.get("text", "")).strip()
-    clean_post_html = markdown_to_telegram_html(clean_post_text)
+    # Извлекаем чистый текст поста (без блока вариантов заголовков и без catX)
+    clean_primary_post = strip_category_footer(strip_headline_options_block(raw_text)).strip()
+    clean_post_html = markdown_to_telegram_html(clean_primary_post)
 
     curr_opt = next((o for o in options if o.get("idx") == selected_idx), None)
     cat_lbl = f" [{curr_opt.get('category')}]" if (curr_opt and curr_opt.get("category")) else ""
-    active_headline = (curr_opt.get("title") if curr_opt else "") or extract_current_body_headline(draft.get("text", ""))
+    active_headline = (curr_opt.get("title") if curr_opt else "") or extract_current_body_headline(raw_text)
 
     lines = []
     if options:
@@ -927,30 +1173,39 @@ def build_publication_menu(draft_id: str) -> tuple[str, dict]:
             else:
                 lines.append(f"{idx}️⃣<b>{cat_badge}:</b> {escape_html(title_text)}")
         lines.append("")
-        lines.append(f"📝 <b>Итоговый текст поста для {link_html}:</b>")
+        lines.append(f"🏷 <b>Рубрика для {TELEGRAM_SECONDARY_CHANNEL}:</b> <b>{escape_html(cat_title)}</b> (<code>#dai {selected_cat}</code>)")
+        lines.append(f"📝 <b>Итоговый текст поста для {channels_html}:</b>")
     else:
         if active_headline:
             lines.append(f"📌 <b>Заголовок поста:</b> <b>«{escape_html(active_headline)}»</b>\n")
-        lines.append(f"📝 <b>Текст для публикации в канале {link_html}:</b>")
+        lines.append(f"🏷 <b>Рубрика для {TELEGRAM_SECONDARY_CHANNEL}:</b> <b>{escape_html(cat_title)}</b> (<code>#dai {selected_cat}</code>)")
+        lines.append(f"📝 <b>Текст для публикации в каналах {channels_html}:</b>")
     lines.append("─────────────────────────")
 
     footer_text = (
         f"─────────────────────────\n"
-        f"📢 <b>Опубликовать этот пост в канале {link_html}?</b>\n"
+        f"📢 <b>Опубликовать этот пост в каналах {channels_html}?</b>\n"
+        f"• <b>{TELEGRAM_CHANNEL}:</b> выйдет чистый пост (без <code>cat1..cat6</code> и <code>breaking</code>)\n"
+        f"• <b>{TELEGRAM_SECONDARY_CHANNEL}:</b> внизу добавится <code>#dai {selected_cat}</code> (при ⚡ Срочно: <code>#dai breaking {selected_cat}</code>)\n"
         f"• 📅 <b>В очередь:</b> выйдет <i>{time_hint}</i> (шаг {PUBLISH_INTERVAL_HOURS}ч)\n"
         f"• ⚡ <b>Срочно:</b> мгновенная публикация прямо сейчас\n"
         f"• ⭐ <b>В избранное:</b> отложить на потом | ❌ <b>Не публиковать</b>"
     )
     if options:
-        footer_text += "\n<i>(нажмите кнопку с нужным заголовком 1️⃣–4️⃣ ниже, чтобы заменить его в посте)</i>"
+        footer_text += "\n<i>(кнопками ниже можно сменить заголовок 1️⃣–4️⃣ или категорию cat1–cat6 перед отправкой)</i>"
+    else:
+        footer_text += "\n<i>(кнопками ниже можно сменить категорию cat1–cat6 перед отправкой)</i>"
 
     available_chars = 4050 - sum(len(l) for l in lines) - len(footer_text) - 30
     if len(clean_post_html) > available_chars:
-        cut_text = clean_post_text[:max(200, available_chars - 60)]
+        cut_text = clean_primary_post[:max(200, available_chars - 70)]
         p = max(cut_text.rfind('.\n'), cut_text.rfind('. '), cut_text.rfind('\n\n'))
         if p > int(available_chars * 0.5):
             cut_text = cut_text[:p + 1]
-        post_preview = markdown_to_telegram_html(cut_text) + "\n\n<i>... [полный текст поста в сообщении выше ⬆️]</i>"
+        post_preview = (
+            markdown_to_telegram_html(cut_text)
+            + "\n\n<i>... [полный текст поста в сообщении выше ⬆️]</i>"
+        )
     else:
         post_preview = clean_post_html
 
@@ -991,8 +1246,10 @@ def handle_headline_selection(callback_query: dict, draft_id: str, opt_idx: int)
             return
 
         chosen_title = chosen_opt.get("title", "")
-        new_text = apply_chosen_headline(draft["text"], chosen_title)
+        cat_code = draft.get("category") or extract_category_from_text(draft["text"]) or detect_post_category(draft["text"], chosen_title)
+        new_text = strip_category_footer(apply_chosen_headline(strip_category_footer(draft["text"]), chosen_title))
         draft["text"] = new_text
+        draft["category"] = cat_code
         draft["selected_headline_idx"] = opt_idx
         draft["title"] = chosen_title[:100]
         post_msg_id = draft.get("post_msg_id")
@@ -1001,7 +1258,7 @@ def handle_headline_selection(callback_query: dict, draft_id: str, opt_idx: int)
     # 1. Обновляем отдельное сообщение с текстом черновика в чате (если известно post_msg_id)
     if post_msg_id:
         try:
-            clean_updated = strip_headline_options_block(new_text)
+            clean_updated = strip_category_footer(strip_headline_options_block(new_text))
             html_updated = markdown_to_telegram_html(clean_updated)
             cut_html = html_updated if len(html_updated) <= 4090 else html_updated[:4085] + "…"
             edit_message_text(chat_id, post_msg_id, cut_html, parse_mode="HTML", disable_web_page_preview=True)
@@ -1016,6 +1273,37 @@ def handle_headline_selection(callback_query: dict, draft_id: str, opt_idx: int)
         log.warning("⚠️ Не удалось обновить меню публикации: %s", e)
 
     answer_callback_query(callback_query["id"], f"✅ Выбран заголовок {opt_idx}!")
+
+
+def handle_category_selection(callback_query: dict, draft_id: str, cat_code: str):
+    """Обрабатывает выбор категории поста по inline-кнопкам cat1..cat6 (локально, без облака)."""
+    if cat_code not in POST_CATEGORIES:
+        answer_callback_query(callback_query["id"], f"❌ Неизвестная категория: {cat_code}", show_alert=True)
+        return
+
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    menu_message_id = callback_query["message"]["message_id"]
+
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        draft = data.get("drafts", {}).get(draft_id)
+        if not draft:
+            answer_callback_query(callback_query["id"], "❌ Черновик устарел или не найден.", show_alert=True)
+            return
+
+        draft["category"] = cat_code
+        draft["text"] = strip_category_footer(draft["text"])
+        save_queue_data(data)
+
+    # Обновляем интерактивное меню
+    text_msg, reply_markup = build_publication_menu(draft_id)
+    try:
+        edit_message_text(chat_id, menu_message_id, text_msg, reply_markup=reply_markup, disable_web_page_preview=True)
+    except Exception as e:
+        log.warning("⚠️ Не удалось обновить меню публикации: %s", e)
+
+    cat_btn_name = POST_CATEGORIES[cat_code]["btn"]
+    answer_callback_query(callback_query["id"], f"✅ Категория для {TELEGRAM_SECONDARY_CHANNEL}: {cat_btn_name}")
 
 
 def handle_publish_queue(callback_query: dict, draft_id: str):
@@ -1237,10 +1525,16 @@ def add_draft_to_favorites(draft_id: str) -> tuple[bool, str]:
         if not draft:
             return False, "Черновик поста не найден или срок его действия истёк."
 
+        raw_text = draft["text"]
+        title = draft.get("title", "")
+        cat_code = draft.get("category") or extract_category_from_text(raw_text) or detect_post_category(raw_text, title)
+        final_text = strip_category_footer(raw_text)
+
         fav_item = {
             "id": draft_id,
-            "title": draft.get("title", ""),
-            "text": draft["text"],
+            "title": title,
+            "text": final_text,
+            "category": cat_code,
             "created_at": draft.get("created_at", now.isoformat()),
             "saved_at": now.isoformat(),
             "chat_id": draft.get("chat_id", "")
@@ -1250,7 +1544,7 @@ def add_draft_to_favorites(draft_id: str) -> tuple[bool, str]:
         data.get("drafts", {}).pop(draft_id, None)
         save_queue_data(data)
 
-    log.info("⭐ Пост [%s] сохранён в Избранное", draft_id)
+    log.info("⭐ Пост [%s] (%s) сохранён в Избранное", draft_id, cat_code)
     return True, "Пост сохранён в Избранное"
 
 
@@ -1268,11 +1562,16 @@ def move_favorite_to_queue(fav_id: str) -> tuple[bool, str, Optional[datetime]]:
 
         next_time = calculate_next_publish_time(data)
         now = datetime.now(timezone.utc)
+        raw_text = fav["text"]
+        title = fav.get("title", "")
+        cat_code = fav.get("category") or extract_category_from_text(raw_text) or detect_post_category(raw_text, title)
+        final_text = strip_category_footer(raw_text)
 
         data.setdefault("queue", []).append({
             "id": fav["id"],
-            "title": fav.get("title", ""),
-            "text": fav["text"],
+            "title": title,
+            "text": final_text,
+            "category": cat_code,
             "status": "pending",
             "is_urgent": False,
             "created_at": fav.get("created_at", now.isoformat()),
@@ -1283,12 +1582,12 @@ def move_favorite_to_queue(fav_id: str) -> tuple[bool, str, Optional[datetime]]:
         data["favorites"] = [f for f in data.get("favorites", []) if f.get("id") != fav_id]
         save_queue_data(data)
 
-    log.info("📅 Пост из Избранного [%s] отправлен в очередь на %s", fav_id, next_time.isoformat())
+    log.info("📅 Пост из Избранного [%s] (%s) отправлен в очередь на %s", fav_id, cat_code, next_time.isoformat())
     return True, "Пост перенесён из Избранного в очередь", next_time
 
 
 def publish_favorite_now(fav_id: str) -> tuple[bool, str]:
-    """Публикует пост из Избранного срочно прямо сейчас."""
+    """Публикует пост из Избранного срочно прямо сейчас (в @noticia666 с '#dai breaking catX')."""
     with QUEUE_LOCK:
         data = load_queue_data()
         fav = None
@@ -1298,8 +1597,10 @@ def publish_favorite_now(fav_id: str) -> tuple[bool, str]:
                 break
         if not fav:
             return False, "Пост не найден в Избранном."
+        cat_code = fav.get("category") or extract_category_from_text(fav["text"]) or detect_post_category(fav["text"], fav.get("title", ""))
+        clean_text = strip_category_footer(fav["text"])
 
-    success = publish_post_to_channel(fav["text"])
+    success = publish_post_to_channel(clean_text, category=cat_code, is_breaking=True)
     if not success:
         return False, f"Ошибка отправки в канал {TELEGRAM_CHANNEL}"
 
@@ -1312,7 +1613,8 @@ def publish_favorite_now(fav_id: str) -> tuple[bool, str]:
         data.setdefault("queue", []).append({
             "id": fav["id"],
             "title": fav.get("title", ""),
-            "text": fav["text"],
+            "text": clean_text,
+            "category": cat_code,
             "status": "published",
             "is_urgent": True,
             "created_at": fav.get("created_at", now_iso),
@@ -1339,8 +1641,9 @@ def publish_favorite_now(fav_id: str) -> tuple[bool, str]:
 
         save_queue_data(data)
 
-    log.info("⚡ Пост из Избранного [%s] опубликован в канал %s", fav_id, TELEGRAM_CHANNEL)
-    return True, f"Пост опубликован в {TELEGRAM_CHANNEL}"
+    log.info("⚡ Пост из Избранного [%s] (breaking %s) опубликован в каналы %s, %s",
+             fav_id, cat_code, TELEGRAM_CHANNEL, TELEGRAM_SECONDARY_CHANNEL)
+    return True, f"Пост опубликован в {TELEGRAM_CHANNEL} и {TELEGRAM_SECONDARY_CHANNEL}"
 
 
 def remove_from_favorites(fav_id: str) -> bool:
@@ -1792,32 +2095,93 @@ async def _query_rag_async(
             # Извлекаем ссылки или названия источников из references
             cited_links = []
             ref_url_map: Dict[int, str] = {}
+            answer_raw = result.answer or ""
+            # Находим номера цитат [1], [2, 3], реально использованные в тексте ответа
+            cited_nums_in_answer = {
+                int(x)
+                for m_cit in re.finditer(r'\[([0-9,\s\-–—]+)\]', answer_raw)
+                for x in re.findall(r'\d+', m_cit.group(1))
+            }
+            query_keywords = {
+                w.lower()
+                for w in re.findall(r'[A-Za-zА-Яа-яЁёÁÉÍÓÚÑáéíóúñÜü0-9]{4,}', f"{prompt} {answer_raw}")
+            }
+
             if hasattr(result, "references") and result.references:
                 for idx_ref, ref in enumerate(result.references, 1):
                     cited_text = getattr(ref, "cited_text", "") or ""
-                    cit_num = getattr(ref, "citation_number", None) or idx_ref
-                    # Сначала ищем явный Original URL из разметки корпуса
-                    orig_urls = re.findall(
-                        r'Original\s+URL[:\s*]*\[?(https?://[^\s)\]"\'>]+)',
-                        cited_text,
-                        flags=re.IGNORECASE
-                    )
+                    cit_num = int(getattr(ref, "citation_number", None) or idx_ref)
+
+                    # Если один чанк NotebookLM захватил 2 соседние статьи через '---' или '### ',
+                    # выбираем только тот подблок статьи, который максимально совпадает по ключевым словам с запросом и ответом
+                    sub_blocks = [
+                        b.strip()
+                        for b in re.split(r'(?:\n\s*---+\s*\n|(?=###\s+\d+\.)|(?=\bArticle\s+ID\s*:))', cited_text)
+                        if b and b.strip()
+                    ]
+                    if len(sub_blocks) > 1 and query_keywords:
+                        def _score_subblock(blk: str) -> int:
+                            blk_words = {
+                                w.lower()
+                                for w in re.findall(r'[A-Za-zА-Яа-яЁёÁÉÍÓÚÑáéíóúñÜü0-9]{4,}', blk)
+                            }
+                            return len(blk_words & query_keywords)
+                        best_blocks = sorted(sub_blocks, key=_score_subblock, reverse=True)
+                        target_texts = [best_blocks[0], cited_text]
+                    else:
+                        target_texts = [cited_text]
+
+                    orig_urls = []
+                    for t_chunk in target_texts:
+                        # 0. Самый надежный способ: достаем точный URL из локальной БД по Article ID
+                        art_ids = re.findall(r'Article\s+ID[:\s*]*(\d+)', t_chunk, flags=re.IGNORECASE)
+                        for aid_str in art_ids:
+                            db_u = lookup_article_url_by_id(int(aid_str))
+                            if db_u and is_valid_article_url(db_u) and db_u not in orig_urls:
+                                orig_urls.append(db_u)
+                                break
+                        if orig_urls:
+                            break
+
+                        # 1. Ищем явный Original URL из разметки корпуса
+                        found_orig = re.findall(
+                            r'Original\s+URL[:\s*]*\[?(https?://[^\s)\]"\'>]+)',
+                            t_chunk,
+                            flags=re.IGNORECASE
+                        )
+                        for fo in found_orig:
+                            cu = sanitize_article_url(fo)
+                            if cu and is_valid_article_url(cu) and cu not in orig_urls:
+                                orig_urls.append(cu)
+                                break
+                        if orig_urls:
+                            break
+
                     if not orig_urls:
                         raw_urls = re.findall(r'https?://[^\s)\]"\'>]+', cited_text)
-                        orig_urls = [
-                            re.sub(r'Original$', '', u).rstrip('.,;)')
-                            for u in raw_urls
-                            if not re.search(r'(/rss/?(?:Original)?$|/feed/?$|\.xml$|\.rss$)', u, re.IGNORECASE)
-                        ]
+                        for ru in raw_urls:
+                            cu = sanitize_article_url(ru)
+                            if cu and is_valid_article_url(cu) and cu not in orig_urls:
+                                orig_urls.append(cu)
+                                break
+
                     for u in orig_urls:
-                        clean_u = re.sub(r'Original$', '', u).rstrip('.,;)')
-                        if clean_u and not re.search(r'(/rss/?$|/feed/?$|\.xml$|\.rss$)', clean_u, re.IGNORECASE):
+                        clean_u = sanitize_article_url(u)
+                        if clean_u and is_valid_article_url(clean_u):
                             if cit_num not in ref_url_map:
-                                ref_url_map[int(cit_num)] = clean_u
-                            if clean_u not in cited_links:
+                                ref_url_map[cit_num] = clean_u
+                            # Добавляем в общий список ссылок только те источники, которые реально процитированы [N] в ответе
+                            if (not cited_nums_in_answer or cit_num in cited_nums_in_answer) and clean_u not in cited_links:
                                 cited_links.append(clean_u)
 
             answer_text = result.answer
+            # Очищаем все прямые URL внутри самого ответа RAG (чтобы карточки 1..10 сразу имели чистые ссылки)
+            if answer_text:
+                answer_text = re.sub(
+                    r'https?://[^\s)\]"\'>]+',
+                    lambda m: sanitize_article_url(m.group(0)),
+                    answer_text
+                )
             # Если в ответе есть строки "- Источники: ... [N]" без прямой http-ссылки, подставляем точный URL из ref_url_map
             if ref_url_map and answer_text:
                 out_lines = []
@@ -1878,14 +2242,312 @@ POST_STYLES = {
 
 # =================== ПОСТ-ОБРАБОТКА ЧЕРЕЗ ANYMODEL LLM ===================
 
+MEDIA_DOMAIN_NAMES: Dict[str, str] = {
+    "elpais.com": "El País",
+    "cincodias.elpais.com": "Cinco Días",
+    "elmundo.es": "El Mundo",
+    "larazon.es": "La Razón",
+    "abc.es": "ABC",
+    "lavanguardia.com": "La Vanguardia",
+    "elconfidencial.com": "El Confidencial",
+    "eldiario.es": "elDiario.es",
+    "20minutos.es": "20minutos",
+    "eldebate.com": "El Debate",
+    "antena3.com": "Antena 3",
+    "rtve.es": "RTVE",
+    "telecinco.es": "Telecinco",
+    "lasexta.com": "laSexta",
+    "cadenaser.com": "Cadena SER",
+    "cope.es": "COPE",
+    "ondacero.es": "Onda Cero",
+    "eleconomista.es": "elEconomista",
+    "expansion.com": "Expansión",
+    "idealista.com": "Idealista",
+    "fotocasa.es": "Fotocasa",
+    "infobae.com": "Infobae",
+    "theobjective.com": "The Objective",
+    "okdiario.com": "OKDIARIO",
+    "vozpopuli.com": "Vozpópuli",
+    "publico.es": "Público",
+    "huffingtonpost.es": "El HuffPost",
+    "europapress.es": "Europa Press",
+    "efe.com": "EFE",
+    "boe.es": "BOE",
+    "dgt.es": "DGT",
+    "aemet.es": "AEMET",
+    "seg-social.es": "Seguridad Social",
+    "agenciatributaria.es": "Agencia Tributaria",
+    "levante-emv.com": "Levante-EMV",
+    "diariosur.es": "Diario Sur",
+    "diariodemallorca.es": "Diario de Mallorca",
+    "diariodenavarra.es": "Diario de Navarra",
+    "diariodeibiza.es": "Diario de Ibiza",
+    "diariodeleon.es": "Diario de León",
+    "laprovincia.es": "La Provincia",
+    "canarias7.es": "Canarias7",
+    "lne.es": "La Nueva España",
+    "elperiodicodearagon.com": "El Periódico de Aragón",
+    "elperiodico.com": "El Periódico",
+    "heraldo.es": "Heraldo",
+    "elcorreo.com": "El Correo",
+    "diariovasco.com": "El Diario Vasco",
+    "lavozdegalicia.es": "La Voz de Galicia",
+    "farodevigo.es": "Faro de Vigo",
+    "ultimahora.es": "Última Hora",
+    "cronicaglobal.elespanol.com": "Crónica Global",
+    "elespanol.com": "El Español",
+    "informacion.es": "Información",
+    "lasprovincias.es": "Las Provincias",
+    "laverdad.es": "La Verdad",
+    "ideal.es": "Ideal",
+    "surinenglish.com": "SUR in English",
+    "theolivepress.es": "The Olive Press",
+    "majorcadailybulletin.com": "Majorca Daily Bulletin",
+    "ara.cat": "Ara",
+    "naciodigital.cat": "NacióDigital",
+    "vilaweb.cat": "VilaWeb",
+    "eltemps.es": "Eltiempo.es",
+    "eltiempo.es": "Eltiempo.es",
+}
 
-def ensure_post_integrity(post_text: str, links: Optional[List[str]] = None, max_chars: int = 3500) -> str:
+
+def lookup_article_url_by_id(article_id: int) -> Optional[str]:
+    """Возвращает точный оригинальный URL статьи из локальной БД baza.db по её ID."""
+    if not article_id or not os.path.exists(DB_FILE):
+        return None
+    try:
+        conn = sqlite3.connect(DB_FILE, timeout=2.0)
+        row = conn.execute("SELECT link FROM news WHERE id = ?", (int(article_id),)).fetchone()
+        conn.close()
+        if row and row[0]:
+            return str(row[0]).strip()
+    except Exception:
+        pass
+    return None
+
+
+def _resolve_url_in_db(candidate_url: str) -> Optional[str]:
+    """
+    Проверяет URL по индексу таблицы news(link) в baza.db:
+    - если точный URL есть в базе — возвращает его;
+    - если к URL прилип хвост ('.../3462300/La') или обрезан конец ('.htm' вместо '.html') —
+      находит и возвращает 100% точный оригинальный URL из базы.
+    """
+    if not candidate_url or len(candidate_url) < 22 or not os.path.exists(DB_FILE):
+        return None
+    try:
+        conn = sqlite3.connect(DB_FILE, timeout=2.0)
+        try:
+            # 1. Быстрая проверка точного совпадения по UNIQUE-индексу
+            row = conn.execute("SELECT link FROM news WHERE link = ? LIMIT 1", (candidate_url,)).fetchone()
+            if row and row[0]:
+                return str(row[0]).strip()
+
+            # 2. Поиск по префиксу (без последних 1..15 символов на случай прилипшего слова или обрезанного .htm)
+            prefix = re.sub(r'/[A-ZÁÉÍÓÚÑÜ][A-Za-zÁÉÍÓÚÑáéíóúñÜü0-9_:-]*$', '/', candidate_url)
+            prefix = re.sub(r'\.htm$', '.html', prefix)
+            search_pref = prefix[:max(20, len(prefix) - 6)]
+            rows = conn.execute(
+                "SELECT link FROM news WHERE link >= ? AND link < ? LIMIT 10",
+                (search_pref, search_pref + "\uffff")
+            ).fetchall()
+            for (db_link,) in rows:
+                if not db_link:
+                    continue
+                # Если candidate_url начинается с db_link (к нему прилип хвост типа 'La' или 'TÍTULO:')
+                # или db_link начинается с candidate_url (обрезан конец типа '.htm' вместо '.html')
+                if candidate_url.startswith(db_link) or db_link.startswith(candidate_url) or db_link.startswith(prefix):
+                    return str(db_link).strip()
+        finally:
+            conn.close()
+    except Exception:
+        pass
+    return None
+
+
+def is_valid_article_url(url: str) -> bool:
+    """
+    Проверяет, что URL ведёт на конкретную новостную статью, а не на главную страницу домена
+    (например, 'https://elpais.com' или 'https://elpais.com/') и не на RSS-ленту.
+    """
+    if not url or not isinstance(url, str):
+        return False
+    u = url.strip()
+    m = re.match(r'^https?://[^/?#]+(/[^\s?#]*)?', u, flags=re.IGNORECASE)
+    if not m:
+        return False
+    path = (m.group(1) or "").strip("/")
+    # Отсекаем голые домены без пути к статье или слишком короткие заглушки
+    if len(path) < 8:
+        return False
+    if re.search(r'(^|/)(rss|feed|portada|home|index\.html?)(/|$)|\.xml$|\.rss$', path, flags=re.IGNORECASE):
+        return False
+    # У настоящей статьи в пути есть либо дефис в slug, либо цифры (дата/ID), либо несколько сегментов '/'
+    if "-" not in path and not re.search(r'\d', path) and "/" not in path:
+        return False
+    return True
+
+
+def sanitize_article_url(url: str) -> str:
+    """
+    Очищает URL от мусора, прилипающего из склеенных строк cited_text в NotebookLM
+    (например: '.htmlTÍTULO:', '.htmlRubén', '.htmlLa', '...-3462300/La', 'Original'),
+    и сверяет результат с локальной базой baza.db для 100% точности ссылки.
+    """
+    if not url or not isinstance(url, str):
+        return ""
+    u = url.strip().rstrip(").,;\"'>]")
+
+    # 1. Если в URL есть .shtml / .html / .htm / .php / .aspx и сразу после него прилипло слово с заглавной буквы или двоеточие
+    #    Важно: порядок shtml -> html -> htm и проверка (?=[A-ZА-ЯЁÁÉÍÓÚÑÜ:]), чтобы '.html' НИКОГДА не превращался в '.htm'!
+    u = re.sub(
+        r'(\.(?:shtml|html|htm|php|aspx|ece))(?=[A-ZА-ЯЁÁÉÍÓÚÑÜ:])[A-Za-zА-Яа-яЁёÁÉÍÓÚÑáéíóúñÜü0-9_:-]+$',
+        r'\1',
+        u
+    )
+    # 2. Срезаем прилипшие служебные маркеры в конце любого URL
+    u = re.sub(r'(?:T[ÍI]TULO|RESUMEN|FUENTE|Original|User|Article)\b[:\s]*.*$', '', u, flags=re.IGNORECASE)
+    # 3. Если после слэша или строчного slug/цифры в конце длинного пути прилипло слово с заглавной буквы
+    #    (например, 'https://www.moncloa.com/2026/11/05/competencias-xunta-galicia-aerodromos-3462300/La')
+    if u.count("/") >= 4:
+        u = re.sub(r'/[A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]{1,15}:?$', '/', u)
+        u = re.sub(r'(?<=[a-z0-9])[A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]{1,15}:?$', '', u)
+
+    u = u.rstrip(").,;:\"'>]")
+
+    # 4. Сверяем с локальной базой baza.db (восстанавливает обрезанный '.htm' -> '.html' и убирает любой прилипший хвост)
+    db_exact = _resolve_url_in_db(u)
+    if db_exact:
+        return db_exact
+
+    return u
+
+
+def extract_source_domain_label(url: str) -> str:
+    """Возвращает красивое название СМИ по URL (например, 'El País', 'La Razón', 'Antena 3')."""
+    if not url:
+        return "Источник"
+    m = re.match(r'^https?://(?:www\.|m\.)?([^/?#]+)', url.strip(), flags=re.IGNORECASE)
+    if not m:
+        return "Источник"
+    host = m.group(1).lower()
+    if host in MEDIA_DOMAIN_NAMES:
+        return MEDIA_DOMAIN_NAMES[host]
+    for dom, label in MEDIA_DOMAIN_NAMES.items():
+        if host.endswith("." + dom):
+            return label
+    # Генерируем читаемое имя из домена первого уровня (без .es/.com)
+    parts = host.split(".")
+    core = parts[-2] if len(parts) >= 2 else parts[0]
+    return core.replace("-", " ").capitalize()
+
+
+def visible_post_length(text: str) -> int:
+    """Возвращает реальную видимую длину текста в Telegram (без учета скрытых URL внутри [текст](url) и **)."""
+    if not text:
+        return 0
+    vis = re.sub(r'\[([^\]]+)\]\((https?://[^\)\s]+)\)', r'\1', text)
+    vis = vis.replace("**", "").replace("__", "")
+    return len(vis)
+
+
+def prettify_post_links(body_text: str, allowed_urls: Optional[List[str]] = None) -> str:
+    """
+    1. Очищает все URL внутри существующих Markdown-ссылок [текст](url) от мусора (.htmlTÍTULO: и т.д.)
+       и удаляет битые ссылки на корень домена (вроде https://elpais.com/).
+    2. Схлопывает вертикальные списки голых ссылок вида '• https://...' в компактную строку
+       '🔗 Источники: [La Razón](url1) • [El País](url2) • [Antena 3](url3)' (максимум 5 уникальных СМИ).
+    3. Превращает любые оставшиеся голые ссылки https://... в аккуратные спрятанные ссылки [Название СМИ](url).
+    """
+    if not body_text:
+        return ""
+
+    allowed_set = {sanitize_article_url(u) for u in (allowed_urls or []) if u}
+
+    # 1. Чистим URL внутри уже оформленных [текст](url)
+    def _fix_md_link(m: re.Match) -> str:
+        anchor = m.group(1).strip()
+        clean_u = sanitize_article_url(m.group(2))
+        if not clean_u or not is_valid_article_url(clean_u):
+            return ""
+        if allowed_set and clean_u not in allowed_set:
+            return ""
+        if anchor.startswith("http"):
+            anchor = extract_source_domain_label(clean_u)
+        return f"[{anchor}]({clean_u})"
+
+    body_text = re.sub(r'\[([^\]]+)\]\((https?://[^\)\s]+)\)', _fix_md_link, body_text)
+
+    # 2. Если есть блок '🔗 Источники:' с вертикальным списком голых или оформленных ссылок — собираем его в одну красивую строку
+    src_block_re = re.compile(
+        r'(?:🔗\s*)?(?:\*\*)?Источники?(?:\*\*)?[:\s]*\n+(?:[ \t]*[•\-*]\s*https?://[^\n]+\n?)+',
+        flags=re.IGNORECASE
+    )
+
+    def _collapse_sources_block(m: re.Match) -> str:
+        block_str = m.group(0)
+        raw_urls = re.findall(r'https?://[^\s)\]"\'>]+', block_str)
+        pretty_items = []
+        seen_labels = set()
+        for ru in raw_urls:
+            cu = sanitize_article_url(ru)
+            if not cu or not is_valid_article_url(cu):
+                continue
+            if allowed_set and cu not in allowed_set:
+                continue
+            lbl = extract_source_domain_label(cu)
+            if lbl not in seen_labels:
+                seen_labels.add(lbl)
+                pretty_items.append(f"[{lbl}]({cu})")
+            if len(pretty_items) >= 5:
+                break
+        if not pretty_items:
+            return ""
+        prefix = "🔗 Источник: " if len(pretty_items) == 1 else "🔗 Источники: "
+        return prefix + " • ".join(pretty_items) + "\n"
+
+    body_text = src_block_re.sub(_collapse_sources_block, body_text)
+
+    # 3. Заменяем оставшиеся голые URL (не внутри скобок (...)) на спрятанные ссылки [Название СМИ](url)
+    def _replace_bare_url(m: re.Match) -> str:
+        raw_u = m.group(1)
+        clean_u = sanitize_article_url(raw_u)
+        if not clean_u or not is_valid_article_url(clean_u):
+            return ""
+        if allowed_set and clean_u not in allowed_set:
+            return ""
+        label = extract_source_domain_label(clean_u)
+        return f"[{label}]({clean_u})"
+
+    body_text = re.sub(r'(?<!\()(?<!\[)(https?://[^\s)\]"\'>]+)', _replace_bare_url, body_text)
+
+    # 4. Приводим в порядок однострочные блоки '🔗 Источник(и): ...' после удаления пустых/корневых ссылок
+    def _clean_inline_sources_line(m: re.Match) -> str:
+        line_content = m.group(1)
+        valid_md_links = re.findall(r'\[[^\]]+\]\(https?://[^\)\s]+\)', line_content)
+        if not valid_md_links:
+            return ""
+        prefix = "🔗 Источник: " if len(valid_md_links) == 1 else "🔗 Источники: "
+        return prefix + " • ".join(valid_md_links)
+
+    body_text = re.sub(
+        r'^[ \t]*🔗\s*(?:\*\*)?Источники?(?:\*\*)?[:\s]*(.+)$',
+        _clean_inline_sources_line,
+        body_text,
+        flags=re.IGNORECASE | re.MULTILINE
+    )
+
+    # Убираем пустые маркеры списка, если в конце был оборванный URL
+    body_text = re.sub(r'\n[ \t]*[•\-]\s*(?=\n|$)', '', body_text)
+    body_text = re.sub(r'\n{3,}', '\n\n', body_text)
+    return body_text.strip()
+
+
+def ensure_post_integrity(post_text: str, links: Optional[List[str]] = None, max_chars: int = 2200) -> str:
     """
     1. Очищает одиночные звёздочки (*), оставляя только **жирный шрифт**.
-    2. Гарантирует наличие оригинальных ссылок на первоисточники в тексте поста.
-       Если модель опустила ссылку, функция аккуратно вставляет блок '🔗 Источник: URL' перед хэштегами.
-    3. Ограничивает объем знаков САМОГО ТЕЛА ПОСТА (без учета служебного блока вариантов заголовка),
-       никогда не обрезая на цифрах нумерованного списка ('📌 4.').
+    2. Очищает ссылки от прилипших слов (.htmlTÍTULO: и т.п.) и прячет ВСЕ ссылки под красивые названия СМИ [El País](url).
+    3. Гарантирует, что пост ВСЕГДА помещается ровно в 1 стандартное сообщение Telegram (без разбиения на 2 поста).
     """
     if not post_text:
         return ""
@@ -1893,8 +2555,7 @@ def ensure_post_integrity(post_text: str, links: Optional[List[str]] = None, max
     # 0. Очищаем одиночные звёздочки (*), сохраняя **жирный**
     post_text = clean_asterisks_formatting(post_text)
 
-    # Отделяем служебный блок вариантов заголовка (💡 ВАРИАНТЫ ЗАГОЛОВКА: ... ---) от тела поста,
-    # чтобы он НЕ съедал лимит символов max_chars и не приводил к обрезанию 4-й и 5-й новостей!
+    # Отделяем служебный блок вариантов заголовка (💡 ВАРИАНТЫ ЗАГОЛОВКА: ... ---) от тела поста
     m_split = re.search(r'^(.*?)\n\s*[-_*=]{3,}\s*\n(.*)$', post_text, flags=re.DOTALL)
     if m_split and "ВАРИАНТ" in m_split.group(1).upper():
         head_block = m_split.group(1).strip()
@@ -1903,53 +2564,77 @@ def ensure_post_integrity(post_text: str, links: Optional[List[str]] = None, max
         head_block = ""
         body_text = post_text.strip()
 
-    # 1. Извлекаем и фильтруем ссылки (отбрасываем битые /rss/Original)
+    # 1. Извлекаем и очищаем переданные эталонные ссылки
     valid_links = []
     if links:
         for lk in links:
             if isinstance(lk, str) and lk.strip().startswith("http"):
-                clean_lk = re.sub(r'Original$', '', lk.strip()).rstrip(").,;")
-                if (
-                    clean_lk
-                    and not re.search(r'(/rss/?$|/feed/?$|\.xml$|\.rss$)', clean_lk, re.IGNORECASE)
-                    and clean_lk not in valid_links
-                ):
+                clean_lk = sanitize_article_url(lk)
+                if clean_lk and is_valid_article_url(clean_lk) and clean_lk not in valid_links:
                     valid_links.append(clean_lk)
 
-    missing = [lk for lk in valid_links if lk not in body_text]
-    if missing:
-        if len(missing) == 1:
-            lbl = f"\n\n🔗 Источник: {missing[0]}"
-        else:
-            lbl = "\n\n🔗 Источники:\n" + "\n".join(f"• {lk}" for lk in missing[:len(valid_links)])
+    # 2. Приводим все ссылки внутри текста поста к аккуратному спрятанному виду [Название СМИ](url)
+    #    и отсекаем любые галлюцинированные/чужие ссылки, если известен точный список valid_links
+    body_text = prettify_post_links(body_text, allowed_urls=valid_links if valid_links else None)
 
-        # Вставляем перед хэштегами (#...) или в конец
-        tag_match = re.search(r'(\n+(?:#[\w\d_]+\s*)+)$', body_text)
-        if tag_match:
-            pos = tag_match.start(1)
-            body_text = body_text[:pos].rstrip() + lbl + "\n\n" + body_text[pos:].lstrip()
-        else:
-            body_text = body_text.rstrip() + lbl
+    # Если в тексте поста вообще нет ни одной ссылки, добавляем компактную строчку (до 4–5 уникальных СМИ)
+    has_any_link_in_body = bool(re.search(r'\[[^\]]+\]\(https?://[^\)\s]+\)', body_text))
+    if not has_any_link_in_body and valid_links:
+        pretty_missing = []
+        seen_domains = set()
+        for lk in valid_links:
+            dom_lbl = extract_source_domain_label(lk)
+            if dom_lbl not in seen_domains:
+                seen_domains.add(dom_lbl)
+                pretty_missing.append(f"[{dom_lbl}]({lk})")
+            if len(pretty_missing) >= 4:
+                break
 
-    # 2. Жесткое ограничение объема знаков ТОЛЬКО для тела поста (body_text)
-    if len(body_text) > max_chars:
-        tag_match = re.search(r'(\n+(?:🔗[^\n]*\n*)*(?:#[\w\d_]+\s*)+)$', body_text)
-        footer = tag_match.group(1) if tag_match else ""
-        main_body = body_text[:len(body_text) - len(footer)]
-        allowed_body_len = max_chars - len(footer) - 10
-        if allowed_body_len > 300:
-            cut = main_body[:allowed_body_len]
-            # Ищем конец настоящего предложения (НЕ точку после цифры '📌 4.')
+        if pretty_missing:
+            if len(pretty_missing) == 1:
+                lbl = f"\n\n🔗 Источник: {pretty_missing[0]}"
+            else:
+                lbl = "\n\n🔗 Источники: " + " • ".join(pretty_missing)
+
+            tag_match = re.search(r'(\n+(?:#[\w\d_]+\s*)+)$', body_text)
+            if tag_match:
+                pos = tag_match.start(1)
+                body_text = body_text[:pos].rstrip() + lbl + "\n\n" + body_text[pos:].lstrip()
+            else:
+                body_text = body_text.rstrip() + lbl
+
+    # 3. Гарантируем, что пост помещается в 1 стандартное сообщение Telegram (и по видимому тексту, и по HTML)
+    vis_len = visible_post_length(body_text)
+    html_len = len(markdown_to_telegram_html(body_text))
+    if vis_len > max_chars or html_len > 3650:
+        # Выделяем подвал (блок 🔗 Источник(и) + хэштеги), чтобы никогда его не обрезать
+        footer_match = re.search(
+            r'(\n+(?:🔗\s*(?:\*\*)?Источники?(?:\*\*)?[^\n]*\n+)?(?:#[\w\d_]+\s*)+)$',
+            body_text,
+            flags=re.IGNORECASE
+        )
+        footer = footer_match.group(1) if footer_match else ""
+        main_body = body_text[:len(body_text) - len(footer)].rstrip()
+
+        footer_vis = visible_post_length(footer)
+        target_vis = min(max_chars, 2400) - footer_vis - 15
+        if target_vis > 300 and len(main_body) > target_vis:
+            # Пересчитываем пропорциональный срез с учетом спрятанных ссылок в main_body
+            ratio = target_vis / max(1, visible_post_length(main_body))
+            approx_cut_idx = min(len(main_body), int(len(main_body) * min(1.0, ratio)))
+            cut = main_body[:approx_cut_idx]
+            # Не режем внутри незакрытой Markdown-ссылки [текст](url)
+            last_open_br = cut.rfind('[')
+            last_close_par = cut.rfind(')')
+            if last_open_br > last_close_par:
+                cut = cut[:last_open_br].rstrip()
             sent_ends = [m.end() for m in re.finditer(r'(?<!\d)[.!?](?=\s|\n|$)', cut)]
-            if sent_ends and sent_ends[-1] > int(allowed_body_len * 0.6):
+            if sent_ends and sent_ends[-1] > int(len(cut) * 0.55):
                 cut = cut[:sent_ends[-1]]
-            # На случай если в конце остался пустой заголовок пункта вида '📌 4.' — убираем его
             cut = re.sub(r'\n+(?:📌\s*)?\d+[.)]\s*$', '', cut.rstrip())
-            body_text = cut.rstrip() + "\n\n" + footer.lstrip()
-        else:
-            body_text = body_text[:max_chars].rstrip()
+            body_text = cut.rstrip() + ("\n\n" + footer.lstrip() if footer else "")
 
-    # Дополнительно очищаем случайно оборванный пустой пункт перед хэштегами (например, '📌 4.\n#испания')
+    # Очищаем случайно оборванный пустой пункт перед хэштегами
     body_text = re.sub(r'\n+(?:📌\s*)?\d+[.)]\s*(?=\n+#)', '\n', body_text)
 
     if head_block:
@@ -1966,19 +2651,12 @@ def polish_post_with_llm(
 ) -> str:
     """
     Прогоняет сырой RAG-ответ через AnyModel LLM для финальной полировки.
-
-    Задачи:
-    - Учесть выбранный стиль (POST_STYLES) и угол/идею публикации
-    - Убрать квадратные скобки [N] из цитирований
-    - Сохранить и органично встроить ВСЕ оригинальные ссылки (исходная статья + ссылки из RAG)
-    - Подогнать длину ровно под 1 ТГ-пост (800-1500 символов)
-    - Оформить в стиле ТГ-канала (эмодзи, форматирование, хэштеги)
     """
     if not ANYMODEL_KEY:
         log.warning("⚠️ ANYMODEL_KEY не задан. Возвращаю RAG-текст без пост-обработки.")
         return _basic_cleanup(raw_rag_text, article_context, extra_links)
 
-    original_url = article_context.get("url", "")
+    original_url = sanitize_article_url(article_context.get("url", ""))
     title = article_context.get("title", "")
     categories = article_context.get("categories", [])
     hashtags = " ".join(f"#{c}" for c in categories[:5]) if categories else "#испания #новости"
@@ -1986,16 +2664,19 @@ def polish_post_with_llm(
     style_cfg = POST_STYLES.get(style_key, POST_STYLES["standard"])
     style_instruction = style_cfg["prompt"]
 
-    # Собираем все уникальные ссылки
+    # Если у статьи из /top уже есть точный оригинальный URL — используем только его,
+    # чтобы в пост по одной конкретной статье не попадали ссылки из соседних чанков NotebookLM
     all_links = []
-    if original_url:
+    if original_url and is_valid_article_url(original_url):
         all_links.append(original_url)
-    if extra_links:
+    elif extra_links:
         for lk in extra_links:
-            if lk and lk not in all_links:
-                all_links.append(lk)
+            clean_lk = sanitize_article_url(lk)
+            if clean_lk and is_valid_article_url(clean_lk) and clean_lk not in all_links:
+                all_links.append(clean_lk)
 
-    links_text = "\n".join(f"- {lk}" for lk in all_links) if all_links else "(нет ссылок)"
+    pretty_links_list = [f"- [{extract_source_domain_label(lk)}]({lk})" for lk in all_links[:5]]
+    links_text = "\n".join(pretty_links_list) if pretty_links_list else "(нет ссылок)"
 
     angle_instruction = f"Фокус публикации (выбранная идея): {chosen_angle}" if chosen_angle else ""
 
@@ -2022,16 +2703,17 @@ def polish_post_with_llm(
 
 3. КАТЕГОРИЧЕСКИЙ ЗАПРЕТ НА ПОХОЖИЕ ЗАГОЛОВКИ:
    Варианты заголовков ОБЯЗАНЫ быть принципиально разными по структуре, тону, длине и подаче!
-   Категорически запрещено переставлять слова, менять синонимы или давать 4 вариации одной мысли (например, недопустимо: «Новый закон об аренде», «В Испании приняли закон об аренде», «Что говорит закон об аренде»).
-   Каждый вариант обязан бить в совершенно другой интерес читателя (факты vs эмоция vs польза vs спор)!
-
-4. КАТЕГОРИЧЕСКИ УДАЛИ все квадратные скобки вида [1], [2], [N], [source 1] — это технические маркеры цитирования RAG. Никаких скобок в тексте!
-5. ОБЯЗАТЕЛЬНО сохрани и органично добавь в пост оригинальные ссылки на первоисточники (список дан ниже). Ссылки должны быть кликабельными URL в конце поста или в контексте текста.
-6. Длина основного текста поста — СТРОГО 800-1500 символов. Текст должен помещаться ровно в 1 сообщение Telegram.
+4. КАТЕГОРИЧЕСКИ УДАЛИ все квадратные скобки вида [1], [2], [N], [source 1] — это технические маркеры цитирования RAG.
+5. КРАСИВЫЕ СПРЯТАННЫЕ ССЫЛКИ НА ИСТОЧНИКИ:
+   КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО выводить голые длинные URL (https://...) открытым текстом!
+   Все ссылки ОБЯЗАНЫ быть спрятаны под короткое название СМИ в формате Markdown: [El País](https://...) или [La Razón](https://...).
+   В конце поста (перед хэштегами) оформи источники ОДНОЙ компактной строкой через точку:
+   🔗 Источники: [La Razón](url1) • [El País](url2) (максимум 3–4 главных источника).
+6. Длина основного текста поста — СТРОГО 900–1400 символов. Пост ОБЯЗАН компактно помещаться ровно в 1 стандартное сообщение Telegram!
 7. Используй продуманные эмодзи для структуры (📌, 💡, ⚠️, 📊, 🏠, 💰 и т.д.).
 8. В самом конце обязательно добавь 3-5 релевантных хэштегов.
-9. НЕ используй HTML теги. Выдавай чистый отформатированный текст с переносами строк и эмодзи, готовый к мгновенному копированию.
-10. КАТЕГОРИЧЕСКИЙ ЗАПРЕТ НА ОДИНОЧНЫЕ ЗВЁЗДОЧКИ (*): Запрещено использовать одиночные звёздочки (*). Списки оформляй только через эмодзи или дефис. Для выделения важного разрешено использовать ТОЛЬКО двойные звёздочки **жирный текст** (никаких одиночных звёздочек для списков или курсива!)."""
+9. НЕ используй HTML теги.
+10. КАТЕГОРИЧЕСКИЙ ЗАПРЕТ НА ОДИНОЧНЫЕ ЗВЁЗДОЧКИ (*): Запрещено использовать одиночные звёздочки (*). Списки оформляй только через эмодзи или маркер •. Для выделения важного разрешено использовать ТОЛЬКО двойные звёздочки **жирный текст**."""
 
     user_prompt = f"""Сырой текст от RAG-системы:
 ---
@@ -2041,7 +2723,7 @@ def polish_post_with_llm(
 Данные статьи:
 - Тема: {title}
 - Выбранный угол/идея: {chosen_angle or "Общий обзор"}
-- Ссылки на оригинальные статьи и источники:
+- Доступные ссылки на источники (прячь их под названия СМИ в формате [Название СМИ](URL)):
 {links_text}
 - Рекомендуемые хэштеги: {hashtags}
 
@@ -2049,7 +2731,7 @@ def polish_post_with_llm(
 Требования:
 1. В самом верху дай 4 КОНТРАСТНЫХ, не похожих друг на друга варианта заголовка (Фактический, Цепляющий, Практический, Вопрос/Дискуссия).
 2. Разделитель '---'.
-3. Полный готовый текст поста (ровно 800-1500 символов, без квадратных скобок, со ссылками на источники в конце)."""
+3. Полный готовый текст поста (ровно 900–1400 символов, компактно в 1 пост ТГ, со спрятанными ссылками [Название СМИ](URL))."""
 
     endpoint = f"{ANYMODEL_BASE_URL}/chat/completions"
     headers = {
@@ -2079,10 +2761,8 @@ def polish_post_with_llm(
 
         polished = choices[0].get("message", {}).get("content", "")
         if polished:
-            # Двойная страховка: убираем любые оставшиеся квадратные скобки с цифрами
             polished = clean_rag_citations(polished)
-            # Гарантируем обязательные ссылки на оригинал и строгий лимит объема знаков
-            polished = ensure_post_integrity(polished, all_links, max_chars=1600)
+            polished = ensure_post_integrity(polished, all_links, max_chars=1550)
             log.info("✅ Пост отполирован через AnyModel (%d символов, стиль: %s)", len(polished), style_key)
             return polished.strip()
 
@@ -2094,29 +2774,24 @@ def polish_post_with_llm(
 
 def _basic_cleanup(text: str, article_context: Dict[str, Any], extra_links: Optional[List[str]] = None) -> str:
     """Базовая чистка текста без LLM (fallback)."""
-    # Удаляем [N] цитирования
     cleaned = clean_rag_citations(text)
 
-    # Добавляем ссылки на оригиналы
-    url = article_context.get("url", "")
+    url = sanitize_article_url(article_context.get("url", ""))
     all_links = []
-    if url:
+    if url and is_valid_article_url(url):
         all_links.append(url)
-    if extra_links:
+    elif extra_links:
         for lk in extra_links:
-            if lk and lk not in all_links:
-                all_links.append(lk)
+            clean_lk = sanitize_article_url(lk)
+            if clean_lk and is_valid_article_url(clean_lk) and clean_lk not in all_links:
+                all_links.append(clean_lk)
 
-    if all_links:
-        cleaned += "\n\n🔗 Источники:\n" + "\n".join(f"• {lk}" for lk in all_links)
-
-    # Добавляем хэштеги
     categories = article_context.get("categories", [])
     if categories:
         hashtags = " ".join(f"#{c}" for c in categories[:5])
         cleaned += f"\n\n{hashtags}"
 
-    return ensure_post_integrity(cleaned.strip(), all_links, max_chars=1600)
+    return ensure_post_integrity(cleaned.strip(), all_links, max_chars=1550)
 
 
 def polish_custom_topic_post_with_llm(
@@ -2124,10 +2799,10 @@ def polish_custom_topic_post_with_llm(
     topic: str,
     style_key: str = "standard",
     extra_links: Optional[List[str]] = None,
-    length_hint: str = "800-1500",
+    length_hint: str = "900-1400",
     max_tokens: int = 1500,
     item_count: int = 1,
-    max_chars: int = 3800
+    max_chars: int = 2200
 ) -> str:
     """
     Прогоняет сырой RAG-ответ по произвольной теме через AnyModel LLM
@@ -2140,7 +2815,16 @@ def polish_custom_topic_post_with_llm(
     style_cfg = POST_STYLES.get(style_key, POST_STYLES["standard"])
     style_instruction = style_cfg["prompt"]
 
-    links_text = "\n".join(f"- {lk}" for lk in extra_links) if extra_links else "(нет внешних ссылок)"
+    clean_links = []
+    if extra_links:
+        for lk in extra_links:
+            cu = sanitize_article_url(lk)
+            if cu and cu not in clean_links:
+                clean_links.append(cu)
+
+    max_links_to_pass = max(4, item_count)
+    pretty_links_list = [f"- [{extract_source_domain_label(lk)}]({lk})" for lk in clean_links[:max_links_to_pass]]
+    links_text = "\n".join(pretty_links_list) if pretty_links_list else "(нет внешних ссылок)"
 
     system_prompt = f"""Ты — главный редактор русскоязычного Telegram-канала о жизни, законах, налогах и новостях в Испании.
 Твоя задача — написать идеальный, готовый к публикации пост для канала на заданную тему, опираясь на факты и материал от RAG-системы.
@@ -2164,32 +2848,31 @@ def polish_custom_topic_post_with_llm(
 
 3. КАТЕГОРИЧЕСКИЙ ЗАПРЕТ НА ПОХОЖИЕ ЗАГОЛОВКИ:
    Варианты заголовков ОБЯЗАНЫ быть принципиально разными по структуре, тону, длине и подаче!
-   Категорически запрещено переставлять слова, менять синонимы или давать 4 похожие вариации одной мысли. Каждый вариант обязан бить в совершенно другой интерес аудитории (факты vs эмоция vs польза vs спор)!
-
 4. КАТЕГОРИЧЕСКИ УДАЛИ все квадратные скобки вида [1], [2], [N], [source 1] — никаких технических меток цитирования в тексте быть не должно!
-5. Если есть ссылки на первоисточники или законы — органично включи их в текст или блок источников в конце.
-6. Длина основного текста поста — СТРОГО {length_hint} символов. Текст должен быть ёмким, без воды и клише, идеален для чтения с экрана смартфона.
+5. КРАСИВЫЕ СПРЯТАННЫЕ ССЫЛКИ НА ПЕРВОИСТОЧНИКИ:
+   КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО вставлять голые длинные URL (https://...) открытым текстом или делать длинный список сырых URL!
+   Все ссылки ОБЯЗАНЫ быть спрятаны под короткое название СМИ в формате Markdown: [El País](https://...) или [La Razón](https://...).
+   - Если это пост по одной теме: укажи в конце перед хэштегами одну компактную строчку (не более 3–4 главных СМИ):
+     🔗 Источники: [La Razón](url1) • [El País](url2) • [Antena 3](url3)
+   - Если это дайджест из нескольких новостей: в конце каждого пункта ставь аккуратную ссылку 🔗 [Название СМИ](url).
+6. Длина видимого текста поста — СТРОГО {length_hint} символов. Текст ОБЯЗАН целиком помещаться в 1 стандартный пост Telegram!
 7. Используй продуманные эмодзи для структуры (📌, 💡, ⚠️, 📊, 🏠, 💰 и т.д.).
 8. В самом конце обязательно добавь 3-5 релевантных хэштегов (например: #испания #законы #новости #жизньвиспании).
-9. НЕ используй HTML теги. Выдавай чистый отформатированный текст с переносами строк и эмодзи, готовый к мгновенному копированию.
-10. КАТЕГОРИЧЕСКИЙ ЗАПРЕТ НА ОДИНОЧНЫЕ ЗВЁЗДОЧКИ (*): Запрещено использовать одиночные звёздочки (*). Списки оформляй только через эмодзи или дефис. Для выделения важного разрешено использовать ТОЛЬКО двойные звёздочки **жирный текст** (никаких одиночных звёздочек для списков или курсива!)."""
+9. НЕ используй HTML теги.
+10. КАТЕГОРИЧЕСКИЙ ЗАПРЕТ НА ОДИНОЧНЫЕ ЗВЁЗДОЧКИ (*): Запрещено использовать одиночные звёздочки (*). Списки оформляй только через эмодзи или маркер •. Для выделения важного разрешено использовать ТОЛЬКО двойные звёздочки **жирный текст**."""
 
     if item_count > 1:
-        per_item_chars = max(250, min(450, 2400 // item_count))
-        system_prompt += f"""\n11. ОБЯЗАТЕЛЬНОЕ ВКЛЮЧЕНИЕ ВСЕХ {item_count} СЮЖЕТОВ БЕЗ ПРОПУСКОВ:
+        per_item_chars = max(200, min(340, 1750 // item_count))
+        system_prompt += f"""\n11. ОБЯЗАТЕЛЬНОЕ ВКЛЮЧЕНИЕ ВСЕХ {item_count} СЮЖЕТОВ В 1 СООБЩЕНИЕ TELEGRAM:
 Во входных материалах передано РОВНО {item_count} выбранных новостных сюжетов (от Сюжета 1 до Сюжета {item_count}).
 Ты ОБЯЗАН включить в основной текст поста КАЖДЫЙ из этих {item_count} сюжетов отдельным нумерованным пунктом!
-Формат:
+Формат каждого пункта:
 📌 1. **[Название 1-го сюжета]**
-Кратко суть события, цифры, ключевые детали (ёмко, 2–4 предложения, ~{per_item_chars} символов).
-📌 2. **[Название 2-го сюжета]**
-Кратко суть события...
+Кратко суть события, цифры, ключевые детали (ёмко, 2–3 предложения, ~{per_item_chars} символов). 🔗 [Название СМИ](url)
 ...
 📌 {item_count}. **[Название {item_count}-го сюжета]**
-Кратко суть события...
-Категорически ЗАПРЕЩЕНО игнорировать, объединять, обрывать или отбрасывать любые из {item_count} сюжетов!
-В посте должно быть ровно {item_count} полных пунктов (от 📌 1. до 📌 {item_count}. включительно).
-Пиши каждый пункт лаконично и по сути, чтобы все {item_count} пунктов гарантированно поместились целиком!"""
+Кратко суть события... 🔗 [Название СМИ](url)
+Категорически ЗАПРЕЩЕНО игнорировать или отбрасывать любые из {item_count} сюжетов! Пиши ёмко, чтобы все {item_count} пунктов гарантированно уместились в 1 стандартный пост Telegram."""
 
     user_prompt = f"""Тема поста, сформулированная автором:
 «{topic}»
@@ -2199,19 +2882,19 @@ def polish_custom_topic_post_with_llm(
 {raw_rag_text if (raw_rag_text and raw_rag_text.strip()) else "(RAG не вернул специфических данных, напиши максимально экспертный пост по теме, опираясь на общие знания о ситуации в Испании)"}
 ---
 
-Найденные ссылки на источники:
+Найденные ссылки на источники (обязательно прячь их под название издания [Название СМИ](URL), НЕ выводи голые URL!):
 {links_text}
 
 Напиши готовый ТГ-пост в стиле «{style_cfg['title']}».
 Требования:
 1. В самом верху дай 4 КОНТРАСТНЫХ, не похожих друг на друга варианта заголовка (Фактический, Цепляющий, Практический, Вопрос/Дискуссия).
 2. Разделитель '---'.
-3. Полный готовый текст поста (длиной ориентировочно {length_hint} символов, без квадратных скобок цитирования, с чёткой структурой и хэштегами в конце)."""
+3. Полный готовый текст поста (видимой длиной {length_hint} символов, строго в 1 сообщение Telegram, со спрятанными ссылками [Название СМИ](URL) и хэштегами в конце)."""
 
     if item_count > 1:
         user_prompt += f"""
 4. ВНИМАНИЕ: Во входном материале передано ровно {item_count} сюжетов.
-Твой пост ОБЯЗАН содержать РОВНО {item_count} нумерованных пунктов (от 1 до {item_count}), подробно раскрывающих КАЖДЫЙ из этих {item_count} сюжетов. Ни один сюжет не должен быть упущен!"""
+Твой пост ОБЯЗАН содержать РОВНО {item_count} нумерованных пунктов (от 1 до {item_count}), раскрывающих КАЖДЫЙ из этих {item_count} сюжетов, и при этом уложиться в 1 сообщение Telegram!"""
 
     endpoint = f"{ANYMODEL_BASE_URL}/chat/completions"
     headers = {
@@ -2232,18 +2915,17 @@ def polish_custom_topic_post_with_llm(
         resp = requests.post(endpoint, headers=headers, json=payload, timeout=60)
         if resp.status_code != 200:
             log.warning("⚠️ AnyModel API ошибка (%d): %s", resp.status_code, resp.text[:200])
-            return _basic_topic_cleanup(raw_rag_text, topic, extra_links, max_chars=max_chars)
+            return _basic_topic_cleanup(raw_rag_text, topic, clean_links, max_chars=max_chars)
 
         data = resp.json()
         choices = data.get("choices", [])
         if not choices:
-            return _basic_topic_cleanup(raw_rag_text, topic, extra_links, max_chars=max_chars)
+            return _basic_topic_cleanup(raw_rag_text, topic, clean_links, max_chars=max_chars)
 
         polished = choices[0].get("message", {}).get("content", "")
         if polished:
             polished = clean_rag_citations(polished)
-            # Гарантируем обязательные ссылки на оригинал и строгий лимит объема знаков
-            polished = ensure_post_integrity(polished, extra_links, max_chars=max_chars)
+            polished = ensure_post_integrity(polished, clean_links, max_chars=max_chars)
             log.info("✅ Пост по теме '%s' отполирован через AnyModel (%d симв, стиль: %s)",
                      topic[:30], len(polished), style_key)
             return polished.strip()
@@ -2251,17 +2933,13 @@ def polish_custom_topic_post_with_llm(
     except Exception as e:
         log.warning("⚠️ Ошибка AnyModel пост-обработки: %s", e)
 
-    return _basic_topic_cleanup(raw_rag_text, topic, extra_links, max_chars=max_chars)
+    return _basic_topic_cleanup(raw_rag_text, topic, clean_links, max_chars=max_chars)
 
 
-def _basic_topic_cleanup(text: str, topic: str, extra_links: Optional[List[str]] = None, max_chars: int = 3800) -> str:
+def _basic_topic_cleanup(text: str, topic: str, extra_links: Optional[List[str]] = None, max_chars: int = 2200) -> str:
     """Базовая чистка для поста по теме без LLM."""
     cleaned = clean_rag_citations(text or "")
-
-    res = f"📌 {topic}\n\n{cleaned}"
-    if extra_links:
-        res += "\n\n🔗 Источники:\n" + "\n".join(f"• {lk}" for lk in extra_links[:10])
-    res += "\n\n#испания #новости"
+    res = f"📌 {topic}\n\n{cleaned}\n\n#испания #новости"
     return ensure_post_integrity(res.strip(), extra_links, max_chars=max_chars)
 
 
@@ -2722,6 +3400,17 @@ def process_callback_query(callback_query: dict):
                 handle_headline_selection(callback_query, draft_id, int(opt_idx_str))
             except Exception as e:
                 log.error("❌ Ошибка handle_headline_selection: %s", e)
+        return
+
+    # --- Выбор категории поста (cat1..cat6) ---
+    if data.startswith("cat:"):
+        parts = data[4:].split(":")
+        if len(parts) == 2:
+            draft_id, cat_code = parts
+            try:
+                handle_category_selection(callback_query, draft_id, cat_code)
+            except Exception as e:
+                log.error("❌ Ошибка handle_category_selection: %s", e)
         return
 
     # --- Публикация в канал @iberia_news ---
@@ -3973,7 +4662,7 @@ def _run_basket_post_generation(
         s = it.get("summary", "").strip()
         w = it.get("why", "").strip()
         raw_src = it.get("source", "").strip()
-        src = re.sub(r'Original$', '', raw_src).rstrip('.,;)')
+        src = sanitize_article_url(raw_src)
         if re.search(r'(/rss/?$|/feed/?$|\.xml$|\.rss$)', src, re.IGNORECASE):
             src = ""
         if src and src not in extra_links:
@@ -3982,30 +4671,30 @@ def _run_basket_post_generation(
         if w:
             block += f"\nКонтекст / почему важно: {w}"
         if src:
-            block += f"\nПервоисточник / ссылка: {src}"
+            block += f"\nПервоисточник / ссылка: [{extract_source_domain_label(src)}]({src})"
         materials.append(block)
 
     raw_rag_text = "\n\n".join(materials)
     topic = f"{basket_title} (Обзор всех {item_count} сюжетов)"
 
     if item_count == 1:
-        length_hint = "800-1400"
+        length_hint = "800-1300"
         max_tokens = 1500
-        max_chars = 1800
+        max_chars = 1600
     elif item_count == 2:
-        length_hint = "1200-1800"
-        max_tokens = 2200
-        max_chars = 2400
+        length_hint = "1100-1600"
+        max_tokens = 2000
+        max_chars = 1900
     elif item_count == 3:
-        length_hint = "1500-2200"
-        max_tokens = 2800
-        max_chars = 3000
+        length_hint = "1300-1800"
+        max_tokens = 2400
+        max_chars = 2100
     else:
-        min_len = min(1800, item_count * 320)
-        max_len = min(2800, item_count * 460)
+        min_len = min(1500, item_count * 260)
+        max_len = min(2200, item_count * 380)
         length_hint = f"{min_len}-{max_len}"
-        max_tokens = 3800
-        max_chars = 3500
+        max_tokens = 3200
+        max_chars = 2400
 
     polished_post = polish_custom_topic_post_with_llm(
         raw_rag_text=raw_rag_text,
