@@ -1,4 +1,2574 @@
 {
+  "785718": {
+    "title": "Alternativas.Andalucía vuelve a mirar al cielo y a la carretera: vuelos agotados, autobuses llenos y coches compartidos al completo",
+    "url": "https://www.vozpopuli.com/espana/andalucia/andalucia-vuelve-a-mirar-al-cielo-y-a-la-carretera-vuelos-agotados-autobuses-llenos-y-coches-compartidos-al-completo.html",
+    "source": "https://www.vozpopuli.com/",
+    "published_at": "",
+    "news_score": 7.45,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "transport",
+      "cost_of_living",
+      "travel"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "tourist"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "how_to"
+    ],
+    "editorial_angles": [
+      "как добраться из Мадрида в Андалусию после закрытия скоростной ветки",
+      "госрегулирование цен на билеты: как не переплатить за альтернативный транспорт",
+      "масштабные убытки туризма и коллапс бронирований"
+    ],
+    "why": [
+      "крупный транспортный коллапс на ключевом направлении Мадрид — Андалусия",
+      "прямая польза для планирующих поездки: альтернативные маршруты и билеты",
+      "высокий резонанс из-за роста цен и дефицита билетов на самолеты и автобусы"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:31"
+  },
+  "785222": {
+    "title": "Elecciones generales del 29-N y actualidad política, en directo: última hora de la precampaña, crisis ferroviaria y nueva oleada de inmigrantes en El Hierro",
+    "url": "https://okdiario.com/espana/elecciones-generales-del-29-n-actualidad-politica-directo-ultima-hora-precampana-crisis-ferroviaria-nueva-oleada-inmigrantes-hierro-20728621",
+    "source": "https://okdiario.com/feed",
+    "published_at": "2026-11-09T07:34:51",
+    "news_score": 7.45,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "politics",
+      "housing",
+      "immigration",
+      "economy",
+      "transport"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "general"
+    ],
+    "formats": [
+      "news",
+      "breaking",
+      "numbers",
+      "explainer"
+    ],
+    "editorial_angles": [
+      "всеобщая забастовка против дорогого жилья: чего ждать и как подготовиться",
+      "предвыборный расклад в Испании: главные партии и их планы для мигрантов и экспатов",
+      "кризис на транспорте и в экономике: как это отразится на вашем кошельке"
+    ],
+    "why": [
+      "масштабные общенациональные события: выборы, общенациональная забастовка, кризис жилья и миграции",
+      "забастовка по поводу жилья и покупательной способности напрямую касается всех жителей",
+      "высокий уровень обсуждения и срочность из-за предстоящих дат"
+    ],
+    "scores": {
+      "practical_value": 5,
+      "resident_relevance": 8,
+      "content_potential": 8
+    },
+    "saved_at": "2026-11-09T09:42:30"
+  },
+  "784146": {
+    "title": "Los pasajeros de alta velocidad buscan alternativas al tren: “Este accidente es la gota que colma el vaso”",
+    "url": "https://www.lavanguardia.com/vida/20261109/11679298/pasajeros-alta-velocidad-buscan-alternativas-tren-accidente-gota-colma-vaso.html",
+    "source": "https://www.lavanguardia.com/rss/home",
+    "published_at": "2026-11-09T05:00:00",
+    "news_score": 7.55,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "transport",
+      "cost_of_living",
+      "society"
+    ],
+    "audience": [
+      "resident",
+      "family",
+      "general"
+    ],
+    "formats": [
+      "news",
+      "breaking",
+      "explainer",
+      "numbers"
+    ],
+    "editorial_angles": [
+      "кризис испанской авиатранспортной логистики: цены на билеты взлетели до 300 евро",
+      "безопасность скоростных поездов в Испании под вопросом после катастрофы",
+      "как компании компенсируют сотрудникам отказ от поездок на поезде"
+    ],
+    "why": [
+      "крупная трагедия на транспорте затрагивает безопасность миллионов пассажиров в Испании",
+      "резкий скачок цен на авиабилеты между Мадридом и Барселоной бьет по кошелькам",
+      "вызывает огромный резонанс, дискуссии и смену транспортных привычек жителей"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:29"
+  },
+  "785563": {
+    "title": "El Gobierno deja atadas las Zonas de Bajas Emisiones antes de las elecciones para obligar a multar a más conductores",
+    "url": "https://www.eldebate.com/motor/20261109/gobierno-deja-atadas-zonas-bajas-emisiones-antes-elecciones-obligar-multar-conductores_478599.html",
+    "source": "https://www.eldebate.com/",
+    "published_at": "",
+    "news_score": 7.6,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "cars",
+      "transport",
+      "cost_of_living"
+    ],
+    "audience": [
+      "resident"
+    ],
+    "formats": [
+      "news",
+      "how_to",
+      "explainer"
+    ],
+    "editorial_angles": [
+      "кого коснутся новые обязательные штрафы за въезд в Зоны низких выбросов",
+      "в каких 150 городах Испании срочно вводят жесткие ограничения для авто",
+      "как проверить свой автомобиль и избежать штрафа в 200 евро"
+    ],
+    "why": [
+      "касается владельцев автомобилей в 150 городах Испании с населением более 50 тысяч человек",
+      "жесткие штрафы в 200 евро за нарушение правил Зоны низких выбросов (ZBE)",
+      "прямое влияние на кошелек жителей и необходимость менять привычки вождения"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:28"
+  },
+  "785700": {
+    "title": "Impuestos.La Hacienda de Sánchez cierra el ciclo con 160.000 millones extra cobrados a trabajadores y empresas",
+    "url": "https://www.vozpopuli.com/economia/la-hacienda-de-sanchez-cierra-el-ciclo-con-160000-millones-extra-cobrados-a-trabajadores-y-empresas.html",
+    "source": "https://www.vozpopuli.com/",
+    "published_at": "",
+    "news_score": 7.65,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "taxes",
+      "economy",
+      "cost_of_living"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers",
+      "comparison"
+    ],
+    "editorial_angles": [
+      "куда ушли 160 миллиардов евро дополнительной налоговой выручки",
+      "почему отсутствие индексации IRPF бьет по карману каждого работающего",
+      "сравнение роста зарплат со скачком налогового бремени в Испании"
+    ],
+    "why": [
+      "касается каждого налогоплательщика, работающего в Испании",
+      "гигантские цифры дополнительной налоговой нагрузки из-за неиндексации IRPF",
+      "высокий потенциал для бурных обсуждений и практических выводов о финансах"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:27"
+  },
+  "785914": {
+    "title": "¿Dónde han ido a parar las subidas de los salarios?",
+    "url": "https://www.expansion.com/economia/2026/11/09/han-ido-parar-subidas-salarios.html",
+    "source": "https://www.expansion.com/",
+    "published_at": "",
+    "news_score": 7.55,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "taxes",
+      "economy",
+      "salaries",
+      "housing"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant"
+    ],
+    "formats": [
+      "news",
+      "numbers",
+      "explainer"
+    ],
+    "editorial_angles": [
+      "почему съедаются ваши повышения зарплаты: налоги и инфляция",
+      "сколько на самом деле забирает испанское государство из средней зарплаты",
+      "налоговая реальность Испании глазами работающих экспатов"
+    ],
+    "why": [
+      "налоги, инфляция и покупательная способность касаются абсолютно всех работающих в Испании",
+      "неиндексация шкалы IRPF напрямую уменьшает реальные доходы",
+      "острая тема налоговой нагрузки и роста цен на жилье"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:26"
+  },
+  "772293": {
+    "title": "Las demandas por despido están en cifras récord: superan las de la pandemia y la crisis financiera",
+    "url": "https://www.larazon.es/economia/demandas-despido-estan-cifras-record-superan-pandemia-crisis-financiera_202611086af03a60d3bddc0868a9af12.html",
+    "source": "https://www.larazon.es/",
+    "published_at": "",
+    "news_score": 7.55,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "jobs",
+      "salaries",
+      "economy",
+      "society"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers"
+    ],
+    "editorial_angles": [
+      "почему в Испании бьют рекорды по увольнениям несмотря на рост занятости",
+      "ваши права: что делать при незаконном увольнении и как работает субординация",
+      "кризис в сфере услуг и рост судебных споров с работодателями"
+    ],
+    "why": [
+      "Рекордный рост судебных исков по увольнениям в Испании затрагивает рынок труда в целом",
+      "Касается наемных работников, включая экспатов с контрактами",
+      "Важный макроэкономический показатель изменения стабильности трудовых отношений"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:25"
+  },
+  "784489": {
+    "title": "Unai Sordo y Pepe Álvarez: “La gente ha dicho 'hasta aquí hemos llegado' con la vivienda”",
+    "url": "https://www.eldiario.es/economia/unai-sordo-pepe-alvarez-gente-dicho-hemos-llegado-vivienda_128_13644860.html",
+    "source": "https://www.eldiario.es/rss",
+    "published_at": "2026-11-08T20:36:37",
+    "news_score": 7.6,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "housing",
+      "cost_of_living",
+      "society"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "poll"
+    ],
+    "editorial_angles": [
+      "жилищный кризис в Испании достиг точки кипения: чего ждать от всеобщей забастовки",
+      "требования профсоюзов: поможет ли арендаторам выделение 1% ВВП на социальное жилье",
+      "аренда жилья в Испании: почему ситуация с ценами накаляет социальную обстановку"
+    ],
+    "why": [
+      "жилищный кризис касается абсолютно всех арендаторов и экспатов в Испании",
+      "общенациональная забастовка и масштабные протесты создают сильный инфоповод",
+      "вызывает горячие споры между арендаторами и собственниками жилья"
+    ],
+    "scores": {
+      "practical_value": 6,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:23"
+  },
+  "783621": {
+    "title": "Hasta 3.000 euros de devolución en la Renta por aislar tu casa: las obras de calefacción que desgravan este año",
+    "url": "https://www.20minutos.es/lainformacion/economia-y-finanzas/hasta-3-000-euros-devolucion-renta-aislar-casa-obras-calefaccion-desgravan_7054834_0.html",
+    "source": "https://www.20minutos.es/rss/",
+    "published_at": "2026-11-09T04:00:00",
+    "news_score": 8.05,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "taxes",
+      "housing",
+      "cost_of_living"
+    ],
+    "audience": [
+      "resident",
+      "family",
+      "immigrant"
+    ],
+    "formats": [
+      "explainer",
+      "how_to",
+      "guide"
+    ],
+    "editorial_angles": [
+      "как вернуть до 3000 евро с налогов за ремонт и утепление дома в Испании",
+      "какие типы работ (окна, аэротермия) дают максимальную скидку в IRPF",
+      "пошаговый алгоритм: какие сертификаты и чеки требуются налоговой"
+    ],
+    "why": [
+      "Прямая финансовая выгода до 3000-5000 евро при подаче декларации IRPF для всех владельцев жилья в Испании.",
+      "Высокая практическая ценность: четкие условия по процентам дедукции и дедлайнам сертификатов.",
+      "Отличный материал для сохранения в закладки и обсуждения среди экспатов-собственников."
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 9,
+      "content_potential": 10
+    },
+    "saved_at": "2026-11-09T09:42:21"
+  },
+  "771474": {
+    "title": "El Congreso votará el jueves los decretos de vivienda con el PNV como árbitro",
+    "url": "https://theobjective.com/espana/politica/2026-11-08/congreso-votara-decretos-vivienda-jueves-campana-electoral/",
+    "source": "https://theobjective.com/feed/",
+    "published_at": "2026-11-08T11:59:44",
+    "news_score": 8.15,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "housing",
+      "economy",
+      "taxes"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "how_to"
+    ],
+    "editorial_angles": [
+      "что изменится для арендаторов: продление контрактов до 2028 года и защита уязвимых",
+      "как получить кредиты до 50 000 евро по новой программе ICO ‘Tu Casa’",
+      "политическая борьба в Конгрессе вокруг жилищных декретов"
+    ],
+    "why": [
+      "затрагивает абсолютное большинство арендаторов и покупателей жилья в Испании",
+      "крупные финансовые меры (миллиардные фонды, продление аренды, запрет выселений)",
+      "вызывает бурные споры и имеет высокую практическую ценность"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:20"
+  },
+  "786012": {
+    "title": "Vivienda, pensiones e inmigración: los tres asuntos que están en juego el 29 de noviembre",
+    "url": "https://cadenaser.com/nacional/2026/11/09/vivienda-pensiones-e-inmigracion-los-tres-asuntos-que-estan-en-juego-el-29n-cadena-ser/",
+    "source": "https://cadenaser.com/",
+    "published_at": "",
+    "news_score": 8.2,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "housing",
+      "immigration",
+      "politics",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers",
+      "poll"
+    ],
+    "editorial_angles": [
+      "почему жилье и иммиграция стали главными темами выборов",
+      "чего ждет общество от грядущего изменения политического курса",
+      "главные страхи и тревоги избирателей перед ноябрьским голосованием"
+    ],
+    "why": [
+      "Затрагивает ключевые проблемы каждого жителя Испании: жилье, пенсии и иммиграцию",
+      "Прямое отношение к будущим политическим изменениям, влияющим на экспатов",
+      "Высокий потенциал для обсуждений и опросов среди русскоязычных жителей"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:19"
+  },
+  "784496": {
+    "title": "El hacinamiento en España crece un 73% en una década y ya afecta a una de cada diez personas",
+    "url": "https://www.eldiario.es/catalunya/hacinamiento-espana-crece-73-decada-afecta-diez-personas_1_13645188.html",
+    "source": "https://www.eldiario.es/rss",
+    "published_at": "2026-11-09T06:00:11",
+    "news_score": 8.2,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "housing",
+      "cost_of_living",
+      "immigration",
+      "society"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers",
+      "poll"
+    ],
+    "editorial_angles": [
+      "почему арендный кризис в Испании привел к росту скученности жилья на 73%",
+      "статистика по регионам: где жить стало дороже и сложнее всего",
+      "как мигранты и молодежь выживают в условиях несоответствия зарплат и цен на жилье"
+    ],
+    "why": [
+      "кризис жилья и перенаселенность затрагивают каждого десятого жителя страны",
+      "особенно сильно бьет по мигрантам, молодежи и арендаторам",
+      "мощнейший социальный и экономический тренд с огромным потенциалом для обсуждения"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:18"
+  },
+  "785812": {
+    "title": "La incapacidad temporal cambia a partir del próximo 1 de diciembre 2026: el cálculo retrocederá dos meses en vez de uno",
+    "url": "https://www.diariodenavarra.es/noticias/actualidad/nacional/2026/11/09/incapacidad-temporal-cambia-partir-proximo-1-diciembre-2026-calculo-retrocedera-dos-meses-vez-841782-28.html",
+    "source": "https://www.diariodenavarra.es/",
+    "published_at": "",
+    "news_score": 8.3,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "healthcare",
+      "jobs",
+      "documents",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "how_to",
+      "guide"
+    ],
+    "editorial_angles": [
+      "как изменится расчет больничных в Испании с декабря",
+      "кого сильнее всего затронет новый двухмесячный период ретроспективного расчета",
+      "пошаговый разбор новых правил incapacidad temporal для экспатов и резидентов"
+    ],
+    "why": [
+      "изменение правил расчета больничных касается каждого официального работника",
+      "прямое влияние на размер выплат при временной нетрудоспособности",
+      "отличный материал для сохранения в закладки и детального разбора"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:16"
+  },
+  "785239": {
+    "title": "Huelga general del 11-N: este es el dinero que se te descontará de la nómina si no vas a trabajar y la ley lo confirma",
+    "url": "https://okdiario.com/economia/huelga-general-del-11-n-este-dinero-que-te-descontara-nomina-si-no-vas-trabajar-ley-lo-confirma-20724908",
+    "source": "https://okdiario.com/feed",
+    "published_at": "2026-11-09T07:00:13",
+    "news_score": 8.3,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "jobs",
+      "salaries",
+      "economy",
+      "politics"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "breaking",
+      "explainer",
+      "guide",
+      "poll"
+    ],
+    "editorial_angles": [
+      "сколько потеряют бастующие: расчет вычетов из ноябрьской зарплаты по закону",
+      "почему профсоюзы объявили первую за 14 лет общенациональную забастовку",
+      "участвовать или нет: правовые последствия и позиция работодателей"
+    ],
+    "why": [
+      "первая всеобщая забастовка за 14 лет затрагивает всех работающих в стране",
+      "прямые финансовые последствия в виде вычета из зарплаты",
+      "высочайший уровень актуальности и потенциала для обсуждения"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-09T09:42:15"
+  },
+  "776724": {
+    "title": "Huelga general por la vivienda en España: cuándo es y quién la convoca",
+    "url": "https://www.elconfidencial.com/espana/2026-11-08/huelga-general-vivienda-espana-fecha-convocatoria-1qrt-1tna_4440360/",
+    "source": "https://rss.elconfidencial.com/espana/",
+    "published_at": "2026-11-08T18:24:00",
+    "news_score": 8.65,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "housing",
+      "cost_of_living",
+      "jobs",
+      "society"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "breaking",
+      "explainer",
+      "guide",
+      "poll"
+    ],
+    "editorial_angles": [
+      "всеобщая забастовка по жилью: чего добиваются профсоюзы и как это отразится на вас",
+      "кризис аренды в Испании: инфографика и реальные цифры роста цен",
+      "права арендаторов и работников: к чему готовиться в день забастовки"
+    ],
+    "why": [
+      "кризис арендного жилья и стоимость жизни касаются 100% экспатов и резидентов в Испании",
+      "общенациональная забастовка и требования по зарплатам и жилью напрямую затрагивают работающих людей",
+      "вызовет бурную дискуссию о ценах на недвижимость, окупасах и правах арендаторов"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 10,
+      "content_potential": 10
+    },
+    "saved_at": "2026-11-09T09:42:14"
+  },
+  "785599": {
+    "title": "De la huelga general al arranque de una campaña entre mítines y platós: las claves de una semana decisiva de cara al 29N",
+    "url": "https://www.rtve.es/noticias/20261109/huelga-general-arranque-campana-claves-semana-decisiva-cara-29n/17305114.shtml",
+    "source": "https://www.rtve.es/noticias/",
+    "published_at": "",
+    "news_score": 8.8,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "housing",
+      "immigration",
+      "politics",
+      "transport"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant",
+      "family"
+    ],
+    "formats": [
+      "breaking",
+      "explainer",
+      "how_to",
+      "guide"
+    ],
+    "editorial_angles": [
+      "всеобщая забастовка 29N и кризис жилья: к чему готовиться арендаторам",
+      "новые декреты по защите от выселений и заморозке цен на аренду",
+      "чрезвычайные меры правительства на фоне рекордного притока мигрантов"
+    ],
+    "why": [
+      "комплекс критических событий: всеобщая забастовка, жилищный кризис, новые декреты по аренде и миграционный кризис",
+      "непосредственно касается каждого жителя Испании, арендаторов и мигрантов",
+      "высочайший потенциал для обсуждений, практической пользы и срочности"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 9,
+      "content_potential": 10
+    },
+    "saved_at": "2026-11-09T09:42:13"
+  },
+  "783453": {
+    "title": "Más de la mitad de la oferta de alquiler de vivienda es de habitaciones y de temporada",
+    "url": "https://elpais.com/economia/vivienda/2026-11-09/mas-de-la-mitad-de-la-oferta-de-alquiler-de-vivienda-es-de-habitaciones-y-de-temporada.html",
+    "source": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
+    "published_at": "2026-11-09T04:45:01",
+    "news_score": 8.9,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "housing",
+      "cost_of_living",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers",
+      "guide"
+    ],
+    "editorial_angles": [
+      "кризис аренды: почему больше половины объявлений — это комнаты и сезонное жилье",
+      "как собственники обходят ограничения цен в Мадриде и Барселоне",
+      "что делать тем, кто ищет долгосрочную квартиру в Испании"
+    ],
+    "why": [
+      "критически важная тема аренды жилья, касающаяся каждого экспата и резидента",
+      "демонстрирует масштаб обхода законов через сезонную аренду и комнаты",
+      "высокая практическая ценность и огромный потенциал для обсуждения в комьюнити"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 10,
+      "content_potential": 10
+    },
+    "saved_at": "2026-11-09T09:42:12"
+  },
+  "785266": {
+    "title": "Es oficial: los inquilinos podrán quedarse dos años más en su vivienda sin pagar más alquiler y los propietarios estarán obligados a aceptarlo",
+    "url": "https://okdiario.com/economia/oficial-inquilinos-podran-quedarse-dos-anos-mas-vivienda-sin-pagar-mas-alquiler-propietarios-estaran-obligados-aceptarlo-20720970",
+    "source": "https://okdiario.com/feed",
+    "published_at": "2026-11-09T06:00:23",
+    "news_score": 9.35,
+    "tier": "🔥 TOP",
+    "categories": [
+      "housing",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant",
+      "family"
+    ],
+    "formats": [
+      "breaking",
+      "explainer",
+      "how_to",
+      "guide"
+    ],
+    "editorial_angles": [
+      "как законно продлить аренду еще на два года без повышения платы",
+      "что делать арендатору, если арендодатель отказывается продлевать контракт",
+      "условия и требования для применения чрезвычайной правительственной меры"
+    ],
+    "why": [
+      "Касается огромной части населения Испании, снимающей жилье",
+      "Дает прямое законное право на продление договора аренды без роста цены",
+      "Имеет колоссальный практический и эмоциональный резонанс"
+    ],
+    "scores": {
+      "practical_value": 10,
+      "resident_relevance": 10,
+      "content_potential": 10
+    },
+    "saved_at": "2026-11-09T09:42:11"
+  },
+  "781743": {
+    "title": "Suspesos gairebé la meitat dels desnonaments previstos a Barcelona en l'últim mes",
+    "url": "https://www.ara.cat/societat/habitatge/suspesos-gairebe-meitat-dels-desnonaments-previstos-barcelona-l-ultim-mes_1_5902539.html",
+    "source": "https://www.ara.cat/rss/",
+    "published_at": "2026-11-08T19:30:04",
+    "news_score": 6.9,
+    "tier": "⚪ MAYBE",
+    "categories": [
+      "housing",
+      "economy",
+      "taxes"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers",
+      "guide"
+    ],
+    "editorial_angles": [
+      "как новые декреты тормозят выселения в Барселоне",
+      "что изменится для арендаторов и собственников квартир",
+      "политическая борьба вокруг жилищного вопроса в Испании"
+    ],
+    "why": [
+      "критически важная тема аренды и выселений для всех жителей",
+      "прямое влияние новых декретов на рынок жилья",
+      "высокий потенциал для бурных споров среди экспатов и арендодателей"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:44"
+  },
+  "778928": {
+    "title": "Despedida por enviar correos a su marido, que trabajaba para la competencia: la Justicia obliga a readmitirla",
+    "url": "https://www.larazon.es/economia/despedida-enviar-correos-marido-que-trabajaba-competencia-justicia-obliga-readmitirla-b50m_202611086af0b7d2ea8d8979977e1930.html",
+    "source": "https://www.larazon.es/",
+    "published_at": "",
+    "news_score": 6.9,
+    "tier": "⚪ MAYBE",
+    "categories": [
+      "jobs",
+      "salaries"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "explainer",
+      "how_to",
+      "guide"
+    ],
+    "editorial_angles": [
+      "где грань между шпионажем за сотрудником и корпоративной безопасностью",
+      "права работников в Испании: когда суд обязывает компанию вернуть уволенного",
+      "что грозит за отправку рабочих файлов конкурентам и как защитить свою приватность"
+    ],
+    "why": [
+      "Важный прецедент трудового права о границах контроля работодателя",
+      "Касается прав на неприкосновенность частной жизни и тайну переписки на работе",
+      "Полезный кейс для понимания того, как суды защищают наемных сотрудников"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 7,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:43"
+  },
+  "776405": {
+    "title": "“Me planteo renunciar a ser profesora por lo que cuesta encontrar piso cuando sale una oportunidad”",
+    "url": "https://www.levante-emv.com/comunitat-valenciana/2026/11/08/planteo-renunciar-profesora-cuesta-encontrar-135938142.html",
+    "source": "https://www.levante-emv.com/",
+    "published_at": "",
+    "news_score": 6.9,
+    "tier": "⚪ MAYBE",
+    "categories": [
+      "housing",
+      "jobs",
+      "salaries"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "poll"
+    ],
+    "editorial_angles": [
+      "реалии поиска жилья в Валенсии: сколько реально стоит комната",
+      "жилищный кризис глазами учителей и бюджетников",
+      "абузы при поиске квартир: как не потерять деньги на фейковых просмотрах"
+    ],
+    "why": [
+      "острая тема кризиса арендного жилья в Валенсии",
+      "высокий эмоциональный отклик у работающих экспатов",
+      "отражает реальные проблемы с ценами на комнаты и квартиры"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 8
+    },
+    "saved_at": "2026-11-08T22:18:42"
+  },
+  "772748": {
+    "title": "El primer presupuesto andaluz de PP y Vox: recortes a sindicatos y ayudas a la caza pero ni supresión de impuestos ecológicos ni fin de las ayudas a ONG",
+    "url": "https://www.diariocordoba.com/andalucia/2026/11/08/presupuestos-andaluces-pp-vox-acuerdo-136219712.html",
+    "source": "https://www.diariocordoba.com/",
+    "published_at": "",
+    "news_score": 6.9,
+    "tier": "⚪ MAYBE",
+    "categories": [
+      "taxes",
+      "economy",
+      "education",
+      "healthcare",
+      "immigration"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "numbers",
+      "explainer",
+      "guide"
+    ],
+    "editorial_angles": [
+      "налоговые скидки в Андалусии: кто выиграет от снижения IRPF и вычетов на оптик",
+      "куда пойдут миллиарды евро нового бюджета: медицина, образование и соцпомощь",
+      "политический компромисс PP и Vox: что изменилось для миграцев и семей"
+    ],
+    "why": [
+      "прямые изменения в налогах (IRPF, налог на наследство, вычеты на очки) для жителей Андалусии",
+      "важные региональные бюджетные инициативы, затрагивающие медицину, образование и соцподдержку",
+      "актуально для резидентов юга Испании и вызывает бурные споры о миграции и субсидиях"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 6,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:41"
+  },
+  "772608": {
+    "title": "¿Compraste un coche entre 2006 y 2013? Así puedes saber si tienes derecho a recuperar parte del dinero",
+    "url": "https://motor.elpais.com/conducir/compraste-un-coche-entre-2006-y-2013-asi-puedes-saber-si-tienes-derecho-a-recuperar-parte-del-dinero/",
+    "source": "https://cadenaser.com/",
+    "published_at": "",
+    "news_score": 6.9,
+    "tier": "⚪ MAYBE",
+    "categories": [
+      "cars",
+      "consumer",
+      "economy",
+      "taxes"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "how_to",
+      "explainer",
+      "guide"
+    ],
+    "editorial_angles": [
+      "пошаговая инструкция: как вернуть 10-15% стоимости автомобиля, купленного с 2006 по 2013 год",
+      "картельный сговор автодилеров: почему Верховный суд встал на сторону потребителей",
+      "какие документы нужны и куда бежать владельцам авто для получения компенсации"
+    ],
+    "why": [
+      "касается огромного числа автовладельцев, покупавших машины в указанный период",
+      "высокая практическая ценность: реальная возможность вернуть деньги",
+      "отличный материал для подробного пошагового гайда в Telegram"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 10
+    },
+    "saved_at": "2026-11-08T22:18:40"
+  },
+  "766615": {
+    "title": "Llega la borrasca Bruna a España y la Aemet avisa: lluvias muy fuertes, tormentas y rachas de viento de 100 km/h y estas serán las zonas más afectadas",
+    "url": "https://www.elconfidencial.com/espana/2026-11-08/llega-la-borrasca-bruna-a-espana-y-la-aemet-avisa-lluvias-muy-fuertes-tormentas-y-rachas-de-viento-intensas-y-estas-seran-las-zonas-mas-afectadas_4461160/",
+    "source": "https://rss.elconfidencial.com/espana/",
+    "published_at": "2026-11-08T07:32:00",
+    "news_score": 6.9,
+    "tier": "⚪ MAYBE",
+    "categories": [
+      "weather",
+      "society"
+    ],
+    "audience": [
+      "resident",
+      "tourist",
+      "family"
+    ],
+    "formats": [
+      "breaking",
+      "news",
+      "explainer"
+    ],
+    "editorial_angles": [
+      "шторм Бруна накрывает Испанию: где ждать ураганный ветер и ливни",
+      "предупреждение AEMET: какие регионы в зоне максимального риска",
+      "правила безопасности при штормовом предупреждении в Испании"
+    ],
+    "why": [
+      "масштабное предупреждение AEMET о шторме Бруна по всей Испании",
+      "ураганный ветер до 100 км/ч и ливни затрагивают множество регионов",
+      "высокая срочность и важность для планирования поездок и безопасности"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 7,
+      "content_potential": 8
+    },
+    "saved_at": "2026-11-08T22:18:39"
+  },
+  "768984": {
+    "title": "Reparaciones.Al inquilino de un piso se le rompe la lavadora y la avería provoca humedades, pero el propietario no quiere hacerse cargo: la Ley de Propiedad Horizontala aclara quién debe pagar",
+    "url": "https://www.vozpopuli.com/actualidad/al-inquilino-de-un-piso-se-le-rompe-la-lavadora-y-la-averia-provoca-humedades-pero-el-propietario-no-quiere-hacerse-cargo-la-ley-de-propiedad-horizontala-aclara-quien-debe-pagar.html",
+    "source": "https://www.vozpopuli.com/",
+    "published_at": "",
+    "news_score": 6.95,
+    "tier": "⚪ MAYBE",
+    "categories": [
+      "housing",
+      "documents"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "explainer",
+      "how_to",
+      "guide"
+    ],
+    "editorial_angles": [
+      "кто платит за потоп из-за сломанной стиралки: гид для арендатора и касеро",
+      "разбор законов LAU и Кодекса цивиль: обязанности при поломке техники",
+      "что делать, если арендодатель отказывается ремонтировать жилье"
+    ],
+    "why": [
+      "высокая практическая польза для всех арендаторов и арендодателей",
+      "четко разграничивает ответственность за бытовые аварии и ущерб соседям",
+      "идеально подходит для сохранения в закладки благодаря правовым ссылкам (LAU, LPH)"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:38"
+  },
+  "768655": {
+    "title": "Xavier García Albiol: \"Vamos a endurecer las leyes sobre okupación, inmigración ilegal e inseguridad como nos piden los ciudadanos\"",
+    "url": "https://www.elmundo.es/cataluna/2026/11/08/6aef4e2be85ece804f8b45a3.html",
+    "source": "https://www.elmundo.es/",
+    "published_at": "",
+    "news_score": 6.95,
+    "tier": "⚪ MAYBE",
+    "categories": [
+      "housing",
+      "immigration",
+      "politics"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "poll"
+    ],
+    "editorial_angles": [
+      "что изменится для владельцев недвижимости и арендаторов при ужесточении законов об окупасах",
+      "планы по реформе миграционного законодательства и усилению контроля",
+      "безопасность в городах: почему проблема нелегальной миграции и рецидива стала главной в кампании"
+    ],
+    "why": [
+      "острая тема незаконного захвата жилья (окупасов) и миграции",
+      "прямое волнение резидентов и экспатов по поводу безопасности и законов",
+      "высокий потенциал для жарких дискуссий в комментариях"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 8
+    },
+    "saved_at": "2026-11-08T22:18:37"
+  },
+  "767737": {
+    "title": "Al menos el 20% de las gasolineras deberán estar operativas durante la jornada de huelga general",
+    "url": "https://www.elindependiente.com/espana/2026/11/07/gasolineras-servicios-minimos-huelga-general/",
+    "source": "https://www.elindependiente.com/feed/",
+    "published_at": "2026-11-07T08:38:35",
+    "news_score": 6.95,
+    "tier": "⚪ MAYBE",
+    "categories": [
+      "transport",
+      "cost_of_living",
+      "consumer"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "news",
+      "breaking",
+      "how_to"
+    ],
+    "editorial_angles": [
+      "где искать работающие заправки во время забастовки 11 ноября",
+      "какие службы обязаны работать по закону: полный список",
+      "как подготовиться к транспортным ограничениям в регионах"
+    ],
+    "why": [
+      "касается всех автомобилистов и жителей в дни забастовки",
+      "важно знать, где заправиться во время всеобщей забастовки",
+      "официальные требования BOE по минимальным услугам"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 8
+    },
+    "saved_at": "2026-11-08T22:18:36"
+  },
+  "766778": {
+    "title": "La orden del Gobierno de retirar aceite de oliva vuelve a enfrentar a los productores con la industria envasadora",
+    "url": "https://www.20minutos.es/lainformacion/empresas/orden-gobierno-retirar-aceite-oliva-enfrentar-productores-industria-envasadora_7058096_0.html",
+    "source": "https://www.20minutos.es/rss/",
+    "published_at": "2026-11-08T04:00:00",
+    "news_score": 6.95,
+    "tier": "⚪ MAYBE",
+    "categories": [
+      "cost_of_living",
+      "consumer",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "numbers",
+      "explainer"
+    ],
+    "editorial_angles": [
+      "кризис жидкого золота: почему правительство принудительно изымает оливковое масло",
+      "что будет с ценами на масло в супермаркетах: прогнозы экспертов",
+      "фермеры против экспортеров: из-за чего разгорелся новый конфликт в агросекторе"
+    ],
+    "why": [
+      "прямо касается цен на базовый продукт питания для каждого жителя",
+      "конфликт производителей и упаковщиков влияет на рынок",
+      "прогнозируется изменение цен на полках магазинов"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 8
+    },
+    "saved_at": "2026-11-08T22:18:35"
+  },
+  "775566": {
+    "title": "Transporte fija en el 75% los servicios mínimos de Cercanías en hora punta para la huelga de maquinistas de Renfe del 10 y el 12",
+    "url": "https://www.larazon.es/economia/transporte-fija-75-servicios-minimos-cercanias-hora-punta-huelga-maquinistas-renfe-10-12_202611086af06eb203bbf30bb0447752.html",
+    "source": "https://www.larazon.es/",
+    "published_at": "",
+    "news_score": 7.0,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "transport",
+      "jobs"
+    ],
+    "audience": [
+      "resident",
+      "tourist"
+    ],
+    "formats": [
+      "news",
+      "breaking",
+      "explainer"
+    ],
+    "editorial_angles": [
+      "как добраться до работы во время забастовки машинистов Renfe",
+      "какие поезда будут ходить: подробный разбор минимальных услуг",
+      "права пассажиров при отмене или задержке поездов в Испании"
+    ],
+    "why": [
+      "затрагивает миллионы пассажиров общественного транспорта и поездов дальнего следования",
+      "высокая срочность для планирования поездок в дни забастовок",
+      "четкие проценты минимальных услуг помогают сориентироваться в расписании"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 7,
+      "content_potential": 8
+    },
+    "saved_at": "2026-11-08T22:18:34"
+  },
+  "771628": {
+    "title": "Transportes fija los servicios mínimos en Renfe para la huelga de maquinistas del 10 y 12 de noviembre",
+    "url": "https://www.economiadigital.es/economia/transportes-fija-servicios-minimos-renfe-huelga-maquinistas-10-12-noviembre.html",
+    "source": "https://www.economiadigital.es/feed",
+    "published_at": "2026-11-08T09:04:34",
+    "news_score": 7.0,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "transport",
+      "consumer"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "how_to"
+    ],
+    "editorial_angles": [
+      "как добраться: расписание и гарантированные рейсы в дни забастовки",
+      "права пассажиров: как вернуть деньги за отмененные билеты Renfe",
+      "транспортный коллапс в Испании: почему снова бастуют машинисты"
+    ],
+    "why": [
+      "задевает планы пассажиров поездов Renfe на ключевые даты",
+      "установленные минимумом проценты важны для планирования поездок",
+      "высокая практическая польза для тех, кто пользуется Cercanías, Media y Larga Distancia"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 7,
+      "content_potential": 8
+    },
+    "saved_at": "2026-11-08T22:18:33"
+  },
+  "768653": {
+    "title": "La caja negra del Iryo revela que la maquinista intentó \"reportar a Atocha en 3-4 ocasiones sin contestación\" antes del choque",
+    "url": "https://www.elmundo.es/economia/2026/11/07/6aef1a7ffdddff8b688b45a0.html",
+    "source": "https://www.elmundo.es/",
+    "published_at": "",
+    "news_score": 7.0,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "transport",
+      "society",
+      "crime"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "tourist",
+      "general"
+    ],
+    "formats": [
+      "news",
+      "breaking",
+      "explainer"
+    ],
+    "editorial_angles": [
+      "хроника катастрофы: что показали данные черного ящика поезда Iryo",
+      "вопросы безопасности испанской железнодорожной сети после трагедии",
+      "реакция транспортных ведомств и меры по предотвращению подобных сбоев"
+    ],
+    "why": [
+      "крупнейшая катастрофа на железнодорожном транспорте Испании с огромным числом жертв",
+      "вызывает мощный общественный резонанс и вопросы к безопасности инфраструктуры",
+      "касается каждого, кто пользуется поездами AVE и Iryo по всей стране"
+    ],
+    "scores": {
+      "practical_value": 4,
+      "resident_relevance": 8,
+      "content_potential": 8
+    },
+    "saved_at": "2026-11-08T22:18:32"
+  },
+  "767952": {
+    "title": "«El juez consideró que era nuestra culpa por guardar las claves en el navegador»",
+    "url": "https://www.diariovasco.com/gipuzkoa/victimas-ciber-estafa-juez-claves-negligencia-20261108111258-nt.html",
+    "source": "https://www.diariovasco.com/rss/2.0/portada/",
+    "published_at": "2026-11-07T23:21:13",
+    "news_score": 7.0,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "banking",
+      "consumer",
+      "society"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "how_to"
+    ],
+    "editorial_angles": [
+      "почему суды в Испании перекладывают вину за киберкражи на пользователей",
+      "как правильно настраивать безопасность интернет-банкинга, чтобы не потерять деньги",
+      "можно ли заставить испанский банк вернуть украденные мошенниками средства через суд"
+    ],
+    "why": [
+      "касается безопасности банковских счетов всех жителей Испании",
+      "вызывает широкие споры об ответственности банков и клиентов при киберпреступлениях",
+      "высокая практическая польза: предостережение о рисках хранения паролей в браузере"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 7,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:31"
+  },
+  "781888": {
+    "title": "Los platos preparados encarecen la cesta de la compra hasta 1.600 euros al año, un 40% más que cocinar en casa",
+    "url": "https://www.moncloa.com/2026/11/08/cesta-compra-platos-preparados-encarecen-3464146/",
+    "source": "https://www.moncloa.com/feed/",
+    "published_at": "2026-11-08T18:38:45",
+    "news_score": 7.05,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "cost_of_living",
+      "consumer",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers",
+      "poll"
+    ],
+    "editorial_angles": [
+      "сколько можно сэкономить, отказавшись от полуфабрикатов",
+      "как инфляция и нехватка времени бьют по кошельку испанцев",
+      "сравнение расходов на готовку дома и покупку готовой еды"
+    ],
+    "why": [
+      "касается каждого домохозяйства в Испании из-за роста цен на еду",
+      "высокая практическая польза и повод задуматься об экономии семейного бюджета",
+      "отличный материал для обсуждения привычек питания и цен в супермаркетах"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:29"
+  },
+  "766634": {
+    "title": "Iñaki Barrón: “El ferrocarril tiene mucho que envidiar en seguridad al modo aéreo, sobre todo en entrenamiento”",
+    "url": "https://elpais.com/espana/2026-11-08/inaki-barron-el-ferrocarril-tiene-mucho-que-envidiar-en-seguridad-al-modo-aereo-sobre-todo-en-entrenamiento.html",
+    "source": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
+    "published_at": "2026-11-08T04:30:01",
+    "news_score": 7.05,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "transport",
+      "safety",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "tourist"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers"
+    ],
+    "editorial_angles": [
+      "насколько безопасны скоростные поезда в Испании: итоги жесткой критики экспертов",
+      "куда пойдут 10 миллиардов евро: ремонт железных дорог глазами инженеров",
+      "авиация против поезда: почему эксперты говорят об отставании испанского ж/д транспорта"
+    ],
+    "why": [
+      "Безопасность поездов AVE и пригородных линий касается миллионов пассажиров по всей Испании",
+      "Требование масштабного аудита и миллиардных вложений подчеркивает системные проблемы транспорта",
+      "Вызывает тревогу у регулярных пользователей железных дорог после недавних инцидентов"
+    ],
+    "scores": {
+      "practical_value": 6,
+      "resident_relevance": 8,
+      "content_potential": 8
+    },
+    "saved_at": "2026-11-08T22:18:28"
+  },
+  "780985": {
+    "title": "Por qué tu pediatra no te receta antibióticos «por si acaso»",
+    "url": "https://www.diariosur.es/sociedad/salud/pediatra-receta-antibioticos-acaso-20261106195918-nt.html",
+    "source": "https://www.diariosur.es/rss/2.0/portada/",
+    "published_at": "2026-11-08T18:59:18",
+    "news_score": 7.1,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "healthcare",
+      "family",
+      "education"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "explainer",
+      "how_to",
+      "poll",
+      "guide"
+    ],
+    "editorial_angles": [
+      "почему испанские врачи не выписывают антибиотики при любой температуре",
+      "как лечить ОРВИ у детей по стандартам испанской педиатрии",
+      "культурный шок экспатов: парацетамол от всего и борьба с рецептами"
+    ],
+    "why": [
+      "актуальная проблема системы здравоохранения Испании для родителей",
+      "разрушает опасные мифы о самолечении антибиотиками",
+      "вызывает оживленную дискуссию среди экспатов о местной медицине"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:27"
+  },
+  "780978": {
+    "title": "La Junta reforzará la inspección de las VPO para evitar fraudes o usos turísticos irregulares",
+    "url": "https://www.diariosur.es/andalucia/andalucia-junta-reforzara-inspeccion-vpo-evitar-fraudes-usos-20261105212207-nt.html",
+    "source": "https://www.diariosur.es/rss/2.0/portada/",
+    "published_at": "2026-11-08T20:22:07",
+    "news_score": 7.1,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "housing",
+      "taxes",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "guide"
+    ],
+    "editorial_angles": [
+      "чем грозит владельцам социальное жилье, сдаваемое туристам в Андалусии",
+      "как власти будут проверять пустующие квартиры по новому плану",
+      "миллионные бюджеты на жилье и налоговые вычеты: кому достанутся льготы"
+    ],
+    "why": [
+      "ужесточение контроля за социальным жильем (VPO) в Андалусии затронет десятки тысяч собственников и арендаторов",
+      "борьба с нелегальной сдачей в туризм касается рынка недвижимости всего региона",
+      "крупные налоговые льготы и бюджетные планы привлекают внимание резидентов"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 8
+    },
+    "saved_at": "2026-11-08T22:18:26"
+  },
+  "773563": {
+    "title": "Sánchez reenfoca la campaña del PSOE en la gestión y asegura que blindará las pensiones en la Constitución",
+    "url": "https://elpais.com/espana/elecciones-generales/2026-11-08/sanchez-reenfoca-la-campana-del-psoe-en-la-gestion-y-asegura-que-blindara-las-pensiones-en-la-constitucion.html",
+    "source": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
+    "published_at": "2026-11-08T15:02:00",
+    "news_score": 7.1,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "salaries",
+      "taxes",
+      "housing",
+      "politics"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers"
+    ],
+    "editorial_angles": [
+      "сколько составят новые зарплаты и пенсии по плану правительства",
+      "реально ли загнать аренду в рамки жестких лимитов через декреты",
+      "предвыборная борьба за кошельки испанцев: что предлагают партии"
+    ],
+    "why": [
+      "затрагивает каждого работающего и пенсионера в стране из-за роста МРОТ и пенсий",
+      "предвыборные обещания и реальные декреты по арендным плафонам влияют на кошельки резидентов",
+      "высокий уровень дискуссии о будущем экономики и социальных гарантий"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:25"
+  },
+  "773524": {
+    "title": "Los bomberos advierten cuando llega el frío: «Si hay olor a gas en nuestro bloque, hay que avisar a los vecinos pero sin usar el ascensor, los timbres ni las luces»",
+    "url": "https://okdiario.com/curiosidades/aviso-bomberos-advierten-cuando-llega-frio-si-hay-olor-gas-nuestro-bloque-hay-que-avisar-vecinos-pero-sin-usar-ascensor-timbres-ni-luces-20618665",
+    "source": "https://okdiario.com/feed",
+    "published_at": "2026-11-08T17:30:10",
+    "news_score": 7.1,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "cost_of_living",
+      "housing",
+      "society"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family",
+      "general"
+    ],
+    "formats": [
+      "explainer",
+      "how_to",
+      "guide"
+    ],
+    "editorial_angles": [
+      "как спастись при утечке газа в испанском доме: правила безопасности",
+      "скрытая угроза зимой: почему молчание и вызов лифта могут стоить жизни",
+      "чек-лист для жильцов: проверяем газовые колонки и отопление перед холодами"
+    ],
+    "why": [
+      "касается каждого жителя многоквартирных домов в преддверии холодов",
+      "высокая практическая ценность и прямые инструкции безопасности при утечке газа",
+      "важный сезонный гайд, который полезно сохранить в закладки"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:24"
+  },
+  "771270": {
+    "title": "La brecha generacional empieza por la vivienda",
+    "url": "https://www.diariodeburgos.es/noticia/z5053ff81-56d7-424f-a9a15917d9785b83/202611/la-brecha-generacional-empieza-por-la-vivienda",
+    "source": "http://www.diariodeburgos.es/RSS/DBPortada.xml",
+    "published_at": "2026-11-08T10:01:40",
+    "news_score": 7.35,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "housing",
+      "cost_of_living",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant",
+      "family"
+    ],
+    "formats": [
+      "explainer",
+      "numbers",
+      "comparison",
+      "poll"
+    ],
+    "editorial_angles": [
+      "почему аренда съедает 80% зарплаты молодежи и как это бьет по приезжим",
+      "статистика жилья и труда в Испании глазами международных институтов",
+      "вечная проблема откладывания независимости: дебаты поколений в Испании"
+    ],
+    "why": [
+      "Жилищный кризис и дорогая аренда касаются почти каждого экспата и резидента",
+      "Высокая актуальность для молодежи и семей с детьми при поиске жилья",
+      "Гарантированно вызывает бурные обсуждения в комментариях из-за реалий рынка"
+    ],
+    "scores": {
+      "practical_value": 6,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:23"
+  },
+  "767411": {
+    "title": "¿Harto del ruido de tus vecinos? Los casos en los que puedes reclamar",
+    "url": "https://www.elcorreo.com/vivir/tendencias/harto-ruido-tus-vecinos-casos-puedes-reclamar-20261108000238-ntrc.html",
+    "source": "https://www.elcorreo.com/rss/2.0/portada/",
+    "published_at": "2026-11-08T07:28:47",
+    "news_score": 7.35,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "housing",
+      "society",
+      "documents"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "how_to",
+      "explainer",
+      "guide"
+    ],
+    "editorial_angles": [
+      "как законно наказать шумных соседей и отсудить деньги за собачий лай",
+      "какие децибелы считаются нормой по закону о шуме в Испании",
+      "пошаговый алгоритм действий: куда жаловаться, если мирные переговоры не работают"
+    ],
+    "why": [
+      "Проблема шумных соседей касается абсолютного большинства жителей многоквартирных домов в Испании",
+      "Четкие юридические критерии, децибелы и суммы штрафов дают прямую практическую пользу",
+      "Отличный материал для сохранения в закладки и бурных обсуждений в комментариях"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:22"
+  },
+  "768859": {
+    "title": "El Gobierno invita, la empresa paga: Yolanda Díaz decreta otro subidón del SMI pero no que haya dinero para pagarlo",
+    "url": "https://www.eldebate.com/economia/20261108/gobierno-invita-empresa-paga-yolanda-diaz-decreta-otro-subidon-smi-no-haya-dinero-pagarlo_477979.html",
+    "source": "https://www.eldebate.com/",
+    "published_at": "",
+    "news_score": 7.4,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "salaries",
+      "jobs",
+      "economy",
+      "taxes"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers",
+      "poll"
+    ],
+    "editorial_angles": [
+      "на сколько вырастет минимальная зарплата в ближайшие годы и коснется ли это вас",
+      "расходы для малого бизнеса: почему рост SMI пугает предпринимателей",
+      "сравнение темпов роста зарплат и реальной инфляции в стране"
+    ],
+    "why": [
+      "Затрагивает доходы и занятость миллионов наемных работников в Испании",
+      "Вызывает ожесточенные споры между профсоюзами, правительством и бизнесом",
+      "Прямо влияет на экономическую ситуацию и стоимость труда в стране"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:21"
+  },
+  "766786": {
+    "title": "Las nueve rutas para entrar y salir de Madrid en los 43 días de corte de la A-5",
+    "url": "https://www.20minutos.es/madrid/las-nueve-rutas-para-entrar-salir-madrid-los-43-dias-corte-5-m-40-42-general-ricardos-puente-los-franceses_7058120_0.html",
+    "source": "https://www.20minutos.es/rss/",
+    "published_at": "2026-11-08T06:58:27",
+    "news_score": 7.4,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "transport",
+      "cars"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "news",
+      "breaking",
+      "how_to",
+      "guide"
+    ],
+    "editorial_angles": [
+      "транспортный коллапс в Мадриде: гид по объездам на ближайшие 43 дня",
+      "как перекрытие A-5 повлияет на работу городского транспорта и метро",
+      "чек-лист для водителей: лучшие альтернативные маршруты в час пик"
+    ],
+    "why": [
+      "критически важно для 80 000 водителей ежедневно в Мадриде",
+      "высокая срочность: перекрытие ключевой трассы начинается немедленно",
+      "конкретные альтернативные маршруты и усиление общественного транспорта"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:20"
+  },
+  "775973": {
+    "title": "Pedro Sánchez insiste en blindar pensiones y subir el SMI y pide votar \"en masa\" para \"llegar mucho más lejos\"",
+    "url": "https://www.expansion.com/elecciones/elecciones-generales/2026/11/08/pedro-sanchez-insiste-blindar-pensiones-subir-smi-pide-votar-masa-llegar-lejos.html",
+    "source": "https://www.expansion.com/",
+    "published_at": "",
+    "news_score": 7.45,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "politics",
+      "economy",
+      "salaries"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "poll"
+    ],
+    "editorial_angles": [
+      "вырастет ли ваша зарплата: планы правительства по SMI",
+      "что значит для будущего пенсионеров их конституционный защитный статус",
+      "предвыборная борьба за кошельки испанцев: кому верить"
+    ],
+    "why": [
+      "касается каждого работающего и пенсионера в Испании (SMI и пенсии)",
+      "прямое обещание роста минимальной зарплаты затрагивает экспатов с контрактами",
+      "высокий потенциал для бурных обсуждений в комментариях"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:19"
+  },
+  "771677": {
+    "title": "La compraventa de vivienda encadena su tercer trimestre de caída en España mientras el precio sube a 2.512 euros/m²",
+    "url": "https://www.moncloa.com/2026/11/08/compraventa-vivienda-caida-precio-metro-cuadrado-3463969/",
+    "source": "https://www.moncloa.com/feed/",
+    "published_at": "2026-11-08T12:37:22",
+    "news_score": 7.45,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "housing",
+      "economy",
+      "cost_of_living"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers",
+      "comparison"
+    ],
+    "editorial_angles": [
+      "почему цены растут, несмотря на падение спроса: разбор цифр регистраторов",
+      "как кризис купли-продажи бьет по рынку аренды и кошелькам экспатов",
+      "стоит ли покупать жилье в Испании сейчас или лучше продолжать арендовать"
+    ],
+    "why": [
+      "касается каждого, кто снимает или покупает жилье в Испании",
+      "демонстрирует ключевой тренд рынка: падение числа сделок при росте цен",
+      "высокий резонанс и практическая значимость для экспатов и семей"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:18"
+  },
+  "767042": {
+    "title": "María Cristina Clemente, notaria: “Nunca aconsejaría a una persona de 70 u 80 años que haga donación de sus bienes”",
+    "url": "https://okdiario.com/economia/maria-cristina-clemente-notaria-nunca-aconsejaria-persona-70-u-80-anos-que-haga-donacion-sus-bienes-20714955",
+    "source": "https://okdiario.com/feed",
+    "published_at": "2026-11-08T07:15:41",
+    "news_score": 7.45,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "taxes",
+      "housing",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "family"
+    ],
+    "formats": [
+      "explainer",
+      "guide",
+      "news"
+    ],
+    "editorial_angles": [
+      "почему нотариусы запрещают пенсионерам дарить имущество при жизни",
+      "налоги и риски: чем дарственная опаснее завещания в Испании",
+      "как защитить свои активы и обеспечить старость без потери жилья"
+    ],
+    "why": [
+      "критически важный юридический и финансовый вопрос для пожилых людей и их семей",
+      "прямое предупреждение о рисках потери контроля над имуществом и налоговых ловушках",
+      "высокая практическая польза для долгосрочного планирования наследства в Испании"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:16"
+  },
+  "775561": {
+    "title": "Despedida mientras estaba de baja médica: la Justicia descubre un error en su indemnización y la eleva a 40.379 euros",
+    "url": "https://www.larazon.es/economia/despedida-mientras-estaba-baja-medica-justicia-descubre-error-indemnizacion-eleva-40379-euros-b50m_202611086af0abe003bbf30bb044a92e.html",
+    "source": "https://www.larazon.es/",
+    "published_at": "",
+    "news_score": 7.5,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "jobs",
+      "salaries",
+      "taxes"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "how_to",
+      "numbers"
+    ],
+    "editorial_angles": [
+      "увольнение на больничном: когда суд встает на сторону сотрудника",
+      "как проверить, правильно ли работодатель рассчитал вашу компенсацию",
+      "права сотрудников при ликвидации компании или закрытии точки"
+    ],
+    "why": [
+      "важный юридический прецедент по защите прав работников при увольнении во время больничного",
+      "демонстрирует критическую важность правильного расчета выходного пособия и компенсаций",
+      "полезно для сохранения в закладки всем работающим по найму в Испании"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:15"
+  },
+  "767744": {
+    "title": "Feijóo derogará la Ley de Memoria Democrática por una de Concordia, que mantendrá la búsqueda de las fosas",
+    "url": "https://www.elindependiente.com/espana/2026/11/07/feijoo-derogara-la-ley-de-memoria-democratica-por-una-de-concordia-que-mantendra-la-busqueda-de-las-fosas/",
+    "source": "https://www.elindependiente.com/feed/",
+    "published_at": "2026-11-06T23:02:39",
+    "news_score": 7.5,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "immigration",
+      "documents",
+      "politics"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "guide"
+    ],
+    "editorial_angles": [
+      "что будет с законом о внуках, если к власти придет PP",
+      "детальный разбор инициативы замены Закона о демократической памяти",
+      "инструкция для тех, кто сейчас подает документы на гражданство по новой системе"
+    ],
+    "why": [
+      "прямо затрагивает потенциальную отмену или пересмотр 'закона о внуках', важного для иммигрантов",
+      "высокая практическая значимость для лиц, оформляющих гражданство по происхождению",
+      "вызовет активные споры среди русскоязычного экспатского сообщества"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 7,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:14"
+  },
+  "767522": {
+    "title": "España ante el 11-N: las incógnitas de una huelga general inédita",
+    "url": "https://www.lavanguardia.com/economia/20261108/11678819/espana-11-n-incognitas-huelga-general-inedita.html",
+    "source": "https://www.lavanguardia.com/rss/home",
+    "published_at": "2026-11-08T05:00:00",
+    "news_score": 7.6,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "housing",
+      "cost_of_living",
+      "transport",
+      "society"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "breaking",
+      "explainer",
+      "how_to"
+    ],
+    "editorial_angles": [
+      "чего ждать от общенациональной забастовки 11 ноября и как это повлияет на работу",
+      "кризис аренды в Испании дошел до точки кипения: требования протестующих",
+      "как подготовиться к транспортным сбоям и перебоям в сервисах"
+    ],
+    "why": [
+      "общенациональная забастовка из-за кризиса жилья затрагивает всех жителей",
+      "высокая срочность и практическое значение для планирования поездок и работы",
+      "жигучая тема стоимости аренды и социальной напряженности"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:12"
+  },
+  "772065": {
+    "title": "Límites y derechos de las empresas: ¿Pueden sustituir a los huelguistas o sancionar a los trabajadores?",
+    "url": "https://www.rtve.es/noticias/20261108/huelga-general-11n-empresa-sustituir-huelguistas-sancionar-trabajadores/17303924.shtml",
+    "source": "https://www.rtve.es/noticias/",
+    "published_at": "",
+    "news_score": 7.65,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "jobs",
+      "salaries",
+      "documents"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "explainer",
+      "how_to",
+      "guide"
+    ],
+    "editorial_angles": [
+      "права работников во время всеобщей забастовки: что разрешено и запрещено боссу",
+      "финансовая сторона протеста: как оформляется приостановка контракта и что с зарплатой",
+      "памятка для наемного сотрудника: можно ли отказаться от работы и как избежать давления компании"
+    ],
+    "why": [
+      "общенациональная забастовка и трудовые права напрямую касаются всех работающих в Испании экспатов",
+      "четкие юридические рамки защищают сотрудников от незаконных санкций со стороны работодателей",
+      "высокая практическая ценность: разъяснение прав на участие, оплату и гарантии при забастовке"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:11"
+  },
+  "767956": {
+    "title": "Renegociar la hipoteca y ahorrar 9.000 euros",
+    "url": "https://www.diariovasco.com/economia/tu-bolsillo/renegociar-hipoteca-ahorrar-9000-euros-20261108001056-nt.html",
+    "source": "https://www.diariovasco.com/rss/2.0/portada/",
+    "published_at": "2026-11-07T23:10:56",
+    "news_score": 7.7,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "banking",
+      "housing",
+      "cost_of_living"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "explainer",
+      "how_to",
+      "numbers",
+      "guide"
+    ],
+    "editorial_angles": [
+      "как сэкономить 9000 евро на пересмотре старой ипотеки в Испании",
+      "новация против субРОгации: какой способ смены условий по кредиту выбрать",
+      "пошаговый алгоритм общения с банком при снижении процентной ставки"
+    ],
+    "why": [
+      "Касается всех владельцев ипотеки в Испании на фоне изменения ставок",
+      "Высокая практическая польза: конкретные советы по экономии до 9000 евро",
+      "Отличный материал для сохранения в закладки и детального разбора"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 10
+    },
+    "saved_at": "2026-11-08T22:18:10"
+  },
+  "770189": {
+    "title": "El mapa de las viviendas de Casa 47: dónde están los pisos de alquiler asequible y precios a los que se ofrecen",
+    "url": "https://www.20minutos.es/vivienda/mapa-viviendas-casa-47-donde-esta-pisos-alquiler-asequible-precios-ofertados_7034088_0.html",
+    "source": "https://www.20minutos.es/rss/",
+    "published_at": "2026-11-08T10:38:18",
+    "news_score": 7.75,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "housing",
+      "cost_of_living",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "how_to",
+      "numbers",
+      "guide"
+    ],
+    "editorial_angles": [
+      "где в Испании найти доступное жилье по программе Casa 47 и сколько это стоит",
+      "условия участия: кто может претендовать на льготную аренду до 75 лет",
+      "разбор регионов-лидеров по числу доступных квартир"
+    ],
+    "why": [
+      "острая проблема доступного жилья и аренды касается большинства экспатов",
+      "конкретные цифры, цены и регионы присутствия программы",
+      "высокий потенциал для практического использования и обсуждения"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:09"
+  },
+  "767950": {
+    "title": "«Cuando te estafan por teléfono, te hace daño una voz, es un fantasma que te destruye la vida»",
+    "url": "https://www.diariovasco.com/gipuzkoa/victima-ciberestafa-telefono-20261108111618-nt.html",
+    "source": "https://www.diariovasco.com/rss/2.0/portada/",
+    "published_at": "2026-11-08T05:24:36",
+    "news_score": 7.85,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "banking",
+      "consumer",
+      "crime"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "how_to"
+    ],
+    "editorial_angles": [
+      "новая схема телефонных мошенников в Испании: как SMS попадают в официальную цепочку банка",
+      "что делать, если мошенники оформили на ваше имя кредит в испанском банке",
+      "почему банки отказываются возвращать деньги и как доказать свою невиновность в суде"
+    ],
+    "why": [
+      "крайне опасный и изощренный вид мошенничества с подменой официальных номеров банков",
+      "огромный финансовый и психологический ущерб для жертвы",
+      "сильный эмоциональный триггер и полезный урок по кибербезопасности для всех экспатов"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:08"
+  },
+  "769939": {
+    "title": "Desarticulan una red internacional que suplantaba identidades para declarar beneficios de apuestas online en España",
+    "url": "https://www.elconfidencial.com/espana/2026-11-08/fraude-apuestas-online-suplantacion-identidad-1tps_4461182/",
+    "source": "https://rss.elconfidencial.com/espana/",
+    "published_at": "2026-11-08T08:46:00",
+    "news_score": 7.95,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "taxes",
+      "banking",
+      "crime",
+      "documents"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "general"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "how_to",
+      "guide"
+    ],
+    "editorial_angles": [
+      "как мошенники вешают чужие долги по ставкам на Renta и что с этим делать",
+      "официальный протокол PACs: как проверить, не украли ли ваш налоговый номер",
+      "схемы кражи личных данных через фальшивые вакансии и аренду в Испании"
+    ],
+    "why": [
+      "прямо касается безопасности личных данных и налоговой декларации (Renta) в Испании",
+      "высокая практическая польза: угроза чужих налоговых долгов из-за мошенников",
+      "актуально для всех резидентов, подающих налоги в испанскую налоговую"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:07"
+  },
+  "766658": {
+    "title": "Motivos y riesgos de una huelga general atípica que pretende marcar “un antes y un después”",
+    "url": "https://elpais.com/espana/2026-11-08/motivos-y-riesgos-de-una-huelga-general-atipica-que-pretende-marcar-un-antes-y-un-despues.html",
+    "source": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
+    "published_at": "2026-11-08T04:30:01",
+    "news_score": 8.05,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "housing",
+      "cost_of_living",
+      "politics"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "breaking",
+      "explainer"
+    ],
+    "editorial_angles": [
+      "почему забастовка из-за аренды может изменить правила игры на рынке недвижимости",
+      "как досрочные выборы повлияют на законы об арендаторах и окупасах",
+      "чего ждать жителям от общенационального протеста: перекрытия, забастовки и меры безопасности"
+    ],
+    "why": [
+      "Жилищный кризис и высокие цены на аренду касаются практически каждого резидента в Испании",
+      "Объявление общенациональной забастовки на тему жилья и досрочные выборы — событие исключительного масштаба",
+      "Вызывает мощный резонанс, споры и прямо затрагивает финансовое положение семей"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:06"
+  },
+  "767792": {
+    "title": "Prevén más reclamaciones de bancos a víctimas de ciberestafas",
+    "url": "https://www.diariodeburgos.es/noticia/z34ce7fed-4ad4-4363-8d674f6f96d1a2c8/202611/preven-mas-reclamaciones-de-bancos-a-victimas-de-ciberestafas",
+    "source": "http://www.diariodeburgos.es/RSS/DBPortada.xml",
+    "published_at": "2026-11-07T17:21:42",
+    "news_score": 8.1,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "banking",
+      "consumer",
+      "economy",
+      "justice"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "news",
+      "how_to",
+      "guide"
+    ],
+    "editorial_angles": [
+      "как вернуть украденные с карты деньги: новые правила банков",
+      "суд ЕС обязал банки возмещать ущерб от фишинга: инструкция для пострадавших",
+      "банковская безопасность в Испании: почему теперь доказать вашу вину станет сложнее"
+    ],
+    "why": [
+      "решение TJUE напрямую защищает права всех банковских клиентов в Испании",
+      "высокая практическая ценность: что делать жертвам интернет-мошенников",
+      "меняет правила ответственности испанских банков при киберпреступлениях"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T22:18:05"
+  },
+  "762156": {
+    "title": "Llega a España un adhesivo para las uñas que cambia de color si detecta éxtasis líquido en la bebida",
+    "url": "https://www.eldebate.com/sociedad/20261107/llega-espana-adhesivo-cambia-color-detecta-extasis-liquido-bebida_478475.html",
+    "source": "https://www.eldebate.com/",
+    "published_at": "",
+    "news_score": 7.45,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "consumer",
+      "healthcare",
+      "interesting_spain"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "tourist",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "how_to",
+      "explainer",
+      "interesting_fact"
+    ],
+    "editorial_angles": [
+      "как работают новые наклейки для проверки напитков на экстази",
+      "проблема скрытой преступности и химического насилия в ночной жизни Испании",
+      "где купить и сколько стоят стикеры для безопасности на вечеринках"
+    ],
+    "why": [
+      "высокая практическая польза для защиты от химического насилия в клубах и на фестивалях",
+      "отличный инновационный продукт, актуальный для молодежи и родителей",
+      "высокий потенциал для сохранения в закладки и бурного обсуждения"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 7,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T14:35:32"
+  },
+  "763533": {
+    "title": "El teórico de conducir de la DGT se puede hacer sin pasar por la autoescuela",
+    "url": "https://www.20minutos.es/motor/movilidad/examen-teorico-conducir-dgt-se-puede-hacer-sin-pasar-por-autoescuela_7057648_0.html",
+    "source": "https://www.20minutos.es/rss/",
+    "published_at": "2026-11-07T19:00:00",
+    "news_score": 7.5,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "documents",
+      "transport",
+      "cars"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant"
+    ],
+    "formats": [
+      "how_to",
+      "guide",
+      "explainer"
+    ],
+    "editorial_angles": [
+      "как сдать на права в Испании самостоятельно и сэкономить сотни евро",
+      "пошаговый алгоритм: от справки до электронной записи в DGT",
+      "подводные камни самоподготовки: почему многие все равно идут в автошколу"
+    ],
+    "why": [
+      "актуально для каждого, кто планирует сдавать на права в Испании",
+      "реальная экономия денег на автошколе",
+      "пошаговая инструкция с конкретными суммами и ссылками"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 10
+    },
+    "saved_at": "2026-11-08T14:35:30"
+  },
+  "760502": {
+    "title": "¿Hasta cuándo me pueden notificar que soy miembro de una mesa electoral?",
+    "url": "https://www.diariosur.es/nacional/notificaciones-aviso-miembro-mesa-electoral-plazos-alegaciones-20261107162024-nt.html",
+    "source": "https://www.diariosur.es/rss/2.0/portada/",
+    "published_at": "2026-11-07T15:20:58",
+    "news_score": 7.55,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "documents",
+      "society",
+      "politics"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "news",
+      "how_to",
+      "explainer"
+    ],
+    "editorial_angles": [
+      "что делать, если вам пришло уведомление о включении в избирательную комиссию",
+      "как законно отказаться от работы на участке и какие грозят штрафы",
+      "практические права членов избирательных комиссий: отгулы и выплаты"
+    ],
+    "why": [
+      "касается всех граждан с правом голоса и резидентов с испанским гражданством",
+      "высочайшая практическая ценность: жесткие штрафы и тюремные сроки за неявку",
+      "четкие инструкции по срокам подачи апелляций и компенсациям"
+    ],
+    "scores": {
+      "practical_value": 9,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T14:35:29"
+  },
+  "762479": {
+    "title": "La Guardia Civil retira los dos últimos vagones de accidente ferroviario en Urda",
+    "url": "https://www.antena3.com/noticias/sociedad/ultima-hora-accidente-trenes-urda-toledo-directo-familias-tres-ultimas-victimas-accidente-urda-siguen-pendientes-recibir-sus-restos-mortales_202611076aeed4104196933d7ed42bd8.html",
+    "source": "https://www.antena3.com/",
+    "published_at": "",
+    "news_score": 7.45,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "transport",
+      "economy",
+      "jobs"
+    ],
+    "audience": [
+      "resident",
+      "general"
+    ],
+    "formats": [
+      "news",
+      "breaking",
+      "explainer",
+      "how_to"
+    ],
+    "editorial_angles": [
+      "как и кому подать заявку на компенсацию из-за железнодорожной катастрофы",
+      "коррупция и госконтракты: что выявила европейская прокуратура в Adif",
+      "транспортный коллапс в Испании: убытки регионов и угроза забастовок машинистов"
+    ],
+    "why": [
+      "крупная трагедия и системный кризис транспорта с масштабными последствиями для всей страны",
+      "наличие конкретных мер: порядок подачи заявок на компенсации и выплаты пострадавшим",
+      "параллельное расследование коррупции в сфере инфраструктуры и угроза забастовок"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 8,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T14:35:27"
+  },
+  "765020": {
+    "title": "Habitatge: massa preu per tant poc sou",
+    "url": "https://www.ara.cat/editorial/habitatge-massa-preu-tant-poc-sou_129_5902696.html",
+    "source": "https://www.ara.cat/rss/",
+    "published_at": "2026-11-07T18:06:49",
+    "news_score": 7.9,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "housing",
+      "cost_of_living",
+      "salaries",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "breaking",
+      "numbers",
+      "comparison",
+      "poll"
+    ],
+    "editorial_angles": [
+      "почему испанцы выходят на первую всеобщую забастовку при Санчесе: цифры и факты",
+      "аренда выросла на 70%, а зарплаты — на 30%: как экономика Испании пришла к такому кризису",
+      "чего ждать от всеобщей забастовки 11 ноября и как подготовиться жителям"
+    ],
+    "why": [
+      "всеобщая забастовка из-за роста стоимости жизни и цен на жилье затрагивает абсолютно всех жителей",
+      "сильный дисбаланс между ростом зарплат и аренды бьет по карману экспатов и резидентов",
+      "высокий потенциал для бурных обсуждений в комментариях и большой охват аудитории"
+    ],
+    "scores": {
+      "practical_value": 7,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T14:35:22"
+  },
+  "762591": {
+    "title": "¿Cuándo podrás jubilarte con el 100% a partir de 2027?",
+    "url": "https://www.cope.es/actualidad/economia/noticias/munoz-funcionario-seguridad-social-2027-jubilarse-65-anos-hay-acreditar-carrera-cotizacion-38-anos-6-meses-67-quienes-no-alcancen-ese-20261107_3467541.html",
+    "source": "https://www.cope.es/",
+    "published_at": "",
+    "news_score": 7.95,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "taxes",
+      "economy",
+      "jobs"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "explainer",
+      "how_to",
+      "numbers",
+      "guide"
+    ],
+    "editorial_angles": [
+      "сколько теперь нужно стажа для 100% пенсии с 2027 года",
+      "как изменятся отчисления MEI для работников и работодателей",
+      "пошаговый гид по проверке своих накопленного стажа в Seguridad Social"
+    ],
+    "why": [
+      "затрагивает будущие пенсии и стаж всех работающих в Испании",
+      "изменяются правила расчета и требования к отчислениям",
+      "высокая практическая значимость для планирования карьеры"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T14:35:19"
+  },
+  "759893": {
+    "title": "SMI, una subida positiva",
+    "url": "https://elpais.com/opinion/2026-11-07/smi-una-subida-positiva.html",
+    "source": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
+    "published_at": "2026-11-07T04:30:01",
+    "news_score": 7.95,
+    "tier": "🟡 GOOD",
+    "categories": [
+      "salaries",
+      "economy",
+      "cost_of_living"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "potential_immigrant"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers"
+    ],
+    "editorial_angles": [
+      "сколько теперь составит минималка и как это отразится на ценах и инфляции",
+      "как рост SMI повлияет на требования к доходам для продления ВНЖ и новых резидентов",
+      "почему работодатели критикуют решение и выиграют ли от него рядовые сотрудники"
+    ],
+    "why": [
+      "повышение минимальной зарплаты затрагивает миллионы работающих жителей страны",
+      "влияет на рынок труда, порог доходов для ряда виз и общую экономическую ситуацию",
+      "вызывает активные споры среди работодателей и наемных сотрудников"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T14:35:18"
+  },
+  "765065": {
+    "title": "El PNV confirma su voto al decreto de vivienda del Gobierno central mientras el alquiler cae un 27% en Euskadi",
+    "url": "https://www.moncloa.com/2026/11/07/pnv-decreto-vivienda-alquiler-euskadi-3463621/",
+    "source": "https://www.moncloa.com/feed/",
+    "published_at": "2026-11-07T18:22:44",
+    "news_score": 8.0,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "housing",
+      "economy",
+      "politics"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "numbers",
+      "poll"
+    ],
+    "editorial_angles": [
+      "что меняет новый декрет о жилье для арендаторов и собственников",
+      "почему рынок аренды падает после новых законов",
+      "борьба с фондами и регулирование цен: к чему готовиться снимающим жилье"
+    ],
+    "why": [
+      "жилищный вопрос и регулирование аренды касаются абсолютного большинства жителей",
+      "декрет затрагивает сезонную аренду и права собственников и нанимателей",
+      "вызывает горячие дискуссии из-за падения предложения на рынке"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T14:35:17"
+  },
+  "765696": {
+    "title": "25 consejos para optimizar la Renta antes de que termine el año",
+    "url": "https://www.expansion.com/economia/declaracion-renta/2026/11/07/25-consejos-optimizar-renta-termine-ano.html",
+    "source": "https://www.expansion.com/",
+    "published_at": "",
+    "news_score": 8.05,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "taxes",
+      "economy",
+      "jobs"
+    ],
+    "audience": [
+      "resident",
+      "immigrant"
+    ],
+    "formats": [
+      "how_to",
+      "guide",
+      "explainer",
+      "numbers"
+    ],
+    "editorial_angles": [
+      "как законно уменьшить налог IRPF до конца года: 25 советов",
+      "лайфхаки для autónomos: сэкономьте на налоговой декларации",
+      "ипотека и планы пенсий: что успеть сделать до 31 декабря"
+    ],
+    "why": [
+      "прямая финансовая выгода для налоговых резидентов Испании",
+      "четкий дедлайн до конца года для оптимизации налога IRPF",
+      "полезные практические советы для autónomos и владельцев ипотеки"
+    ],
+    "scores": {
+      "practical_value": 10,
+      "resident_relevance": 9,
+      "content_potential": 10
+    },
+    "saved_at": "2026-11-08T14:35:15"
+  },
+  "765300": {
+    "title": "Madrid no se olvida de Maricarmen un mes después de su fallecimiento",
+    "url": "https://www.elplural.com/politica/espana/madrid-no-olvida-maricarmen-mes-despues-fallecimiento_803594102",
+    "source": "https://www.elplural.com/",
+    "published_at": "",
+    "news_score": 8.05,
+    "tier": "🟠 HIGH",
+    "categories": [
+      "housing",
+      "society",
+      "economy"
+    ],
+    "audience": [
+      "resident",
+      "immigrant",
+      "family"
+    ],
+    "formats": [
+      "news",
+      "explainer",
+      "guide",
+      "poll"
+    ],
+    "editorial_angles": [
+      "кризис аренды в Испании: как трагедия в Мадриде подняла волну протестов",
+      "права арендаторов и старые контракты: что нужно знать, чтобы защитить свое жилье",
+      "общественная реакция и подготовка к забастовке: требования протестующих к властям"
+    ],
+    "why": [
+      "острейшая проблема аренды и жилья, касающаяся каждого жителя Испании",
+      "трагический прецедент вызвал массовые протесты и угрозу общенациональной забастовки",
+      "высокий уровень практического значения и эмоционального отклика у аудитории"
+    ],
+    "scores": {
+      "practical_value": 8,
+      "resident_relevance": 9,
+      "content_potential": 9
+    },
+    "saved_at": "2026-11-08T14:35:14"
+  },
   "766545": {
     "title": "Análisis de la evolución del salario mínimo en España: sube un 86% en los últimos diez años mientras el medio sólo crece un 32%",
     "url": "https://www.elespanol.com/invertia/economia/empleo/20261108/analisis-evolucion-salario-minimo-espana-sube-ultimos-anos-medio-solo-crece/1003744449766_0.html",
@@ -470,45 +3040,6 @@
     },
     "saved_at": "2026-11-08T11:37:29"
   },
-  "767411": {
-    "title": "¿Harto del ruido de tus vecinos? Los casos en los que puedes reclamar",
-    "url": "https://www.elcorreo.com/vivir/tendencias/harto-ruido-tus-vecinos-casos-puedes-reclamar-20261108000238-ntrc.html",
-    "source": "https://www.elcorreo.com/rss/2.0/portada/",
-    "published_at": "2026-11-08T07:28:47",
-    "news_score": 7.35,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "society",
-      "documents"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "how_to",
-      "explainer",
-      "guide"
-    ],
-    "editorial_angles": [
-      "как законно наказать шумных соседей и отсудить деньги за собачий лай",
-      "какие децибелы считаются нормой по закону о шуме в Испании",
-      "пошаговый алгоритм действий: куда жаловаться, если мирные переговоры не работают"
-    ],
-    "why": [
-      "Проблема шумных соседей касается абсолютного большинства жителей многоквартирных домов в Испании",
-      "Четкие юридические критерии, децибелы и суммы штрафов дают прямую практическую пользу",
-      "Отличный материал для сохранения в закладки и бурных обсуждений в комментариях"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:28"
-  },
   "761484": {
     "title": "El Gobierno fija que al menos el 20% de las gasolineras abra el 11 de noviembre por la huelga general",
     "url": "https://www.economiadigital.es/empresas/gobierno-fija-20-gasolineras-abra-11-noviembre-huelga-general.html",
@@ -547,85 +3078,6 @@
       "content_potential": 8
     },
     "saved_at": "2026-11-08T11:37:27"
-  },
-  "768859": {
-    "title": "El Gobierno invita, la empresa paga: Yolanda Díaz decreta otro subidón del SMI pero no que haya dinero para pagarlo",
-    "url": "https://www.eldebate.com/economia/20261108/gobierno-invita-empresa-paga-yolanda-diaz-decreta-otro-subidon-smi-no-haya-dinero-pagarlo_477979.html",
-    "source": "https://www.eldebate.com/",
-    "published_at": "",
-    "news_score": 7.4,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "salaries",
-      "jobs",
-      "economy",
-      "taxes"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers",
-      "poll"
-    ],
-    "editorial_angles": [
-      "на сколько вырастет минимальная зарплата в ближайшие годы и коснется ли это вас",
-      "расходы для малого бизнеса: почему рост SMI пугает предпринимателей",
-      "сравнение темпов роста зарплат и реальной инфляции в стране"
-    ],
-    "why": [
-      "Затрагивает доходы и занятость миллионов наемных работников в Испании",
-      "Вызывает ожесточенные споры между профсоюзами, правительством и бизнесом",
-      "Прямо влияет на экономическую ситуацию и стоимость труда в стране"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:26"
-  },
-  "766786": {
-    "title": "Las nueve rutas para entrar y salir de Madrid en los 43 días de corte de la A-5",
-    "url": "https://www.20minutos.es/madrid/las-nueve-rutas-para-entrar-salir-madrid-los-43-dias-corte-5-m-40-42-general-ricardos-puente-los-franceses_7058120_0.html",
-    "source": "https://www.20minutos.es/rss/",
-    "published_at": "2026-11-08T06:58:27",
-    "news_score": 7.4,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "transport",
-      "cars"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "breaking",
-      "how_to",
-      "guide"
-    ],
-    "editorial_angles": [
-      "транспортный коллапс в Мадриде: гид по объездам на ближайшие 43 дня",
-      "как перекрытие A-5 повлияет на работу городского транспорта и метро",
-      "чек-лист для водителей: лучшие альтернативные маршруты в час пик"
-    ],
-    "why": [
-      "критически важно для 80 000 водителей ежедневно в Мадриде",
-      "высокая срочность: перекрытие ключевой трассы начинается немедленно",
-      "конкретные альтернативные маршруты и усиление общественного транспорта"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:25"
   },
   "761106": {
     "title": "Llega a España un adhesivo para uñas que previene la sumisión química en las bebidas",
@@ -666,83 +3118,6 @@
     },
     "saved_at": "2026-11-08T11:37:24"
   },
-  "767042": {
-    "title": "María Cristina Clemente, notaria: “Nunca aconsejaría a una persona de 70 u 80 años que haga donación de sus bienes”",
-    "url": "https://okdiario.com/economia/maria-cristina-clemente-notaria-nunca-aconsejaria-persona-70-u-80-anos-que-haga-donacion-sus-bienes-20714955",
-    "source": "https://okdiario.com/feed",
-    "published_at": "2026-11-08T07:15:41",
-    "news_score": 7.45,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "taxes",
-      "housing",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "family"
-    ],
-    "formats": [
-      "explainer",
-      "guide",
-      "news"
-    ],
-    "editorial_angles": [
-      "почему нотариусы запрещают пенсионерам дарить имущество при жизни",
-      "налоги и риски: чем дарственная опаснее завещания в Испании",
-      "как защитить свои активы и обеспечить старость без потери жилья"
-    ],
-    "why": [
-      "критически важный юридический и финансовый вопрос для пожилых людей и их семей",
-      "прямое предупреждение о рисках потери контроля над имуществом и налоговых ловушках",
-      "высокая практическая польза для долгосрочного планирования наследства в Испании"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:23"
-  },
-  "762479": {
-    "title": "La Guardia Civil retira los dos últimos vagones de accidente ferroviario en Urda",
-    "url": "https://www.antena3.com/noticias/sociedad/ultima-hora-accidente-trenes-urda-toledo-directo-familias-tres-ultimas-victimas-accidente-urda-siguen-pendientes-recibir-sus-restos-mortales_202611076aeed4104196933d7ed42bd8.html",
-    "source": "https://www.antena3.com/",
-    "published_at": "",
-    "news_score": 7.45,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "transport",
-      "economy",
-      "jobs"
-    ],
-    "audience": [
-      "resident",
-      "general"
-    ],
-    "formats": [
-      "news",
-      "breaking",
-      "explainer",
-      "how_to"
-    ],
-    "editorial_angles": [
-      "как и кому подать заявку на компенсацию из-за железнодорожной катастрофы",
-      "коррупция и госконтракты: что выявила европейская прокуратура в Adif",
-      "транспортный коллапс в Испании: убытки регионов и угроза забастовок машинистов"
-    ],
-    "why": [
-      "крупная трагедия и системный кризис транспорта с масштабными последствиями для всей страны",
-      "наличие конкретных мер: порядок подачи заявок на компенсации и выплаты пострадавшим",
-      "параллельное расследование коррупции в сфере инфраструктуры и угроза забастовок"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:21"
-  },
   "762316": {
     "title": "Colau llama a la huelga general y pide el voto para que Frente Amplio garantice la vivienda",
     "url": "https://cadenaser.com/nacional/2026/11/07/ada-colau-llama-a-la-huelga-general-y-pide-el-voto-para-que-frente-amplio-gobierne-y-garantice-el-derecho-a-la-vivienda-cadena-ser/",
@@ -782,204 +3157,6 @@
       "content_potential": 9
     },
     "saved_at": "2026-11-08T11:37:20"
-  },
-  "762156": {
-    "title": "Llega a España un adhesivo para las uñas que cambia de color si detecta éxtasis líquido en la bebida",
-    "url": "https://www.eldebate.com/sociedad/20261107/llega-espana-adhesivo-cambia-color-detecta-extasis-liquido-bebida_478475.html",
-    "source": "https://www.eldebate.com/",
-    "published_at": "",
-    "news_score": 7.45,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "consumer",
-      "healthcare",
-      "interesting_spain"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "tourist",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "how_to",
-      "explainer",
-      "interesting_fact"
-    ],
-    "editorial_angles": [
-      "как работают новые наклейки для проверки напитков на экстази",
-      "проблема скрытой преступности и химического насилия в ночной жизни Испании",
-      "где купить и сколько стоят стикеры для безопасности на вечеринках"
-    ],
-    "why": [
-      "высокая практическая польза для защиты от химического насилия в клубах и на фестивалях",
-      "отличный инновационный продукт, актуальный для молодежи и родителей",
-      "высокий потенциал для сохранения в закладки и бурного обсуждения"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 7,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:19"
-  },
-  "767744": {
-    "title": "Feijóo derogará la Ley de Memoria Democrática por una de Concordia, que mantendrá la búsqueda de las fosas",
-    "url": "https://www.elindependiente.com/espana/2026/11/07/feijoo-derogara-la-ley-de-memoria-democratica-por-una-de-concordia-que-mantendra-la-busqueda-de-las-fosas/",
-    "source": "https://www.elindependiente.com/feed/",
-    "published_at": "2026-11-06T23:02:39",
-    "news_score": 7.5,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "immigration",
-      "documents",
-      "politics"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "guide"
-    ],
-    "editorial_angles": [
-      "что будет с законом о внуках, если к власти придет PP",
-      "детальный разбор инициативы замены Закона о демократической памяти",
-      "инструкция для тех, кто сейчас подает документы на гражданство по новой системе"
-    ],
-    "why": [
-      "прямо затрагивает потенциальную отмену или пересмотр 'закона о внуках', важного для иммигрантов",
-      "высокая практическая значимость для лиц, оформляющих гражданство по происхождению",
-      "вызовет активные споры среди русскоязычного экспатского сообщества"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 7,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:18"
-  },
-  "763533": {
-    "title": "El teórico de conducir de la DGT se puede hacer sin pasar por la autoescuela",
-    "url": "https://www.20minutos.es/motor/movilidad/examen-teorico-conducir-dgt-se-puede-hacer-sin-pasar-por-autoescuela_7057648_0.html",
-    "source": "https://www.20minutos.es/rss/",
-    "published_at": "2026-11-07T19:00:00",
-    "news_score": 7.5,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "documents",
-      "transport",
-      "cars"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant"
-    ],
-    "formats": [
-      "how_to",
-      "guide",
-      "explainer"
-    ],
-    "editorial_angles": [
-      "как сдать на права в Испании самостоятельно и сэкономить сотни евро",
-      "пошаговый алгоритм: от справки до электронной записи в DGT",
-      "подводные камни самоподготовки: почему многие все равно идут в автошколу"
-    ],
-    "why": [
-      "актуально для каждого, кто планирует сдавать на права в Испании",
-      "реальная экономия денег на автошколе",
-      "пошаговая инструкция с конкретными суммами и ссылками"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 10
-    },
-    "saved_at": "2026-11-08T11:37:17"
-  },
-  "760502": {
-    "title": "¿Hasta cuándo me pueden notificar que soy miembro de una mesa electoral?",
-    "url": "https://www.diariosur.es/nacional/notificaciones-aviso-miembro-mesa-electoral-plazos-alegaciones-20261107162024-nt.html",
-    "source": "https://www.diariosur.es/rss/2.0/portada/",
-    "published_at": "2026-11-07T15:20:58",
-    "news_score": 7.55,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "documents",
-      "society",
-      "politics"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "how_to",
-      "explainer"
-    ],
-    "editorial_angles": [
-      "что делать, если вам пришло уведомление о включении в избирательную комиссию",
-      "как законно отказаться от работы на участке и какие грозят штрафы",
-      "практические права членов избирательных комиссий: отгулы и выплаты"
-    ],
-    "why": [
-      "касается всех граждан с правом голоса и резидентов с испанским гражданством",
-      "высочайшая практическая ценность: жесткие штрафы и тюремные сроки за неявку",
-      "четкие инструкции по срокам подачи апелляций и компенсациям"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:16"
-  },
-  "767522": {
-    "title": "España ante el 11-N: las incógnitas de una huelga general inédita",
-    "url": "https://www.lavanguardia.com/economia/20261108/11678819/espana-11-n-incognitas-huelga-general-inedita.html",
-    "source": "https://www.lavanguardia.com/rss/home",
-    "published_at": "2026-11-08T05:00:00",
-    "news_score": 7.6,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "transport",
-      "society"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "breaking",
-      "explainer",
-      "how_to"
-    ],
-    "editorial_angles": [
-      "чего ждать от общенациональной забастовки 11 ноября и как это повлияет на работу",
-      "кризис аренды в Испании дошел до точки кипения: требования протестующих",
-      "как подготовиться к транспортным сбоям и перебоям в сервисах"
-    ],
-    "why": [
-      "общенациональная забастовка из-за кризиса жилья затрагивает всех жителей",
-      "высокая срочность и практическое значение для планирования поездок и работы",
-      "жигучая тема стоимости аренды и социальной напряженности"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:15"
   },
   "761535": {
     "title": "Colau: “Señora marquesa Cayetana. A usted y a sus amigos pijos les vamos a freír a impuestos”",
@@ -1098,45 +3275,6 @@
     },
     "saved_at": "2026-11-08T11:37:11"
   },
-  "767956": {
-    "title": "Renegociar la hipoteca y ahorrar 9.000 euros",
-    "url": "https://www.diariovasco.com/economia/tu-bolsillo/renegociar-hipoteca-ahorrar-9000-euros-20261108001056-nt.html",
-    "source": "https://www.diariovasco.com/rss/2.0/portada/",
-    "published_at": "2026-11-07T23:10:56",
-    "news_score": 7.7,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "banking",
-      "housing",
-      "cost_of_living"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "explainer",
-      "how_to",
-      "numbers",
-      "guide"
-    ],
-    "editorial_angles": [
-      "как сэкономить 9000 евро на пересмотре старой ипотеки в Испании",
-      "новация против субРОгации: какой способ смены условий по кредиту выбрать",
-      "пошаговый алгоритм общения с банком при снижении процентной ставки"
-    ],
-    "why": [
-      "Касается всех владельцев ипотеки в Испании на фоне изменения ставок",
-      "Высокая практическая польза: конкретные советы по экономии до 9000 евро",
-      "Отличный материал для сохранения в закладки и детального разбора"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 10
-    },
-    "saved_at": "2026-11-08T11:37:10"
-  },
   "761895": {
     "title": "El PNV y el agujero negro del alquiler",
     "url": "https://www.elmundo.es/opinion/editorial/2026/11/07/6aee09c0e9cf4ae17b8b4581.html",
@@ -1175,45 +3313,6 @@
       "content_potential": 9
     },
     "saved_at": "2026-11-08T11:37:09"
-  },
-  "767950": {
-    "title": "«Cuando te estafan por teléfono, te hace daño una voz, es un fantasma que te destruye la vida»",
-    "url": "https://www.diariovasco.com/gipuzkoa/victima-ciberestafa-telefono-20261108111618-nt.html",
-    "source": "https://www.diariovasco.com/rss/2.0/portada/",
-    "published_at": "2026-11-08T05:24:36",
-    "news_score": 7.85,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "banking",
-      "consumer",
-      "crime"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "how_to"
-    ],
-    "editorial_angles": [
-      "новая схема телефонных мошенников в Испании: как SMS попадают в официальную цепочку банка",
-      "что делать, если мошенники оформили на ваше имя кредит в испанском банке",
-      "почему банки отказываются возвращать деньги и как доказать свою невиновность в суде"
-    ],
-    "why": [
-      "крайне опасный и изощренный вид мошенничества с подменой официальных номеров банков",
-      "огромный финансовый и психологический ущерб для жертвы",
-      "сильный эмоциональный триггер и полезный урок по кибербезопасности для всех экспатов"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:08"
   },
   "765052": {
     "title": "El fraude en pagos digitales suma 300 millones al año en España: la Policía Nacional alerta de nuevos frentes legales",
@@ -1254,323 +3353,6 @@
       "content_potential": 9
     },
     "saved_at": "2026-11-08T11:37:07"
-  },
-  "765020": {
-    "title": "Habitatge: massa preu per tant poc sou",
-    "url": "https://www.ara.cat/editorial/habitatge-massa-preu-tant-poc-sou_129_5902696.html",
-    "source": "https://www.ara.cat/rss/",
-    "published_at": "2026-11-07T18:06:49",
-    "news_score": 7.9,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "salaries",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "breaking",
-      "numbers",
-      "comparison",
-      "poll"
-    ],
-    "editorial_angles": [
-      "почему испанцы выходят на первую всеобщую забастовку при Санчесе: цифры и факты",
-      "аренда выросла на 70%, а зарплаты — на 30%: как экономика Испании пришла к такому кризису",
-      "чего ждать от всеобщей забастовки 11 ноября и как подготовиться жителям"
-    ],
-    "why": [
-      "всеобщая забастовка из-за роста стоимости жизни и цен на жилье затрагивает абсолютно всех жителей",
-      "сильный дисбаланс между ростом зарплат и аренды бьет по карману экспатов и резидентов",
-      "высокий потенциал для бурных обсуждений в комментариях и большой охват аудитории"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:06"
-  },
-  "762591": {
-    "title": "¿Cuándo podrás jubilarte con el 100% a partir de 2027?",
-    "url": "https://www.cope.es/actualidad/economia/noticias/munoz-funcionario-seguridad-social-2027-jubilarse-65-anos-hay-acreditar-carrera-cotizacion-38-anos-6-meses-67-quienes-no-alcancen-ese-20261107_3467541.html",
-    "source": "https://www.cope.es/",
-    "published_at": "",
-    "news_score": 7.95,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "taxes",
-      "economy",
-      "jobs"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "explainer",
-      "how_to",
-      "numbers",
-      "guide"
-    ],
-    "editorial_angles": [
-      "сколько теперь нужно стажа для 100% пенсии с 2027 года",
-      "как изменятся отчисления MEI для работников и работодателей",
-      "пошаговый гид по проверке своих накопленного стажа в Seguridad Social"
-    ],
-    "why": [
-      "затрагивает будущие пенсии и стаж всех работающих в Испании",
-      "изменяются правила расчета и требования к отчислениям",
-      "высокая практическая значимость для планирования карьеры"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:05"
-  },
-  "759893": {
-    "title": "SMI, una subida positiva",
-    "url": "https://elpais.com/opinion/2026-11-07/smi-una-subida-positiva.html",
-    "source": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
-    "published_at": "2026-11-07T04:30:01",
-    "news_score": 7.95,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "salaries",
-      "economy",
-      "cost_of_living"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers"
-    ],
-    "editorial_angles": [
-      "сколько теперь составит минималка и как это отразится на ценах и инфляции",
-      "как рост SMI повлияет на требования к доходам для продления ВНЖ и новых резидентов",
-      "почему работодатели критикуют решение и выиграют ли от него рядовые сотрудники"
-    ],
-    "why": [
-      "повышение минимальной зарплаты затрагивает миллионы работающих жителей страны",
-      "влияет на рынок труда, порог доходов для ряда виз и общую экономическую ситуацию",
-      "вызывает активные споры среди работодателей и наемных сотрудников"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:04"
-  },
-  "765065": {
-    "title": "El PNV confirma su voto al decreto de vivienda del Gobierno central mientras el alquiler cae un 27% en Euskadi",
-    "url": "https://www.moncloa.com/2026/11/07/pnv-decreto-vivienda-alquiler-euskadi-3463621/",
-    "source": "https://www.moncloa.com/feed/",
-    "published_at": "2026-11-07T18:22:44",
-    "news_score": 8.0,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "housing",
-      "economy",
-      "politics"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers",
-      "poll"
-    ],
-    "editorial_angles": [
-      "что меняет новый декрет о жилье для арендаторов и собственников",
-      "почему рынок аренды падает после новых законов",
-      "борьба с фондами и регулирование цен: к чему готовиться снимающим жилье"
-    ],
-    "why": [
-      "жилищный вопрос и регулирование аренды касаются абсолютного большинства жителей",
-      "декрет затрагивает сезонную аренду и права собственников и нанимателей",
-      "вызывает горячие дискуссии из-за падения предложения на рынке"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:03"
-  },
-  "766658": {
-    "title": "Motivos y riesgos de una huelga general atípica que pretende marcar “un antes y un después”",
-    "url": "https://elpais.com/espana/2026-11-08/motivos-y-riesgos-de-una-huelga-general-atipica-que-pretende-marcar-un-antes-y-un-despues.html",
-    "source": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
-    "published_at": "2026-11-08T04:30:01",
-    "news_score": 8.05,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "politics"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "breaking",
-      "explainer"
-    ],
-    "editorial_angles": [
-      "почему забастовка из-за аренды может изменить правила игры на рынке недвижимости",
-      "как досрочные выборы повлияют на законы об арендаторах и окупасах",
-      "чего ждать жителям от общенационального протеста: перекрытия, забастовки и меры безопасности"
-    ],
-    "why": [
-      "Жилищный кризис и высокие цены на аренду касаются практически каждого резидента в Испании",
-      "Объявление общенациональной забастовки на тему жилья и досрочные выборы — событие исключительного масштаба",
-      "Вызывает мощный резонанс, споры и прямо затрагивает финансовое положение семей"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:37:01"
-  },
-  "765696": {
-    "title": "25 consejos para optimizar la Renta antes de que termine el año",
-    "url": "https://www.expansion.com/economia/declaracion-renta/2026/11/07/25-consejos-optimizar-renta-termine-ano.html",
-    "source": "https://www.expansion.com/",
-    "published_at": "",
-    "news_score": 8.05,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "taxes",
-      "economy",
-      "jobs"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "how_to",
-      "guide",
-      "explainer",
-      "numbers"
-    ],
-    "editorial_angles": [
-      "как законно уменьшить налог IRPF до конца года: 25 советов",
-      "лайфхаки для autónomos: сэкономьте на налоговой декларации",
-      "ипотека и планы пенсий: что успеть сделать до 31 декабря"
-    ],
-    "why": [
-      "прямая финансовая выгода для налоговых резидентов Испании",
-      "четкий дедлайн до конца года для оптимизации налога IRPF",
-      "полезные практические советы для autónomos и владельцев ипотеки"
-    ],
-    "scores": {
-      "practical_value": 10,
-      "resident_relevance": 9,
-      "content_potential": 10
-    },
-    "saved_at": "2026-11-08T11:37:00"
-  },
-  "765300": {
-    "title": "Madrid no se olvida de Maricarmen un mes después de su fallecimiento",
-    "url": "https://www.elplural.com/politica/espana/madrid-no-olvida-maricarmen-mes-despues-fallecimiento_803594102",
-    "source": "https://www.elplural.com/",
-    "published_at": "",
-    "news_score": 8.05,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "housing",
-      "society",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "guide",
-      "poll"
-    ],
-    "editorial_angles": [
-      "кризис аренды в Испании: как трагедия в Мадриде подняла волну протестов",
-      "права арендаторов и старые контракты: что нужно знать, чтобы защитить свое жилье",
-      "общественная реакция и подготовка к забастовке: требования протестующих к властям"
-    ],
-    "why": [
-      "острейшая проблема аренды и жилья, касающаяся каждого жителя Испании",
-      "трагический прецедент вызвал массовые протесты и угрозу общенациональной забастовки",
-      "высокий уровень практического значения и эмоционального отклика у аудитории"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:36:59"
-  },
-  "767792": {
-    "title": "Prevén más reclamaciones de bancos a víctimas de ciberestafas",
-    "url": "https://www.diariodeburgos.es/noticia/z34ce7fed-4ad4-4363-8d674f6f96d1a2c8/202611/preven-mas-reclamaciones-de-bancos-a-victimas-de-ciberestafas",
-    "source": "http://www.diariodeburgos.es/RSS/DBPortada.xml",
-    "published_at": "2026-11-07T17:21:42",
-    "news_score": 8.1,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "banking",
-      "consumer",
-      "economy",
-      "justice"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "how_to",
-      "guide"
-    ],
-    "editorial_angles": [
-      "как вернуть украденные с карты деньги: новые правила банков",
-      "суд ЕС обязал банки возмещать ущерб от фишинга: инструкция для пострадавших",
-      "банковская безопасность в Испании: почему теперь доказать вашу вину станет сложнее"
-    ],
-    "why": [
-      "решение TJUE напрямую защищает права всех банковских клиентов в Испании",
-      "высокая практическая ценность: что делать жертвам интернет-мошенников",
-      "меняет правила ответственности испанских банков при киберпреступлениях"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-08T11:36:58"
   },
   "759013": {
     "title": "Telefónica inicia el apagado de la red 3G, que acabará en 2027",
@@ -6078,1765 +7860,5 @@
       "content_potential": 9
     },
     "saved_at": "2026-11-04T14:50:09"
-  },
-  "727619": {
-    "title": "A un clic del extranjero: Banco Santander simplifica el envío internacional de dinero",
-    "url": "https://www.infolibre.es/hablemos-de-futuro/clic-extranjero-banco-santander-simplifica-envio-internacional-dinero_1_2239268.html",
-    "source": "https://www.infolibre.es/",
-    "published_at": "",
-    "news_score": 7.75,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "banking",
-      "cost_of_living",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant"
-    ],
-    "formats": [
-      "news",
-      "how_to",
-      "explainer"
-    ],
-    "editorial_angles": [
-      "как теперь переводить деньги за границу без комиссий через Santander",
-      "какие скрытые условия нужно учесть при международных переводах",
-      "сравнение новых условий Santander с конкурентами и платежными системами"
-    ],
-    "why": [
-      "касается клиентов одного из крупнейших банков Испании (Banco Santander)",
-      "отмена комиссий SWIFT и бесплатные переводы за рубеж — высокая практическая выгода",
-      "актуально для экспатов, отправляющих деньги домой или за границу"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-04T14:50:08"
-  },
-  "727447": {
-    "title": "Se acaba la tregua para los propietarios de coches sin etiqueta: El Gobierno obliga a los ayuntamientos a multarlos",
-    "url": "https://www.eldebate.com/motor/20261103/acaba-tregua-propietarios-coches-etiqueta-gobierno-obliga-ayuntamientos-multarlos_476513.html",
-    "source": "https://www.eldebate.com/",
-    "published_at": "",
-    "news_score": 7.75,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "cars",
-      "transport",
-      "cost_of_living"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "how_to"
-    ],
-    "editorial_angles": [
-      "кого коснутся новые обязательные штрафы за машины без экометок",
-      "как проверить свою машину и какие города обязали ввести Зоны низких выбросов",
-      "что делать водителям старых авто: продавать, менять или ждать санкций"
-    ],
-    "why": [
-      "задевает всех владельцев старых автомобилей в Испании",
-      "прямая угроза штрафа в 200 евро и жесткие требования к муниципалитетам",
-      "высокая практическая ценность для автомобилистов с необходимостью проверки экологической марки"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-04T14:50:07"
-  },
-  "727929": {
-    "title": "El alquiler sube otro 5,6% en octubre y la presión se traslada de las grandes urbes a las ciudades medianas",
-    "url": "https://www.larazon.es/economia/alquiler-sube-otro-56-octubre-presion-traslada-grandes-urbes-ciudades-mediandas_202611036ae9b2910250123215722284.html",
-    "source": "https://www.larazon.es/",
-    "published_at": "",
-    "news_score": 7.85,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers",
-      "comparison"
-    ],
-    "editorial_angles": [
-      "почему аренда продолжает дорожать несмотря на ограничения",
-      "куда перетекает спрос: топ регионов с самым резким ростом цен",
-      "сколько теперь стоит квадратный метр в разных провинциях"
-    ],
-    "why": [
-      "аренда жилья — одна из самых болезненных тем для всех экспатов и резидентов",
-      "показывает тренд роста цен и сдвиг спроса в средние города",
-      "вызывает огромный отклик и дискуссии в комментариях"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-04T14:50:04"
-  },
-  "728477": {
-    "title": "El BOE lo hace oficial y se aplicará el 29N: penas de cárcel y multas por no acudir a una mesa electoral si te ha tocado ser presidente, vocal o suplente en las Elecciones Generales",
-    "url": "https://www.laprovincia.es/canarias/2026/11/03/boe-oficial-aplicara-29n-penas-carcel-elecciones-generales-dv-136016130.html",
-    "source": "https://www.laprovincia.es/",
-    "published_at": "",
-    "news_score": 7.9,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "documents",
-      "society",
-      "politics"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "how_to",
-      "explainer"
-    ],
-    "editorial_angles": [
-      "Выпал жребий быть членом избирательной комиссии: что делать и как отказаться законно",
-      "Штрафы и тюрьма за прогул выборов: разбираем новые правила из BOE",
-      "Список уважительных причин для освобождения от работы на участках"
-    ],
-    "why": [
-      "Касается обладателей испанского гражданства (иностранцы без паспорта Испании не привлекаются к выборам, но резиденты с паспортом — да)",
-      "Жесткие штрафы и тюремные сроки за неявку на избирательный участок",
-      "Подробный разбор уважительных причин и сроков подачи апелляций"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-04T14:50:03"
-  },
-  "726467": {
-    "title": "Hacienda pasa el segundo cobro del IRPF: cuándo es, cómo pagarlo si no lo domiciliaste y posibles multas",
-    "url": "https://www.elindependiente.com/economia/2026/11/03/hacienda-pasa-segundo-cobro-irpf-cuando-como-pagarlo/",
-    "source": "https://www.elindependiente.com/feed/",
-    "published_at": "2026-11-03T13:12:19",
-    "news_score": 7.95,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "taxes",
-      "documents"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "how_to",
-      "explainer"
-    ],
-    "editorial_angles": [
-      "Как и когда платить второй взнос IRPF",
-      "Что делать, если пропустил списание со счета"
-    ],
-    "why": [
-      "Касается всех налоговых резидентов Испании, бравших рассрочку по IRPF",
-      "Прямая практическая польза и дедлайн платежа"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-04T14:50:00"
-  },
-  "726174": {
-    "title": "La Seguridad Social triplica la duración de la prestación por cuidado de menores con cáncer o enfermedad grave",
-    "url": "https://www.elcorreo.com/economia/seguridad-social-triplica-duracion-prestacion-cuidado-menores-20261103172700-ntrc.html",
-    "source": "https://www.elcorreo.com/rss/2.0/portada/",
-    "published_at": "2026-11-03T16:37:54",
-    "news_score": 8.05,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "family",
-      "healthcare",
-      "documents",
-      "social"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "how_to",
-      "explainer",
-      "guide"
-    ],
-    "editorial_angles": [
-      "как оформить расширенное пособие по уходу за ребенком в Испании",
-      "какие новые заболевания вошли в обновленный королевский декрет",
-      "условия получения выплат для родителей в разводе или с совместной опекой"
-    ],
-    "why": [
-      "значительное улучшение социальных условий для семей с тяжелобольными детьми",
-      "расширение списка диагнозов (включая TEA) и увеличение сроков выплат",
-      "высокая практическая польза и важность для родителей-резидентов"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-04T14:49:59"
-  },
-  "727761": {
-    "title": "El precio del alquiler crece un 5,6% interanual en octubre: ¿qué capitales lideran las subidas?",
-    "url": "https://www.expansion.com/inmobiliario/mercado-inmobiliario/2026/11/03/precio-alquiler-crece-5-6-interanual-octubre-capitales-lideran-subidas.html",
-    "source": "https://www.expansion.com/",
-    "published_at": "",
-    "news_score": 8.15,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers",
-      "comparison"
-    ],
-    "editorial_angles": [
-      "где в Испании аренда выросла сильнее всего: итоги октября",
-      "сколько стоит квадратный метр в Мадриде, Барселоне и других провинциях",
-      "как защитить себя от резкого повышения цен при продлении контракта"
-    ],
-    "why": [
-      "касается практически каждого арендатора жилья в Испании",
-      "публикация свежих данных по всем ключевым городам и регионам с ростом цен",
-      "высокий уровень обсуждения и сильное эмоциональное влияние на экспатов"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-04T14:49:58"
-  },
-  "725373": {
-    "title": "Los conceptos de Bizum que pueden provocar que salten las alarmas en Hacienda",
-    "url": "https://www.20minutos.es/lainformacion/economia-y-finanzas/cinco-conceptos-bizum-pueden-hacer-saltar-alarmas-hacienda_7056478_0.html",
-    "source": "https://www.20minutos.es/rss/",
-    "published_at": "2026-11-03T11:23:37",
-    "news_score": 8.4,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "banking",
-      "taxes",
-      "documents"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant"
-    ],
-    "formats": [
-      "explainer",
-      "how_to",
-      "guide"
-    ],
-    "editorial_angles": [
-      "какие слова в Bizum привлекают внимание налоговой",
-      "как правильно подписывать переводы друзьям и родственникам",
-      "когда неофициальные переводы могут стать поводом для проверки"
-    ],
-    "why": [
-      "Bizum используется практически каждым жителем Испании ежедневно",
-      "прямой риск привлечь внимание налоговой (Hacienda) из-за неправильных формулировок",
-      "высокая практическая польза и огромный потенциал для сохранения в закладки"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 9,
-      "content_potential": 10
-    },
-    "saved_at": "2026-11-04T14:49:57"
-  },
-  "722521": {
-    "title": "¿Cómo saber si me ha tocado ser parte de una mesa electoral este 29-N?",
-    "url": "https://www.elcomercio.es/elecciones/generales/elecciones-generales-mesa-electoral-noviembre-20261102200234-nt.html",
-    "source": "https://www.elcomercio.es/rss/2.0/portada/",
-    "published_at": "2026-11-02T19:07:01",
-    "news_score": 7.5,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "documents",
-      "society"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "how_to"
-    ],
-    "editorial_angles": [
-      "как проверить, не попали ли вы в избирательную комиссию",
-      "какие штрафы грозят за игнорирование повестки и можно ли отказаться",
-      "что делать иностранцам с двойным гражданством"
-    ],
-    "why": [
-      "жеребьевка избирательных комиссий касается всех граждан Испании с правом голоса (включая обладателей испанского паспорта)",
-      "жесткие штрафы и угроза тюрьмы за неявку создают высокую срочность",
-      "отличный повод объяснить аудитории, как проверить себя в списках через Carpeta Ciudadana"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:17:07"
-  },
-  "722667": {
-    "title": "Los estafadores que usan la IA para crear el engaño perfecto",
-    "url": "https://www.ideal.es/granada/estafadores-usan-ia-crear-engano-perfecto-20261026234300-nt.html",
-    "source": "https://www.ideal.es/rss/2.0/portada/",
-    "published_at": "2026-11-02T22:43:00",
-    "news_score": 7.55,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "banking",
-      "consumer",
-      "crime"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant",
-      "family",
-      "general"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "how_to"
-    ],
-    "editorial_angles": [
-      "как распознать инвестиционное мошенничество с дипфейками",
-      "какие новые схемы используют мошенники в Испании",
-      "как защитить свои банковские счета от удаленного доступа"
-    ],
-    "why": [
-      "масштабная схема мошенничества с использованием ИИ и deepfakes",
-      "высокая практическая польза: предупреждение уязвимых групп (пенсионеров, экспатов)",
-      "высокий потенциал для обсуждения и предупреждения финансовых потерь"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:17:05"
-  },
-  "721844": {
-    "title": "Un agente inmobiliario quiere cobrarnos por enseñarnos un piso. ¿Es normal?",
-    "url": "https://elpais.com/economia/vivienda/consultorio/2026-11-03/un-agente-inmobiliario-quiere-cobrarnos-por-ensenarnos-un-piso-es-normal.html",
-    "source": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
-    "published_at": "2026-11-03T04:30:00",
-    "news_score": 7.55,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "consumer"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant",
-      "family"
-    ],
-    "formats": [
-      "explainer",
-      "how_to",
-      "guide"
-    ],
-    "editorial_angles": [
-      "имеет ли право риелтор в Испании брать деньги за просмотр квартиры",
-      "как не платить комиссию агентству незаконно: памятка для арендаторов и покупателей"
-    ],
-    "why": [
-      "очень частый вопрос и проблема для всех, кто ищет жилье в аренду или покупку в Испании",
-      "высокая практическая польза: четкое объяснение законности требований агентств недвижимости",
-      "помогает защитить права потребителей и избежать незаконных поборов"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:17:04"
-  },
-  "723557": {
-    "title": "El trámite online exacto para asegurar el reembolso de tu billete tras el caos de cancelaciones ferroviarias",
-    "url": "https://www.moncloa.com/2026/11/03/billete-reembolso-cancelaciones-3460542/",
-    "source": "https://www.moncloa.com/feed/",
-    "published_at": "2026-11-03T05:43:12",
-    "news_score": 7.6,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "transport",
-      "consumer",
-      "documents"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "tourist"
-    ],
-    "formats": [
-      "how_to",
-      "guide",
-      "news"
-    ],
-    "editorial_angles": [
-      "пошаговый алгоритм возврата денег за билет при задержке поездов",
-      "какие компенсации положены по закону и как их получить без нервов",
-      "сохраните в закладки: что делать при коллапсе на транспорте"
-    ],
-    "why": [
-      "прямая пошаговая инструкция для возврата денег за отмененные поезда",
-      "высокая практическая польза для всех, кто путешествует по Испании"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:17:00"
-  },
-  "722719": {
-    "title": "Así mejorará nuestra conexión a internet a partir de enero… por ley",
-    "url": "https://www.elcorreo.com/vivir/tecnologia/mejorara-conexion-internet-partir-enero-ley-20261103181243-ntrc.html",
-    "source": "https://www.elcorreo.com/rss/2.0/portada/",
-    "published_at": "2026-11-03T06:17:30",
-    "news_score": 7.6,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "cost_of_living",
-      "consumer",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "guide"
-    ],
-    "editorial_angles": [
-      "высокоскоростной интернет по закону: что изменится для абонентов с января",
-      "как получить скидку на интернет в Испании малоимущим"
-    ],
-    "why": [
-      "изменение закона затрагивает качество связи и минимальную скорость интернета по всей стране",
-      "предусмотрены скидки для уязвимых слоев населения с низкими доходами",
-      "высокая практическая ценность для жителей сельской местности и тех, кто ждет улучшения связи"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:59"
-  },
-  "721976": {
-    "title": "Otra vez sin gestión, sin responsabilidad: ¿dónde está el dinero?",
-    "url": "https://www.20minutos.es/nacional/otra-vez-sin-gestion-sin-responsabilidad-donde-esta-dinero-accidente-urda-pilar-garcia-granja_7056278_3.html",
-    "source": "https://www.20minutos.es/rss/",
-    "published_at": "2026-11-03T04:01:37",
-    "news_score": 7.6,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "transport",
-      "society",
-      "politics"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "general"
-    ],
-    "formats": [
-      "breaking",
-      "news",
-      "numbers"
-    ],
-    "editorial_angles": [
-      "катастрофическая авария поезда: вопросы к безопасности испанской ж/д сети",
-      "статистика инвестиций в инфраструктуру на фоне трагедии"
-    ],
-    "why": [
-      "масштабная трагедия на железной дороге с большим количеством жертв",
-      "критически важная тема безопасности транспорта и инфраструктуры в стране"
-    ],
-    "scores": {
-      "practical_value": 6,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:58"
-  },
-  "724310": {
-    "title": "El abogado Ignacio de la Calzada detalla las claves imprescindibles al cambiar de empleo: del preaviso obligatorio a la trampa de pactar en neto",
-    "url": "https://www.larazon.es/economia/abogado-ignacio-calzada-detalla-claves-imprescindibles-cambiar-empleo-preaviso-obligatorio-trampa-pactar-neto-b51m_202611026ae8fa4d6973466c29e6c6e8.html",
-    "source": "https://www.larazon.es/",
-    "published_at": "",
-    "news_score": 7.65,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "jobs",
-      "salaries",
-      "taxes",
-      "documents"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant"
-    ],
-    "formats": [
-      "explainer",
-      "how_to",
-      "guide"
-    ],
-    "editorial_angles": [
-      "как правильно уволиться в Испании: преависо, брутто и ловушки контрактов",
-      "пошаговый алгоритм смены работы без потери денег и нервов"
-    ],
-    "why": [
-      "критически важные практические советы по смене работы в Испании",
-      "высокая ценность для экспатов, адаптирующихся к местному трудовому праву",
-      "идеально подходит для сохранения в закладки и обсуждения"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:55"
-  },
-  "724079": {
-    "title": "Renfe, Iryo y los maquinistas proponen una salvaguarda que habría parado la orden que causó el choque de Urda",
-    "url": "https://www.infolibre.es/politica/renfe-iryo-maquinistas-proponen-salvaguarda-habria-parado-orden-causo-choque-urda_1_2239391.html",
-    "source": "https://www.infolibre.es/",
-    "published_at": "",
-    "news_score": 7.65,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "transport",
-      "safety"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "tourist"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "guide"
-    ],
-    "editorial_angles": [
-      "новые правила безопасности на скоростных поездах Испании",
-      "насколько безопасен испанский AVE после инцидентов",
-      "что предлагают машинисты для предотвращения аварий"
-    ],
-    "why": [
-      "касается безопасности железнодорожного транспорта, которым пользуются миллионы",
-      "громкая тема с крупной катастрофой в контексте обсуждения новых правил",
-      "высокий общественный резонанс и практическая значимость для путешествующих по Испании"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 8,
-      "content_potential": 8
-    },
-    "saved_at": "2026-11-03T21:16:54"
-  },
-  "722210": {
-    "title": "Antonio López, jubilado español de 72 años: «Cobro 2.500 euros netos al mes pero pienso que en unos años no habrá dinero para las pensiones»",
-    "url": "https://okdiario.com/economia/antonio-lopez-jubilado-espanol-72-anos-cobro-2-500-euros-netos-mes-pero-pienso-que-unos-anos-no-habra-dinero-pensiones-20681951",
-    "source": "https://okdiario.com/feed",
-    "published_at": "2026-11-03T06:45:32",
-    "news_score": 7.65,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "economy",
-      "immigration",
-      "salaries"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers",
-      "poll"
-    ],
-    "editorial_angles": [
-      "выживут ли пенсии в Испании: почему эксперты говорят о необходимости иммиграции",
-      "какой стаж нужен для выхода на пенсию в Испании в 2027 году",
-      "мнения экспатов: стоит ли рассчитывать на испанское государство в старости"
-    ],
-    "why": [
-      "крайне важная и обсуждаемая тема пенсионной системы и экономики Испании",
-      "напрямую затрагивает вопрос роли мигрантов в поддержании системы соцобеспечения",
-      "вызывает огромный резонанс и споры среди резидентов всех возрастов"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:53"
-  },
-  "723556": {
-    "title": "El aviso urgente de los meteorólogos tras el paso de ‘Adam’: 3 zonas que se inundarán hoy",
-    "url": "https://www.moncloa.com/2026/11/03/el-aviso-urgente-de-los-meteorologos-tras-el-paso-de-adam-3-zonas-que-se-inundaran-hoy-3460562/",
-    "source": "https://www.moncloa.com/feed/",
-    "published_at": "2026-11-03T06:06:00",
-    "news_score": 7.7,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "weather",
-      "transport",
-      "society"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "breaking",
-      "news",
-      "explainer"
-    ],
-    "editorial_angles": [
-      "какие зоны затронуты и где объявлен режим изоляции",
-      "как работают службы экстренного реагирования (UME) и что делать при угрозе наводнения",
-      "статус транспорта, дорог и отмена занятий в школах"
-    ],
-    "why": [
-      "критическое погодное предупреждение (красный уровень опасности, эвакуации)",
-      "прямо затрагивает безопасность жителей пострадавших регионов (Валенсия, Каталония, Балеары)",
-      "высокая срочность и практическая ценность для предотвращения угрозы жизни"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:51"
-  },
-  "721807": {
-    "title": "El Gobierno obliga a los ayuntamientos a multar ya a los coches contaminantes en las zonas de bajas emisiones",
-    "url": "https://elpais.com/clima-y-medio-ambiente/2026-11-03/el-gobierno-obliga-a-los-ayuntamientos-a-multar-ya-a-los-coches-contaminantes-en-las-zonas-de-bajas-emisiones.html",
-    "source": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
-    "published_at": "2026-11-03T04:30:01",
-    "news_score": 7.7,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "cars",
-      "transport",
-      "taxes"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "how_to",
-      "guide"
-    ],
-    "editorial_angles": [
-      "конец 'игрушечным' зонам ZBE: где теперь начнут массово штрафовать",
-      "как проверить свой автомобиль и избежать крупных штрафов в испанских городах",
-      "список городов, где ужесточаются правила въезда для старых машин"
-    ],
-    "why": [
-      "затрагивает миллионы автовладельцев в 151 муниципалитете Испании",
-      "прямо влияет на расходы водителей через обязательные штрафы в Зонах низких выбросов",
-      "высокий потенциал для создания практической инструкции и обсуждения"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:49"
-  },
-  "723582": {
-    "title": "El precio del alquiler en Barcelona marca récord: 17,13 euros/m² y los contratos caen un 10%",
-    "url": "https://www.moncloa.com/2026/11/03/precio-alquiler-barcelona-record-3460457/",
-    "source": "https://www.moncloa.com/feed/",
-    "published_at": "2026-11-02T23:31:59",
-    "news_score": 7.75,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "statistics"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "numbers",
-      "explainer",
-      "poll"
-    ],
-    "editorial_angles": [
-      "Сколько теперь стоит аренда в Барселоне и почему падают объемы новых договоров",
-      "Как работает сдерживание цен на практике: штрафы для ленлордов",
-      "Стоит ли ждать снижения цен или рынок продолжит перегреваться"
-    ],
-    "why": [
-      "Барселона — ключевой регион проживания нашей аудитории, рынок аренды критически важен",
-      "Цены бьют исторические рекорды, что напрямую бьет по карману экспатов и местных",
-      "Тема контроля аренды и санкций против крупных арендодателей вызывает бурные обсуждения"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:45"
-  },
-  "724943": {
-    "title": "Encuestas de las elecciones generales 2026: así han cambiado los sondeos tras la tragedia ferroviaria",
-    "url": "https://www.laprovincia.es/espana/2026/11/03/encuestas-elecciones-generales-espana-sondeos-119974426.html",
-    "source": "https://www.laprovincia.es/",
-    "published_at": "",
-    "news_score": 7.8,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "politics",
-      "housing",
-      "society"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "poll"
-    ],
-    "editorial_angles": [
-      "почему правительство объявило досрочные выборы",
-      "как смена власти может повлиять на рынок недвижимости и налоги",
-      "чего ждать иностранцам от нового расклада политических сил"
-    ],
-    "why": [
-      "досрочные всеобщие выборы в стране касаются каждого резидента",
-      "напрямую связано с кризисом жилищной политики и законами об аренде",
-      "вызывает ожесточенные споры и высокий уровень обсуждения в обществе"
-    ],
-    "scores": {
-      "practical_value": 5,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:42"
-  },
-  "723887": {
-    "title": "VídeoLa vivienda adelanta al coste de la vida como el principal problema de los españoles y ya preocupa al 64 %",
-    "url": "https://www.eldebate.com/economia/20261103/vivienda-adelanta-coste-vida-como-principal-problema-espanoles-preocupa-64_475810.html",
-    "source": "https://www.eldebate.com/",
-    "published_at": "",
-    "news_score": 7.9,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "economy",
-      "society",
-      "statistics"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "numbers",
-      "explainer",
-      "poll"
-    ],
-    "editorial_angles": [
-      "почему жилье обогнало инфляцию в качестве главной боли испанцев",
-      "кризис недвижимости и досрочные выборы: чего ждать арендаторам",
-      "главные проблемы современной Испании глазами самих жителей"
-    ],
-    "why": [
-      "жилье стало главным беспокойством для 64% жителей Испании",
-      "глобальная проблема рынка недвижимости, затрагивающая каждого арендатора и покупателя",
-      "высокий потенциал для обсуждения в комментариях и социальных сетях"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:39"
-  },
-  "722435": {
-    "title": "Fact-checking: ¿Es el alquiler temporal un “obstáculo para la vivienda asequible”?",
-    "url": "https://www.lavanguardia.com/economia/20261103/11673972/fact-checking-alquiler-temporal-obstaculo-vivienda-asequible-smr.html",
-    "source": "https://www.lavanguardia.com/rss/home",
-    "published_at": "2026-11-03T05:00:00",
-    "news_score": 7.95,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant",
-      "family"
-    ],
-    "formats": [
-      "explainer",
-      "numbers",
-      "comparison",
-      "poll"
-    ],
-    "editorial_angles": [
-      "как краткосрочная аренда убивает рынок долгосрочной",
-      "сколько зарабатывают собственники и сколько теряют арендаторы",
-      "что говорит европейское законодательство и есть ли выход из кризиса"
-    ],
-    "why": [
-      "жилищный кризис и аренда касаются практически каждого резидента и экспата",
-      "огромные цифры влияния туристического жилья на рынок",
-      "гарантированно вызовет ожесточенные споры в комментариях"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:35"
-  },
-  "721944": {
-    "title": "El precio de la vivienda se duplica en 50 ciudades en una década por la presión en costas y urbes",
-    "url": "https://www.20minutos.es/nacional/precio-vivienda-se-duplica-medio-centenar-ciudades-una-decada-con-presion-sobre-zonas-costeras-grandes-urbes_7052608_0.html",
-    "source": "https://www.20minutos.es/rss/",
-    "published_at": "2026-11-03T04:00:00",
-    "news_score": 8.05,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "numbers",
-      "explainer",
-      "poll"
-    ],
-    "editorial_angles": [
-      "в каких городах Испании цены выросли сильнее всего за 10 лет",
-      "реально ли купить квартиру в Испании при текущей статистике",
-      "почему молодежь и экспаты вынуждены отказываться от покупки жилья"
-    ],
-    "why": [
-      "критически важная тема удвоения цен на жилье в десятках городов касается абсолютного большинства резидентов и мигрантов",
-      "мощнейший триггер для дискуссии о доступности жилья и проблемах молодежи/мигрантов при покупке и аренде"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:33"
-  },
-  "722608": {
-    "title": "El Tribunal Europeo ratifica que los bancos tienen que devolver sin demora el dinero sustraído por 'phishing'",
-    "url": "https://www.diariosur.es/economia/mibolsillo/tribunal-europeo-ratifica-bancos-devolver-demora-dinero-20261021212741-nt.html",
-    "source": "https://www.diariosur.es/rss/2.0/portada/",
-    "published_at": "2026-11-02T20:27:42",
-    "news_score": 8.3,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "banking",
-      "consumer",
-      "justice"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "general"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "how_to"
-    ],
-    "editorial_angles": [
-      "Что делать, если с карты списали деньги через фишинг: новые правила возврата от TJUE",
-      "Имеет ли право банк задерживать выплату и как ссылаться на свежее решение суда",
-      "Инструкция: алгоритм действий при мошенничестве с банковскими картами в Испании"
-    ],
-    "why": [
-      "Судебное решение ЕС касается всех банковских клиентов в Испании и защищает от кибермошенничества",
-      "Имеет высочайшую практическую ценность для каждого владельца счета в испанском банке",
-      "Отличный потенциал для разбора прав потребителей и инструкций по возврату средств"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-03T21:16:31"
-  },
-  "715089": {
-    "title": "¿Te debe dinero Hacienda y no lo sabes? Cómo descubrirlo y reclamarlo",
-    "url": "https://www.abc.es/economia/cuentas-corrientes/debe-dinero-hacienda-sabes-descubrirlo-reclamarlo-20261027094841-nt.html",
-    "source": "https://www.abc.es/rss/2.0/ultima-hora/",
-    "published_at": "2026-11-02T07:58:45",
-    "news_score": 8.5,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "taxes",
-      "economy",
-      "documents"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "how_to",
-      "explainer",
-      "guide",
-      "numbers"
-    ],
-    "editorial_angles": [
-      "как проверить, не задолжала ли вам испанская налоговая",
-      "инструкция: возвращаем переплату по IRPF за последние 4 года",
-      "какие вычеты часто забывают указать резиденты Испании"
-    ],
-    "why": [
-      "касается практически каждого налогового резидента Испании",
-      "огромная практическая польза: пошаговая инструкция, как вернуть деньги от налоговой",
-      "высокий потенциал для сохранения в закладки и бурных обсуждений в комментариях"
-    ],
-    "scores": {
-      "practical_value": 10,
-      "resident_relevance": 9,
-      "content_potential": 10
-    },
-    "saved_at": "2026-11-02T22:21:48"
-  },
-  "703887": {
-    "title": "La UE aplica desde el 1 de noviembre una nueva tasa de dos euros a los paquetes de fuera de la Unión",
-    "url": "https://www.rtve.es/noticias/20261031/nueva-tasa-entrada-paquetes-fuera-ue-claves/17289017.shtml",
-    "source": "https://www.rtve.es/noticias/",
-    "published_at": "",
-    "news_score": 8.55,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "consumer",
-      "cost_of_living",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers"
-    ],
-    "editorial_angles": [
-      "конец дешевого шопинга: ЕС вводит новые сборы на посылки из Китая",
-      "сколько теперь придется доплачивать за заказы с Temu, Shein и AliExpress",
-      "как изменятся правила таможенного оформления с 1 ноября"
-    ],
-    "why": [
-      "напрямую касается всех, кто заказывает товары на AliExpress, Temu, Shein и других неевропейских площадках",
-      "новые пошлины и сборы увеличивают стоимость онлайн-покупок",
-      "высокий практический интерес и обсуждения среди экспатов"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:21:47"
-  },
-  "710923": {
-    "title": "Vivienda: Qué falla en el inmobiliario y cómo solucionarlo",
-    "url": "https://www.expansion.com/inmobiliario/2026/10/31/vivienda-falla-inmobiliario-solucionarlo.html",
-    "source": "https://www.expansion.com/",
-    "published_at": "",
-    "news_score": 8.6,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "housing",
-      "economy",
-      "cost_of_living"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers",
-      "guide",
-      "poll"
-    ],
-    "editorial_angles": [
-      "почему аренда в Испании дорожает быстрее, чем в других странах ЕС",
-      "кризис предложения: куда исчезли сотни тысяч квартир с рынка",
-      "чего ждать тем, кто планирует снимать или покупать жилье в ближайший год"
-    ],
-    "why": [
-      "жилищный кризис и рост цен на аренду/покупку касаются абсолютного большинства жителей",
-      "острейшая проблема для иммигрантов при поиске жилья",
-      "высокий потенциал для бурных обсуждений и комментариев читателей"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 10,
-      "content_potential": 10
-    },
-    "saved_at": "2026-11-02T22:21:46"
-  },
-  "698885": {
-    "title": "Accidente de tren de Toledo, en directo: número de fallecidos y heridos, causas y última hora de los audios antes del choque en vivo online hoy",
-    "url": "https://okdiario.com/espana/ultima-hora-del-accidente-tren-directo-que-sabe-desaparecidos-balance-victimas-ultimas-noticias-20673583",
-    "source": "https://okdiario.com/feed",
-    "published_at": "2026-10-31T08:15:19",
-    "news_score": 8.6,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "transport",
-      "society",
-      "crime"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family",
-      "tourist"
-    ],
-    "formats": [
-      "breaking",
-      "news",
-      "explainer"
-    ],
-    "editorial_angles": [
-      "как трагедия повлияет на транспортное сообщение в праздники",
-      "что делать пассажирам с купленными билетами на отмененные рейсы",
-      "официальные данные о причинах сбоя систем безопасности Adif"
-    ],
-    "why": [
-      "Крупнейшая катастрофа на скоростной железной дороге в Испании с большим числом жертв",
-      "Парализовано движение на ключевом направлении Мадрид-Севилья в разгар праздников",
-      "Вызывает огромный резонанс и требует срочного информирования путешественников"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:21:45"
-  },
-  "698904": {
-    "title": "El Gobierno cambia las normas: a partir del 15 de noviembre, el propietario deberá pagar 12 mensualidades de indemnización al inquilino por cancelar el contrato en estas circunstancias",
-    "url": "https://okdiario.com/economia/gobierno-cambia-normas-partir-del-15-noviembre-propietario-debera-pagar-12-mensualidades-indemnizacion-inquilino-cancelar-contrato-estas-circunstancias-20662436",
-    "source": "https://okdiario.com/feed",
-    "published_at": "2026-10-31T07:15:15",
-    "news_score": 8.85,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "housing",
-      "economy",
-      "documents"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "breaking",
-      "explainer",
-      "how_to",
-      "guide"
-    ],
-    "editorial_angles": [
-      "как новый декрет защищает арендаторов в Испании",
-      "когда арендодатель обязан выплатить 12 месяцев компенсации",
-      "что делать собственникам жилья после вступления новых правил в силу"
-    ],
-    "why": [
-      "крупнейшая реформа рынка аренды, затрагивающая сотни тысяч арендаторов и арендодателей",
-      "огромное практическое значение: новые правила расторжения договоров и крупные компенсации",
-      "гарантирует бурные споры и активное обсуждение в комментариях"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 9,
-      "content_potential": 10
-    },
-    "saved_at": "2026-11-02T22:21:44"
-  },
-  "717554": {
-    "title": "Los empresarios contratacan y responden al 'boom' de absentismo con recortes en los complementos a las bajas",
-    "url": "https://www.diariodenavarra.es/noticias/actualidad/nacional/2026/11/02/empresarios-contratacan-responden-boom-absentismo-recortes-complementos-bajas-840906-28.html",
-    "source": "https://www.diariodenavarra.es/",
-    "published_at": "",
-    "news_score": 7.25,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "jobs",
-      "salaries",
-      "economy",
-      "society"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers"
-    ],
-    "editorial_angles": [
-      "почему работодатели урезают выплаты по больничным",
-      "что происходит с абсентеизмом и рынком труда в Испании"
-    ],
-    "why": [
-      "касается всех работающих по найму в Испании из-за роста больничных и сокращения выплат",
-      "вызывает ожесточенные споры между работниками и работодателями",
-      "высокий практический интерес для трудоустроенных резидентов"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 8,
-      "content_potential": 8
-    },
-    "saved_at": "2026-11-02T22:19:49"
-  },
-  "717458": {
-    "title": "Estabilidad.La cara B de la reforma laboral: se duplica la rotación de los contratos indefinidos",
-    "url": "https://www.vozpopuli.com/economia/empleo/la-cara-b-de-la-reforma-laboral-se-duplica-la-rotacion-de-los-contratos-indefinidos.html",
-    "source": "https://www.vozpopuli.com/",
-    "published_at": "",
-    "news_score": 7.3,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "jobs",
-      "salaries",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers"
-    ],
-    "editorial_angles": [
-      "реальность испанской трудовой реформы: почему бессрочные контракты стали чаще расторгать",
-      "рост увольнений в испытательный срок и ловушка 'fijos discontinuos'",
-      "как изменился рынок труда в Испании для экспатов и местных жителей"
-    ],
-    "why": [
-      "касается всех работающих по найму в Испании и тех, кто ищет работу",
-      "важные данные аналитического центра Fedea о реальной стабильности 'постоянных' контрактов после реформы",
-      "высокий потенциал для дискуссии о рынке труда, увольнениях и фиктивных бессрочных контрактах"
-    ],
-    "scores": {
-      "practical_value": 6,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:19:48"
-  },
-  "720141": {
-    "title": "Una empresa despide a sus trabajadores para meter Inteligencia Artificial y la justicia toma una decisión inesperada",
-    "url": "https://www.economiadigital.es/empresas/empresa-despide-sus-trabajadores-meter-inteligencia-artificial-justicia-toma-decision-inesperada.html",
-    "source": "https://www.economiadigital.es/feed",
-    "published_at": "2026-11-02T11:28:48",
-    "news_score": 7.15,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "jobs",
-      "economy",
-      "society"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "poll"
-    ],
-    "editorial_angles": [
-      "заменит ли робот ваше рабочее место: что решил суд Мадрида",
-      "насколько законно увольнять сотрудника ради автоматизации в Испании",
-      "как защитить свои трудовые права в эпоху ИИ"
-    ],
-    "why": [
-      "прецедент решения суда о законности увольнений из-за внедрения ИИ в Испании",
-      "высокий уровень тревожности и обсуждений вокруг влияния искусственного интеллекта на рабочие места",
-      "актуально для всех наемных сотрудников и специалистов в стране"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 7,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:19:46"
-  },
-  "717401": {
-    "title": "Frenar las expulsiones de la vivienda, de las ciudades y de los cuidados: un reto central y urgente",
-    "url": "https://www.infolibre.es/opinion/plaza-publica/frenar-expulsiones-vivienda-ciudades-cuidados-reto-central-urgente_129_2239085.html",
-    "source": "https://www.infolibre.es/",
-    "published_at": "",
-    "news_score": 7.2,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "immigration"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant",
-      "family"
-    ],
-    "formats": [
-      "explainer",
-      "guide",
-      "poll"
-    ],
-    "editorial_angles": [
-      "почему аренда в Испании бьет все рекорды и куда бежать из центра",
-      "с какими трудностями сталкиваются мигранты при поиске жилья",
-      "что говорит статистика о кризисе недвижимости в Мадриде и регионах"
-    ],
-    "why": [
-      "Жилищный кризис и рост цен на аренду касаются практически каждого резидента",
-      "Затрагивает уязвимость девяти миллионов иностранцев в Испании",
-      "Отличная тема для дискуссии и сбора мнений аудитории"
-    ],
-    "scores": {
-      "practical_value": 6,
-      "resident_relevance": 9,
-      "content_potential": 8
-    },
-    "saved_at": "2026-11-02T22:19:45"
-  },
-  "716539": {
-    "title": "El Sindicato Médicos Unidos convoca una huelga nacional del 16 al 27 de noviembre para exigir un Estatuto del Médico",
-    "url": "https://www.infosalus.com/actualidad/noticia-sindicato-medicos-unidos-convoca-huelga-nacional-16-27-noviembre-exigir-estatuto-medico-20261102092555.html",
-    "source": "https://www.europapress.es/rss/rss.aspx",
-    "published_at": "2026-11-02T08:25:55",
-    "news_score": 7.2,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "healthcare",
-      "jobs",
-      "society"
-    ],
-    "audience": [
-      "resident",
-      "family",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer"
-    ],
-    "editorial_angles": [
-      "чего ждать пациентам во время ноябрьской забастовки врачей",
-      "как отменятся приемы и что делать в экстренных случаях",
-      "почему бастуют медики и чего именно они требуют от властей"
-    ],
-    "why": [
-      "общенациональная забастовка врачей напрямую затронет всех пациентов системы здравоохранения",
-      "высокая практическая значимость для планирования визитов к врачам и плановых операций",
-      "острая социальная тема, вызывающая активные споры в обществе"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 8,
-      "content_potential": 8
-    },
-    "saved_at": "2026-11-02T22:19:44"
-  },
-  "715690": {
-    "title": "El alquiler en Barcelona cae un 4,2% y crece un 0,7% en el resto de Cataluña desde el inicio de la regulación hace más de dos años",
-    "url": "https://www.20minutos.es/cataluna/barcelona/precio-alquiler-barcelona-cae-un-4-2-crece-un-0-7-resto-catalunya-desde-inicio-regulacion-2024_7056104_0.html",
-    "source": "https://www.20minutos.es/rss/",
-    "published_at": "2026-11-02T09:02:13",
-    "news_score": 7.25,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers",
-      "comparison"
-    ],
-    "editorial_angles": [
-      "реально ли помог контроль цен на аренду в Каталонии",
-      "сравнение цен в зонах с регулированием и без него",
-      "как закон об аренде влияет на рынок недвижимости"
-    ],
-    "why": [
-      "огромная важность темы аренды жилья в Барселоне и Каталонии",
-      "официальные данные об эффективности регулирования цен",
-      "высокий потенциал для бурных дискуссий среди арендаторов и собственников"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:19:42"
-  },
-  "717683": {
-    "title": "Entra en vigor la nueva tasa europea de dos euros a los paquetes de comercio electrónico",
-    "url": "https://www.expansion.com/economia/2026/11/01/entra-vigor-nueva-tasa-europea-dos-euros-pequenos-envios.html",
-    "source": "https://www.expansion.com/",
-    "published_at": "",
-    "news_score": 7.3,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "cost_of_living",
-      "consumer",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "how_to"
-    ],
-    "editorial_angles": [
-      "как изменятся цены на AliExpress и Temu из-за нового налога ЕС",
-      "сколько теперь придется доплачивать за посылки из Китая",
-      "как избежать лишних трат при онлайн-шопинге"
-    ],
-    "why": [
-      "затрагивает всех, кто заказывает товары на AliExpress, Temu, Shein и других китайских платформах",
-      "новые европейские пошлины меняют привычную стоимость онлайн-покупок",
-      "высокая практическая ценность для покупателей"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 7,
-      "content_potential": 8
-    },
-    "saved_at": "2026-11-02T22:19:41"
-  },
-  "716138": {
-    "title": "La UE comienza a cobrar una «tasa de tramitación» de 2 euros a paquetes de plataformas como Shein y Temu",
-    "url": "https://www.elcorreo.com/economia/ue-comienza-cobrar-tasa-tramitacion-euros-paquetes-20261101182339-ntrc.html",
-    "source": "https://www.elcorreo.com/rss/2.0/portada/",
-    "published_at": "2026-11-01T17:23:40",
-    "news_score": 7.3,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "economy",
-      "consumer",
-      "taxes"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers"
-    ],
-    "editorial_angles": [
-      "Как ЕС добивает дешевые посылки: сколько теперь придется переплачивать за заказы из Китая",
-      "Что изменилось в правилах растаможки для обычных покупателей"
-    ],
-    "why": [
-      "Касается всех жителей Испании, заказывающих товары на AliExpress, Shein и Temu",
-      "Новые таможенные сборы ЕС напрямую влияют на стоимость онлайн-покупок"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 8,
-      "content_potential": 8
-    },
-    "saved_at": "2026-11-02T22:19:39"
-  },
-  "717815": {
-    "title": "Los códigos QR, una potencial puerta al engaño: «Creemos que vamos a acceder a información pero acabamos en una web fraudulenta»",
-    "url": "https://www.farodevigo.es/sociedad/2026/11/02/codigos-qr-potencial-puerta-engano-135979639.html",
-    "source": "https://www.farodevigo.es/",
-    "published_at": "",
-    "news_score": 7.8,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "consumer",
-      "banking"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant",
-      "family",
-      "tourist"
-    ],
-    "formats": [
-      "explainer",
-      "how_to",
-      "news"
-    ],
-    "editorial_angles": [
-      "что такое квишинг и как не потерять деньги через QR-код в ресторане",
-      "официальные предупреждения INCIBE: как распознать фишинговый код в Испании"
-    ],
-    "why": [
-      "касается всех, кто пользуется смартфонами и сканирует QR-коды в ресторанах и на парковках",
-      "высокая практическая польза — предупреждение о мошенничестве (quishing)",
-      "отличный материал для карточек безопасности и сохранения в закладки"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:19:38"
-  },
-  "716639": {
-    "title": "Un abogado aclara quién paga las averías en un piso de alquiler: “El decreto cambia el reparto en la vivienda temporal”",
-    "url": "https://www.eldiario.es/consumoclaro/abogado-aclara-paga-averias-piso-alquiler-decreto-cambia-reparto-vivienda-temporal-xp_1_13616145.html",
-    "source": "https://www.eldiario.es/rss",
-    "published_at": "2026-11-02T08:59:29",
-    "news_score": 7.8,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "documents"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "potential_immigrant"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "how_to",
-      "guide"
-    ],
-    "editorial_angles": [
-      "новый декрет об аренде: кто теперь должен платить за мелкий ремонт",
-      "как арендаторам вернуть деньги за ремонт по закону"
-    ],
-    "why": [
-      "крайне важные изменения в законе об аренде (особенно временной)",
-      "четкая практическая инструкция о том, кто платит за ремонт и как удерживать расходы из аренды"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:19:37"
-  },
-  "719099": {
-    "title": "El precio del alquiler sube un 2,6% en las zonas reguladas de Catalunya, hasta los 894 euros",
-    "url": "https://www.lavanguardia.com/economia/20261102/11673979/precio-alquiler-sube-2-6-zonas-reguladas-catalunya-894-euros.html",
-    "source": "https://www.lavanguardia.com/rss/home",
-    "published_at": "2026-11-02T11:40:01",
-    "news_score": 7.95,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers",
-      "guide"
-    ],
-    "editorial_angles": [
-      "как работают ограничения цен на аренду в Каталонии",
-      "реальная статистика роста цен в Барселоне",
-      "что происходит с рынком временной аренды"
-    ],
-    "why": [
-      "затрагивает огромную часть аудитории, живущей в Каталонии и Барселоне",
-      "актуальные данные по регулированию цен на аренду и рынку жилья",
-      "высокий потенциал для обсуждения среди арендаторов"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:19:36"
-  },
-  "716818": {
-    "title": "Els topalls eviten l'encariment dels lloguers: pugen un 1% des del 2024",
-    "url": "https://www.ara.cat/economia/immobiliari/topalls-eviten-l-encariment-dels-lloguers-pugen-1-des-2024_1_5897362.html",
-    "source": "https://www.ara.cat/rss/",
-    "published_at": "2026-11-02T09:01:51",
-    "news_score": 8.0,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "housing",
-      "cost_of_living",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "numbers",
-      "poll"
-    ],
-    "editorial_angles": [
-      "работают ли ограничения цен на аренду в Каталонии спустя два года",
-      "сколько реально стоит снять квартиру в Барселоне по последней статистике",
-      "как закон защищает арендаторов и какие санкции грозят нарушителям"
-    ],
-    "why": [
-      "очень важная тема стоимости аренды жилья в Каталонии и Барселоне",
-      "реальные цифры эффективности ограничения цен на аренду",
-      "высокий потенциал для бурных споров среди экспатов-арендаторов и собственников"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 9,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:19:35"
-  },
-  "715390": {
-    "title": "Accidente de tren en Toledo, en directo: número de muertos, heridos, última hora de Óscar Puente y de las investigaciones hoy",
-    "url": "https://okdiario.com/espana/accidente-tren-toledo-directo-numero-muertos-heridos-ultima-hora-oscar-puente-investigaciones-hoy-20679734",
-    "source": "https://okdiario.com/feed",
-    "published_at": "2026-11-02T09:13:44",
-    "news_score": 8.05,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "transport",
-      "society"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family",
-      "general"
-    ],
-    "formats": [
-      "breaking",
-      "news",
-      "explainer"
-    ],
-    "editorial_angles": [
-      "хроника катастрофы и официальные данные о пострадавших",
-      "какие меры помощи пострадавшим утвердило правительство",
-      "безопасность испанских поездов: что говорят эксперты"
-    ],
-    "why": [
-      "крупнейшая катастрофа на железнодорожном транспорте Испании с человеческими жертвами",
-      "национальный масштаб, трехдневный траур и экстренные меры правительства",
-      "вызывает огромный эмоциональный отклик и резонанс у всех жителей страны"
-    ],
-    "scores": {
-      "practical_value": 7,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:19:34"
-  },
-  "717362": {
-    "title": "Los ayuntamientos comienzan a devolver las multas de las Zonas de Bajas Emisiones: esto es lo que hay que hacer",
-    "url": "https://www.eldebate.com/motor/20261102/ayuntamientos-comienzan-devolver-multas-zonas-bajas-emisiones-esto-hay-hacer_474683.html",
-    "source": "https://www.eldebate.com/",
-    "published_at": "",
-    "news_score": 8.1,
-    "tier": "🟠 HIGH",
-    "categories": [
-      "cars",
-      "transport",
-      "taxes"
-    ],
-    "audience": [
-      "resident",
-      "immigrant"
-    ],
-    "formats": [
-      "news",
-      "how_to",
-      "explainer"
-    ],
-    "editorial_angles": [
-      "как вернуть деньги за незаконные штрафы ZBE",
-      "какие города начали массовый возврат средств автомобилистам",
-      "что делать тем, кто уже оплатил штраф в Мадриде, Барселоне или Малаге"
-    ],
-    "why": [
-      "касается миллионов автомобилистов в крупных городах из-за отмены штрафов Зоны низких выбросов",
-      "высокая практическая ценность: можно вернуть уплаченные деньги или аннулировать текущие штрафы",
-      "масштабная новость национального значения с конкретными алгоритмами действий"
-    ],
-    "scores": {
-      "practical_value": 9,
-      "resident_relevance": 8,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:19:33"
-  },
-  "715946": {
-    "title": "Una nueva tasa aduanera de 2 euros se une a la de 3 ya existente para los envíos de plataformas como Shein y Temu: ¿quién lo pagará?",
-    "url": "https://www.diariosur.es/economia/mibolsillo/nueva-tasa-aduanera-euros-une-existente-envios-20261028072839-nt.html",
-    "source": "https://www.diariosur.es/rss/2.0/portada/",
-    "published_at": "2026-11-02T06:28:39",
-    "news_score": 7.3,
-    "tier": "🟡 GOOD",
-    "categories": [
-      "cost_of_living",
-      "consumer",
-      "economy"
-    ],
-    "audience": [
-      "resident",
-      "immigrant",
-      "family"
-    ],
-    "formats": [
-      "news",
-      "explainer",
-      "how_to"
-    ],
-    "editorial_angles": [
-      "сколько теперь будут стоить посылки из Китая в Испанию",
-      "как новые таможенные сборы ЕС повлияют на любителей дешевого шопинга",
-      "требуют ли маркетплейсы незаконные доплаты с покупателей"
-    ],
-    "why": [
-      "касается всех, кто заказывает товары на Shein, Temu и AliExpress",
-      "новые таможенные сборы напрямую бьют по кошельку потребителей",
-      "высокая практическая польза — предупреждение о дополнительных расходах"
-    ],
-    "scores": {
-      "practical_value": 8,
-      "resident_relevance": 7,
-      "content_potential": 9
-    },
-    "saved_at": "2026-11-02T22:19:33"
   }
 }

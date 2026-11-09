@@ -542,12 +542,22 @@ def score_single_news(
 
     # 1. Приоритетный вызов AnyModel (основной провайдер проекта)
     if provider in ("anymodel", "auto") and os.environ.get("ANYMODEL_KEY"):
-        target_model = model or os.environ.get("ANYMODEL_MODEL") or "ag/gemini-2.5-flash"
+        target_model = model or os.environ.get("ANYMODEL_MODEL")
         base_url = os.environ.get("ANYMODEL_BASE_URL", "https://anymodel.org/v1")
         api_key = os.environ["ANYMODEL_KEY"]
         
-        candidate_models = [target_model]
-        for fb in ("ag/gemini-2.5-flash", "ag/gemini-3.1-flash-lite-preview", "qwen/qwen3.7-max", "am/deepseek-v4-flash"):
+        env_models = [
+            m.strip()
+            for m in (os.environ.get("ANYMODELS_MODELS") or os.environ.get("ANYMODEL_FREE_MODELS") or "").split(",")
+            if m.strip()
+        ]
+        candidate_models = []
+        if target_model:
+            candidate_models.append(target_model)
+        for em in env_models:
+            if em not in candidate_models:
+                candidate_models.append(em)
+        for fb in ("ds/deepseek-v4-flash-vision", "ag/gemini-2.5-flash", "qwen/qwen3.7-max", "am/deepseek-v4-flash"):
             if fb not in candidate_models:
                 candidate_models.append(fb)
 
@@ -571,8 +581,8 @@ def score_single_news(
             model_name=target_model
         )
 
-    # 3. Резервный вызов Google AI Studio (Free tier ограничен 15 RPM)
-    if not editorial and (provider in ("gemini", "auto") and os.environ.get("GEMINI_API_KEY")):
+    # 3. Прямой вызов Google AI Studio отключен в режиме auto (GEMINI_API_KEY используется только для генерации картинок)
+    if not editorial and (provider == "gemini" and os.environ.get("GEMINI_API_KEY")):
         target_model = model or "gemini-flash-lite-latest"
         editorial = call_gemini_scorer(prompt, model_name=target_model)
 

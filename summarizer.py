@@ -70,8 +70,9 @@ ANYMODEL_MODEL = (
     or os.environ.get('LLM_MODEL', 'am/deepseek-v4-flash')
 ).strip()
 # Keep the provider's free catalogue in one place for selection and fallback.
+# Приоритетно берем ANYMODELS_MODELS, если задан в .env
 ANYMODEL_FREE_MODELS = tuple(
-    m.strip() for m in os.environ.get('ANYMODEL_FREE_MODELS', '').split(',') if m.strip()
+    m.strip() for m in (os.environ.get('ANYMODELS_MODELS') or os.environ.get('ANYMODEL_FREE_MODELS', '')).split(',') if m.strip()
 )
 ANYMODEL_FALLBACK_MODEL = os.environ.get(
     'ANYMODEL_FALLBACK_MODEL',
@@ -80,14 +81,13 @@ ANYMODEL_FALLBACK_MODEL = os.environ.get(
 MISTRAL_API_KEY = os.environ.get('MISTRAL_API_KEY', '').strip()
 MISTRAL_BASE_URL = os.environ.get('MISTRAL_BASE_URL', 'https://api.mistral.ai/v1').rstrip('/')
 MISTRAL_MODEL = os.environ.get('MISTRAL_MODEL', 'mistral-small-latest').strip()
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '').strip()
+# Прямой Google Gemini API в summarizer отключен: GEMINI_API_KEY в .env используется ТОЛЬКО для генерации картинок в telegram_bot.py
+GEMINI_API_KEY = ""
 GEMINI_BASE_URL = os.environ.get(
     'GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'
 ).rstrip('/')
-GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-3.5-flash-lite').strip()
-GEMINI_MODELS = tuple(
-    m.strip() for m in os.environ.get('GEMINI_MODELS', GEMINI_MODEL).split(',') if m.strip()
-)
+GEMINI_MODEL = ""
+GEMINI_MODELS = ()
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '').strip()
 OPENROUTER_BASE_URL = os.environ.get('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1').rstrip('/')
 OPENROUTER_MODEL = os.environ.get('OPENROUTER_MODEL', 'openrouter/free').strip()

@@ -91,7 +91,32 @@ log = logging.getLogger("telegram_bot")
 BOT_TOKEN = os.environ.get("TELEGA_BOT") or os.environ.get("TELEGRAM_BOT_TOKEN")
 ANYMODEL_KEY = os.environ.get("ANYMODEL_KEY")
 ANYMODEL_BASE_URL = os.environ.get("ANYMODEL_BASE_URL", "https://anymodel.org/v1").rstrip("/")
-ANYMODEL_MODEL = os.environ.get("ANYMODEL_MODEL", "ag/gemini-2.5-flash")
+ANYMODEL_MODEL = os.environ.get("ANYMODEL_MODEL", "").strip()
+
+# Список моделей для вызова AnyModel (приоритетно из ANYMODELS_MODELS, затем ANYMODEL_FREE_MODELS)
+ANYMODELS_MODELS = [
+    m.strip()
+    for m in (
+        os.environ.get("ANYMODELS_MODELS")
+        or os.environ.get("ANYMODEL_MODELS")
+        or os.environ.get("ANYMODEL_FREE_MODELS")
+        or ""
+    ).split(",")
+    if m.strip()
+]
+
+
+def get_anymodel_candidates() -> List[str]:
+    """Возвращает упорядоченный список моделей для вызовов AnyModel с fallback-ротацией."""
+    candidates = []
+    if ANYMODEL_MODEL:
+        candidates.append(ANYMODEL_MODEL)
+    for m in ANYMODELS_MODELS:
+        if m not in candidates:
+            candidates.append(m)
+    if not candidates:
+        candidates = ["ds/deepseek-v4-flash-vision", "ag/gemini-2.5-flash", "qwen/qwen3.7-max"]
+    return candidates
 
 # Каналы для публикаций и интервал очереди
 TELEGRAM_CHANNEL = os.environ.get("TELEGRAM_CHANNEL", "@iberia_news").strip()
@@ -470,7 +495,7 @@ def detect_post_category(text: str, title: str = "") -> str:
     # 1. Быстрые подсказки по названию рубрики
     if any(w in t_low for w in ["инструкции", "как сделать", "лайфхак"]):
         return "cat3"
-    if any(w in t_low for w in ["детям и семьям"]):
+    if any(w in t_low for w in ["детям и семьям", "дети и школы", "дети, школы"]):
         return "cat6"
     if any(w in t_low for w in [
         "для пар", "культура и классическая", "бесплатные мероприятия",
@@ -478,7 +503,7 @@ def detect_post_category(text: str, title: str = "") -> str:
         "афиша на выходные", "куда поехать", "гастрономия и вино"
     ]):
         return "cat5"
-    if any(w in t_low for w in ["законы, налоги и документы"]):
+    if any(w in t_low for w in ["законы, налоги и документы", "льготы и пособия", "бюрократия"]):
         return "cat2"
 
     # 2. Подсчёт весов по ключевым маркерам для cat1..cat6
@@ -1721,6 +1746,9 @@ def handle_fav_to_queue(callback_query: dict, fav_id: str):
             [
                 {"text": "⚡ Опубликовать сейчас", "callback_data": f"pub_q_now:{fav_id}"},
                 {"text": "❌ Удалить из очереди", "callback_data": f"pub_q_del:{fav_id}"}
+            ],
+            [
+                {"text": "⭐ К списку Избранного (/fav)", "callback_data": "fav_page:0"}
             ]
         ]
     }
@@ -1748,12 +1776,18 @@ def handle_fav_publish_now(callback_query: dict, fav_id: str):
 
     if success:
         now_str = datetime.now(timezone.utc).strftime("%H:%M UTC")
+        keyboard = {
+            "inline_keyboard": [
+                [{"text": "⭐ К списку Избранного (/fav)", "callback_data": "fav_page:0"}]
+            ]
+        }
         edit_message_text(
             chat_id,
             message_id,
             f"⚡ <b>Пост из Избранного опубликован в канале!</b>\n\n"
             f"📢 Канал: {link_html}\n"
             f"🕒 Время публикации: <b>{now_str}</b>",
+            reply_markup=keyboard,
             disable_web_page_preview=True
         )
     else:
@@ -1800,42 +1834,45 @@ def handle_fav_show_text(callback_query: dict, fav_id: str):
     )
 
 
-def handle_fav_delete(callback_query: dict, fav_id: str):
-    """Удаляет пост из Избранного."""
-    chat_id = str(callback_query["message"]["chat"]["id"])
-    message_id = callback_query["message"]["message_id"]
-
-    if remove_from_favorites(fav_id):
-        answer_callback_query(callback_query["id"], "🗑 Пост удалён из Избранного")
-        edit_message_text(chat_id, message_id, "🗑 <b>Пост удалён из Избранного.</b>")
-    else:
-        answer_callback_query(callback_query["id"], "❌ Пост не найден в Избранном", show_alert=True)
+FAV_PAGE_SIZE = 6
 
 
-def handle_favorites_command(chat_id: str):
-    """Команда /fav — показывает список сохранённых постов."""
+def build_favorites_page(page: int = 0) -> tuple[str, Optional[dict]]:
+    """Формирует текст и клавиатуру страницы Избранного с пагинацией."""
     with QUEUE_LOCK:
         data = load_queue_data()
     favorites = data.get("favorites", [])
 
     if not favorites:
-        send_message(
-            chat_id,
+        empty_text = (
             "⭐ <b>Избранное пусто (нет отложенных постов).</b>\n\n"
             "Вы можете сгенерировать пост через <code>/post</code> или по новости из <code>/top</code> "
-            "и нажать <b>«⭐ В избранное»</b>, чтобы сохранить его на потом.",
-            disable_web_page_preview=True
+            "и нажать <b>«⭐ В избранное»</b>, чтобы сохранить его на потом."
         )
-        return
+        return empty_text, None
 
-    header = (
-        f"⭐ <b>Избранные посты (отложенные на потом)</b>\n"
-        f"📦 Всего сохранено: <b>{len(favorites)}</b>\n\n"
-    )
+    total = len(favorites)
+    total_pages = max(1, (total + FAV_PAGE_SIZE - 1) // FAV_PAGE_SIZE)
+    page = max(0, min(page, total_pages - 1))
+
+    start_idx = page * FAV_PAGE_SIZE
+    end_idx = min(total, start_idx + FAV_PAGE_SIZE)
+    page_items = favorites[start_idx:end_idx]
+
+    header_lines = [
+        "⭐ <b>Избранные посты (отложенные на потом)</b>",
+        f"📦 Всего запомнено постов: <b>{total}</b>"
+    ]
+    if total_pages > 1:
+        header_lines.append(
+            f"📄 Страница: <b>{page + 1} из {total_pages}</b> "
+            f"(показаны <b>{start_idx + 1}–{end_idx}</b> из <b>{total}</b>)"
+        )
+    header = "\n".join(header_lines) + "\n\n"
 
     lines = []
     keyboard_buttons = []
-    for idx, f_item in enumerate(favorites[:6], start=1):
+    for idx, f_item in enumerate(page_items, start=start_idx + 1):
         f_id = f_item.get("id", "")
         raw_text = f_item.get("text", "")
         first_line = raw_text.split("\n")[0] if raw_text else ""
@@ -1853,13 +1890,79 @@ def handle_favorites_command(chat_id: str):
             {"text": f"📅 В очередь #{idx}", "callback_data": f"fav_q:{f_id}"},
             {"text": f"⚡ Срочно #{idx}", "callback_data": f"fav_now:{f_id}"},
             {"text": "👁 Текст", "callback_data": f"fav_show:{f_id}"},
-            {"text": "🗑", "callback_data": f"fav_del:{f_id}"}
+            {"text": "🗑", "callback_data": f"fav_del:{f_id}:{page}"}
         ])
 
+    if total_pages > 1:
+        nav_row = []
+        if page > 0:
+            nav_row.append({"text": "⬅️ Назад", "callback_data": f"fav_page:{page - 1}"})
+        nav_row.append({
+            "text": f"📄 {page + 1}/{total_pages} (всего: {total})",
+            "callback_data": f"fav_page:{page}"
+        })
+        if page < total_pages - 1:
+            nav_row.append({"text": "Вперёд ➡️", "callback_data": f"fav_page:{page + 1}"})
+        keyboard_buttons.append(nav_row)
+
+    reply_markup = {"inline_keyboard": keyboard_buttons} if keyboard_buttons else None
+    return header + "\n\n".join(lines), reply_markup
+
+
+def handle_fav_page(callback_query: dict, page: int):
+    """Переключает страницу списка Избранного (/fav)."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    message_id = callback_query["message"]["message_id"]
+
+    text_msg, reply_markup = build_favorites_page(page=page)
+    answer_callback_query(callback_query["id"], f"📄 Страница {page + 1}")
+    edit_message_text(
+        chat_id,
+        message_id,
+        text_msg,
+        reply_markup=reply_markup,
+        disable_web_page_preview=True
+    )
+
+
+def handle_fav_delete(callback_query: dict, fav_id: str, page: Optional[int] = None):
+    """Удаляет пост из Избранного."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    message_id = callback_query["message"]["message_id"]
+
+    if remove_from_favorites(fav_id):
+        answer_callback_query(callback_query["id"], "🗑 Пост удалён из Избранного")
+        if page is not None:
+            text_msg, reply_markup = build_favorites_page(page=page)
+            edit_message_text(
+                chat_id,
+                message_id,
+                text_msg,
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
+            )
+        else:
+            edit_message_text(
+                chat_id,
+                message_id,
+                "🗑 <b>Пост удалён из Избранного.</b>",
+                reply_markup={
+                    "inline_keyboard": [
+                        [{"text": "⭐ К списку Избранного (/fav)", "callback_data": "fav_page:0"}]
+                    ]
+                }
+            )
+    else:
+        answer_callback_query(callback_query["id"], "❌ Пост не найден в Избранном", show_alert=True)
+
+
+def handle_favorites_command(chat_id: str, page: int = 0):
+    """Команда /fav — показывает список сохранённых постов с пагинацией."""
+    text_msg, reply_markup = build_favorites_page(page=page)
     send_message(
         chat_id,
-        header + "\n\n".join(lines),
-        reply_markup={"inline_keyboard": keyboard_buttons} if keyboard_buttons else None,
+        text_msg,
+        reply_markup=reply_markup,
         disable_web_page_preview=True
     )
 
@@ -2062,29 +2165,21 @@ async def _query_rag_async(
             else:
                 enriched_prompt = prompt
 
+            # Всегда очищаем предыдущую ветку диалога в NotebookLM перед новым запросом:
+            # 1) чтобы контекст прошлой рубрики (например, «Испания безумная») НИКОГДА не примешивался к новому запросу («Бесплатные мероприятия»);
+            # 2) чтобы не скачивать многомегабайтную историю старых ответов (khqZz) при каждом вызове.
             try:
-                result = await client.chat.ask(
-                    notebook_id=notebook_id,
-                    question=enriched_prompt,
-                    source_ids=source_ids
-                )
-            except Exception as ask_err:
-                err_str = str(ask_err)
-                if "RPC response exceeded" in err_str or "RPCResponseTooLargeError" in type(ask_err).__name__:
-                    log.warning("⚠️ История диалога NotebookLM переполнена (>50 МБ), очищаем старую ветку и повторяем запрос...")
-                    try:
-                        conv_id = await client.chat.get_conversation_id(notebook_id)
-                        if conv_id:
-                            await client.chat.delete_conversation(notebook_id, conv_id)
-                    except Exception as del_err:
-                        log.warning("⚠️ Не удалось удалить переполненную беседу: %s", del_err)
-                    result = await client.chat.ask(
-                        notebook_id=notebook_id,
-                        question=enriched_prompt,
-                        source_ids=source_ids
-                    )
-                else:
-                    raise ask_err
+                old_conv_id = await client.chat.get_conversation_id(notebook_id)
+                if old_conv_id:
+                    await client.chat.delete_conversation(notebook_id, old_conv_id)
+            except Exception as clear_err:
+                log.debug("ℹ️ Очистка предыдущей беседы NotebookLM пропущена: %s", clear_err)
+
+            result = await client.chat.ask(
+                notebook_id=notebook_id,
+                question=enriched_prompt,
+                source_ids=source_ids
+            )
 
             if not result or not result.answer:
                 log.warning("⚠️ NotebookLM вернул пустой ответ")
@@ -2738,36 +2833,40 @@ def polish_post_with_llm(
         "Authorization": f"Bearer {ANYMODEL_KEY}",
         "Content-Type": "application/json"
     }
-    payload = {
-        "model": ANYMODEL_MODEL,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ],
-        "temperature": 0.65,
-        "max_tokens": 2000,
-    }
 
-    try:
-        resp = requests.post(endpoint, headers=headers, json=payload, timeout=30)
-        if resp.status_code != 200:
-            log.warning("⚠️ AnyModel API ошибка (%d): %s", resp.status_code, resp.text[:200])
-            return _basic_cleanup(raw_rag_text, article_context, extra_links)
+    candidates = get_anymodel_candidates()
+    for m_name in candidates:
+        payload = {
+            "model": m_name,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            "temperature": 0.65,
+            "max_tokens": 2000,
+        }
 
-        data = resp.json()
-        choices = data.get("choices", [])
-        if not choices:
-            return _basic_cleanup(raw_rag_text, article_context, extra_links)
+        try:
+            resp = requests.post(endpoint, headers=headers, json=payload, timeout=30)
+            if resp.status_code != 200:
+                log.warning("⚠️ AnyModel API ошибка (%d) для модели %s: %s", resp.status_code, m_name, resp.text[:200])
+                continue
 
-        polished = choices[0].get("message", {}).get("content", "")
-        if polished:
-            polished = clean_rag_citations(polished)
-            polished = ensure_post_integrity(polished, all_links, max_chars=1550)
-            log.info("✅ Пост отполирован через AnyModel (%d символов, стиль: %s)", len(polished), style_key)
-            return polished.strip()
+            data = resp.json()
+            choices = data.get("choices", [])
+            if not choices:
+                continue
 
-    except Exception as e:
-        log.warning("⚠️ Ошибка AnyModel пост-обработки: %s", e)
+            polished = choices[0].get("message", {}).get("content", "")
+            if polished:
+                polished = clean_rag_citations(polished)
+                polished = ensure_post_integrity(polished, all_links, max_chars=1550)
+                log.info("✅ Пост отполирован через AnyModel [%s] (%d символов, стиль: %s)", m_name, len(polished), style_key)
+                return polished.strip()
+
+        except Exception as e:
+            log.warning("⚠️ Ошибка AnyModel (%s): %s", m_name, e)
+            continue
 
     return _basic_cleanup(raw_rag_text, article_context, extra_links)
 
@@ -2901,37 +3000,41 @@ def polish_custom_topic_post_with_llm(
         "Authorization": f"Bearer {ANYMODEL_KEY}",
         "Content-Type": "application/json"
     }
-    payload = {
-        "model": ANYMODEL_MODEL,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ],
-        "temperature": 0.65,
-        "max_tokens": max_tokens + 500,
-    }
 
-    try:
-        resp = requests.post(endpoint, headers=headers, json=payload, timeout=60)
-        if resp.status_code != 200:
-            log.warning("⚠️ AnyModel API ошибка (%d): %s", resp.status_code, resp.text[:200])
-            return _basic_topic_cleanup(raw_rag_text, topic, clean_links, max_chars=max_chars)
+    candidates = get_anymodel_candidates()
+    for m_name in candidates:
+        payload = {
+            "model": m_name,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            "temperature": 0.65,
+            "max_tokens": max_tokens + 500,
+        }
 
-        data = resp.json()
-        choices = data.get("choices", [])
-        if not choices:
-            return _basic_topic_cleanup(raw_rag_text, topic, clean_links, max_chars=max_chars)
+        try:
+            resp = requests.post(endpoint, headers=headers, json=payload, timeout=60)
+            if resp.status_code != 200:
+                log.warning("⚠️ AnyModel API ошибка (%d) для модели %s: %s", resp.status_code, m_name, resp.text[:200])
+                continue
 
-        polished = choices[0].get("message", {}).get("content", "")
-        if polished:
-            polished = clean_rag_citations(polished)
-            polished = ensure_post_integrity(polished, clean_links, max_chars=max_chars)
-            log.info("✅ Пост по теме '%s' отполирован через AnyModel (%d симв, стиль: %s)",
-                     topic[:30], len(polished), style_key)
-            return polished.strip()
+            data = resp.json()
+            choices = data.get("choices", [])
+            if not choices:
+                continue
 
-    except Exception as e:
-        log.warning("⚠️ Ошибка AnyModel пост-обработки: %s", e)
+            polished = choices[0].get("message", {}).get("content", "")
+            if polished:
+                polished = clean_rag_citations(polished)
+                polished = ensure_post_integrity(polished, clean_links, max_chars=max_chars)
+                log.info("✅ Пост по теме '%s' отполирован через AnyModel [%s] (%d симв, стиль: %s)",
+                         topic[:30], m_name, len(polished), style_key)
+                return polished.strip()
+
+        except Exception as e:
+            log.warning("⚠️ Ошибка AnyModel (%s): %s", m_name, e)
+            continue
 
     return _basic_topic_cleanup(raw_rag_text, topic, clean_links, max_chars=max_chars)
 
@@ -3445,6 +3548,14 @@ def process_callback_query(callback_query: dict):
         return
 
     # --- Избранные посты (Fav) ---
+    if data.startswith("fav_page:"):
+        try:
+            page_idx = int(data[9:])
+        except ValueError:
+            page_idx = 0
+        handle_fav_page(callback_query, page_idx)
+        return
+
     if data.startswith("fav_q:"):
         fav_id = data[6:]
         handle_fav_to_queue(callback_query, fav_id)
@@ -3461,8 +3572,16 @@ def process_callback_query(callback_query: dict):
         return
 
     if data.startswith("fav_del:"):
-        fav_id = data[8:]
-        handle_fav_delete(callback_query, fav_id)
+        raw_arg = data[8:]
+        if ":" in raw_arg:
+            fav_id, page_str = raw_arg.split(":", 1)
+            try:
+                page_idx = int(page_str)
+            except ValueError:
+                page_idx = 0
+            handle_fav_delete(callback_query, fav_id, page=page_idx)
+        else:
+            handle_fav_delete(callback_query, raw_arg)
         return
 
     answer_callback_query(callback_query["id"], "❓ Неизвестная команда")
@@ -3895,11 +4014,24 @@ _SUBFIELD_PREFIXES = (
 
 
 def _is_subfield_title(text: str) -> bool:
-    """Проверяет, является ли строка служебным подполем сюжета/инструкции (а не новым сюжетом)."""
-    t = text.lower().strip("*_ #:\t")
+    """
+    Проверяет, является ли строка служебным подполем сюжета/инструкции (например, 'Описание: ...',
+    'Пошаговый алгоритм:', 'Стоимость: ...'), а не заголовком нового сюжета (например, 'Программа «Pasea Madrid»').
+    """
+    raw = text.strip().strip("*_ #\t")
+    t_no_colon = raw.rstrip(":").strip().lower()
+    t_low = raw.lower()
     for p in _SUBFIELD_PREFIXES:
-        if t.startswith(p):
+        if t_no_colon == p:
             return True
+        if t_low.startswith(p):
+            rest = raw[len(p):].lstrip()
+            # Это подполе ТОЛЬКО если сразу после названия поля идёт двоеточие (или 'действий:' / 'и сроки:' и двоеточие),
+            # но НЕ кавычки «...» и НЕ длинный заголовок новости без двоеточия!
+            if rest.startswith(":"):
+                return True
+            if ":" in rest[:25] and "«" not in rest.split(":", 1)[0] and '"' not in rest.split(":", 1)[0]:
+                return True
     return False
 
 
@@ -3986,6 +4118,18 @@ def _parse_rag_news_items(text: str, fallback_links: Optional[List[str]] = None)
     # Очищаем служебный футер модели в конце сообщения
     clean = _clean_trailing_footer(clean)
 
+    # Удаляем промежуточные заголовки макро-разделов (например: "## 🏛️ 1. Государственные программы (вся Испания)"),
+    # если внутри них дальше идут реальные нумерованные карточки 1., 2., ... 10.
+    clean = re.sub(
+        r'^(?:#{1,4}\s*)?(?:\*\*\s*)?(?:[^\w\n]*\s*)?(?:\d+\s*[.)]\s*)?(?:[^\w\n]*\s*)?'
+        r'(?:Государственные программы|Региональные программы|Муниципальные программы|'
+        r'Школы и образование|Дети и родители|Система здравоохранения|Медицина и исследования|Дети и здоровье семьи)'
+        r'[^\n]*$',
+        '',
+        clean,
+        flags=re.IGNORECASE | re.MULTILINE
+    )
+
     # Строгий паттерн префикса нумерации заголовка (только '1.', '1)', '№ 1', но НЕ '5 ноября' и НЕ '31-летний')
     title_prefix_re = re.compile(
         r'^(?:#{1,4}\s*)?(?:\*\*\s*)?(?:№\s*\d+\s*[:.)\-—\s]+|\d+\s*[.)]\s*)?(?:\*\*\s*)?(?:Заголовок[:\s*]*|Тема[:\s*]*)?',
@@ -3993,9 +4137,12 @@ def _parse_rag_news_items(text: str, fallback_links: Optional[List[str]] = None)
     )
 
     # 2. Если в тексте 3 и более разделителей --- -> они разделяют целые инструкции или статьи
+    #    (но ТОЛЬКО если внутри одного блока нет нескольких самостоятельных нумерованных карточек!)
     hr_chunks = [c.strip() for c in re.split(r'\n\s*[-_*]{3,}\s*\n|\n---\s*\n?', clean) if c.strip()]
+    nested_num_pat = re.compile(r'^(?:#{1,4}\s*)?(?:\*\*\s*)?\d+\s*[.)]\s+\*\*', flags=re.MULTILINE)
+    has_nested_numbered_cards = any(len(nested_num_pat.findall(ch)) >= 2 for ch in hr_chunks)
     hr_items = []
-    if len(hr_chunks) >= 3:
+    if len(hr_chunks) >= 3 and not has_nested_numbered_cards:
         for i, chunk in enumerate(hr_chunks):
             # Пропускаем чисто вступительный абзац без деталей
             if i == 0 and len(chunk) < 500 and any(w in chunk.lower() for w in ['подборка', 'обзор', 'период', 'испани', 'список', 'материал', 'рубрик']):
@@ -4113,6 +4260,8 @@ def _parse_rag_news_items(text: str, fallback_links: Optional[List[str]] = None)
                 if inline_b:
                     curr_body.append(inline_b)
         elif curr_title is not None:
+            if re.match(r'^[-_*]{3,}$', sline):
+                continue
             if sline.startswith(("-", "*", "•")):
                 in_sublist = False
             curr_body.append(sline)
@@ -4307,7 +4456,14 @@ def _send_interactive_news_basket(
         sc_badge = f" — ⭐ <b>{sc:.1f}</b>" if sc is not None else ""
         block.append(f"<b>{idx+1}. {esc(t)}</b>{sc_badge}")
         if s:
-            block.append(markdown_to_telegram_html(s))
+            s_safe = s
+            if len(s_safe) > 2600:
+                cut_s = s_safe[:2600]
+                nl_pos = cut_s.rfind("\n")
+                if nl_pos > 1200:
+                    cut_s = cut_s[:nl_pos]
+                s_safe = cut_s.rstrip() + "…"
+            block.append(markdown_to_telegram_html(s_safe))
         if w:
             block.append(f"💡 <i>{esc(w)}</i>")
         if rubrics:
@@ -4319,8 +4475,6 @@ def _send_interactive_news_basket(
             block.append(f"🔗 {esc(src)}")
 
         card_text = "\n\n".join(block)
-        if len(card_text) > 3800:
-            card_text = card_text[:3800] + "..."
 
         reply_markup = {
             "inline_keyboard": [
@@ -4818,10 +4972,13 @@ def _run_toppromt(chat_id: str, count: int, period: str):
 
 
 def handle_prompts_command(chat_id: str):
-    """Показывает 10 редакторских промптов кнопками."""
+    """Показывает редакторские промпты кнопками (сгруппированными по 3 в ряд)."""
     from editorial_prompts import EDITORIAL_PROMPTS
-    keyboard = [[{"text": p["title"], "callback_data": f"ed_pr:{k}"}]
-                for k, p in EDITORIAL_PROMPTS.items()]
+    all_btns = [
+        {"text": p["title"], "callback_data": f"ed_pr:{k}"}
+        for k, p in EDITORIAL_PROMPTS.items()
+    ]
+    keyboard = [all_btns[i:i + 3] for i in range(0, len(all_btns), 3)]
     keyboard.append([{"text": "❌ Отмена", "callback_data": "cancel"}])
     send_message(
         chat_id,
@@ -5407,7 +5564,7 @@ def _handle_text_command(chat_id: str, text: str):
                      f"📢 Канал: {link_html} (интервал: {PUBLISH_INTERVAL_HOURS}ч)\n"
                      f"📦 В очереди: <b>{len(pending_q)}</b> постов (посл. публикация: {last_pub_str})\n"
                      f"⭐ В избранном: <b>{fav_count}</b> постов (отложены на потом)\n"
-                     f"🤖 LLM: <code>{ANYMODEL_MODEL}</code>\n"
+                     f"🤖 LLM (AnyModel): <code>{', '.join(get_anymodel_candidates()[:4])}</code>\n"
                      f"✅ Бот работает")
         return
 
