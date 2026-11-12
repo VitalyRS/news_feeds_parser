@@ -98,7 +98,7 @@ CEREBRAS_MODEL = os.environ.get('CEREBRAS_MODEL', 'gemma-4-31b').strip()
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-DEFAULT_WORKERS = 25
+DEFAULT_WORKERS = 8
 # (connect, read). Длинные статьи требуют времени на генерацию: 12с рвало
 # ответ и сыпало статьи в error. Даём модели дочитать, а ротация подхватит
 # только реально зависшие эндпоинты.
@@ -106,12 +106,14 @@ REQUEST_TIMEOUT = (
     float(os.environ.get('ANYMODEL_CONNECT_TIMEOUT', '5')),
     float(os.environ.get('ANYMODEL_READ_TIMEOUT', '45')),
 )
-MAX_RETRIES = max(1, int(os.environ.get('ANYMODEL_MAX_RETRIES', '2')))
+MAX_RETRIES = max(1, int(os.environ.get('ANYMODEL_MAX_RETRIES', '4')))
 CLASSIFICATION_BATCH_SIZE = max(1, int(os.environ.get('CLASSIFICATION_BATCH_SIZE', '10')))
 SUMMARY_BATCH_SIZE = max(1, int(os.environ.get('SUMMARY_BATCH_SIZE', '3')))
-API_MAX_CONCURRENT = max(1, int(os.environ.get('ANYMODEL_MAX_CONCURRENT', '1')))
-API_MIN_INTERVAL = max(0.0, float(os.environ.get('ANYMODEL_MIN_INTERVAL', '4.0')))
+API_MAX_CONCURRENT = max(1, int(os.environ.get('ANYMODEL_MAX_CONCURRENT', '2')))
+API_MIN_INTERVAL = max(0.0, float(os.environ.get('ANYMODEL_MIN_INTERVAL', '1.5')))
 PROVIDER_MAX_CONCURRENT = max(1, int(os.environ.get('PROVIDER_MAX_CONCURRENT', '5')))
+MISTRAL_MAX_CONCURRENT = max(1, int(os.environ.get('MISTRAL_MAX_CONCURRENT', '1')))
+MISTRAL_MIN_INTERVAL = max(0.0, float(os.environ.get('MISTRAL_MIN_INTERVAL', '1.5')))
 GEMINI_MAX_CONCURRENT = max(1, int(os.environ.get('GEMINI_MAX_CONCURRENT', '5')))
 # По умолчанию перебираем ВЕСЬ каталог бесплатных моделей, а не первые 5:
 # таймаут/отказ одной модели не должен ронять статью в error, пока есть
@@ -134,12 +136,16 @@ log = logging.getLogger(__name__)
 # Пул постоянных HTTP-сессий для параллельных потоков с Keep-Alive
 _HTTP_SESSION = None
 _API_SEMAPHORE = threading.BoundedSemaphore(API_MAX_CONCURRENT)
-_MISTRAL_SEMAPHORE = threading.BoundedSemaphore(PROVIDER_MAX_CONCURRENT)
+_MISTRAL_SEMAPHORE = threading.BoundedSemaphore(MISTRAL_MAX_CONCURRENT)
 _GEMINI_SEMAPHORE = threading.BoundedSemaphore(GEMINI_MAX_CONCURRENT)
 _OPENROUTER_SEMAPHORE = threading.BoundedSemaphore(PROVIDER_MAX_CONCURRENT)
 _CEREBRAS_SEMAPHORE = threading.BoundedSemaphore(PROVIDER_MAX_CONCURRENT)
 _API_RATE_LOCK = threading.Lock()
 _API_NEXT_REQUEST_AT = 0.0
+_API_COOLDOWN_UNTIL = 0.0
+_MISTRAL_RATE_LOCK = threading.Lock()
+_MISTRAL_NEXT_REQUEST_AT = 0.0
+_MISTRAL_COOLDOWN_UNTIL = 0.0
 _UNAVAILABLE_MODELS: set[str] = set()
 _MODEL_STATE_LOCK = threading.Lock()
 _CEREBRAS_DISABLED = False
@@ -157,21 +163,67 @@ _ANYMODEL_SUCCESS_MODELS: set[str] = set()
 
 
 def _wait_for_api_slot():
-    """Apply a process-wide request interval shared by all worker threads."""
+    """Apply a process-wide request interval and respect global cooldowns."""
     global _API_NEXT_REQUEST_AT
-    with _API_RATE_LOCK:
-        now = time.monotonic()
-        wait_for = max(0.0, _API_NEXT_REQUEST_AT - now)
-        _API_NEXT_REQUEST_AT = max(now, _API_NEXT_REQUEST_AT) + API_MIN_INTERVAL
-    if wait_for:
+    while True:
+        with _API_RATE_LOCK:
+            now = time.monotonic()
+            if now < _API_COOLDOWN_UNTIL:
+                wait_cooldown = _API_COOLDOWN_UNTIL - now
+            else:
+                wait_cooldown = 0.0
+                wait_for = max(0.0, _API_NEXT_REQUEST_AT - now)
+                _API_NEXT_REQUEST_AT = max(now, _API_NEXT_REQUEST_AT) + API_MIN_INTERVAL
+                break
+        if wait_cooldown > 0:
+            time.sleep(min(wait_cooldown, 2.0))
+    if wait_for > 0:
         time.sleep(wait_for)
+        # Если во время ожидания слота другой поток словил 429, дожидаемся окончания кулдауна
+        while True:
+            with _API_RATE_LOCK:
+                now = time.monotonic()
+                rem = _API_COOLDOWN_UNTIL - now
+            if rem <= 0:
+                break
+            time.sleep(min(rem, 2.0))
 
 
 def _apply_api_cooldown(seconds: float):
     """Pause every worker after a rate-limit response instead of retrying in parallel."""
-    global _API_NEXT_REQUEST_AT
+    global _API_NEXT_REQUEST_AT, _API_COOLDOWN_UNTIL
     with _API_RATE_LOCK:
-        _API_NEXT_REQUEST_AT = max(_API_NEXT_REQUEST_AT, time.monotonic() + seconds)
+        until = time.monotonic() + seconds
+        _API_COOLDOWN_UNTIL = max(_API_COOLDOWN_UNTIL, until)
+        _API_NEXT_REQUEST_AT = max(_API_NEXT_REQUEST_AT, _API_COOLDOWN_UNTIL)
+
+
+def _wait_for_mistral_slot():
+    """Apply a process-wide request interval for Mistral API to avoid HTTP 429."""
+    global _MISTRAL_NEXT_REQUEST_AT
+    while True:
+        with _MISTRAL_RATE_LOCK:
+            now = time.monotonic()
+            if now < _MISTRAL_COOLDOWN_UNTIL:
+                wait_cooldown = _MISTRAL_COOLDOWN_UNTIL - now
+            else:
+                wait_cooldown = 0.0
+                wait_for = max(0.0, _MISTRAL_NEXT_REQUEST_AT - now)
+                _MISTRAL_NEXT_REQUEST_AT = max(now, _MISTRAL_NEXT_REQUEST_AT) + MISTRAL_MIN_INTERVAL
+                break
+        if wait_cooldown > 0:
+            time.sleep(min(wait_cooldown, 2.0))
+    if wait_for > 0:
+        time.sleep(wait_for)
+
+
+def _apply_mistral_cooldown(seconds: float):
+    """Pause Mistral workers after HTTP 429."""
+    global _MISTRAL_NEXT_REQUEST_AT, _MISTRAL_COOLDOWN_UNTIL
+    with _MISTRAL_RATE_LOCK:
+        until = time.monotonic() + seconds
+        _MISTRAL_COOLDOWN_UNTIL = max(_MISTRAL_COOLDOWN_UNTIL, until)
+        _MISTRAL_NEXT_REQUEST_AT = max(_MISTRAL_NEXT_REQUEST_AT, _MISTRAL_COOLDOWN_UNTIL)
 
 def get_http_session() -> requests.Session:
     """Создаёт и возвращает переиспользуемую HTTP-сессию с пулом соединений."""
@@ -539,6 +591,7 @@ def classify_articles_mistral(pending: list[tuple]) -> tuple[dict[int, bool] | N
     }
     try:
         with _MISTRAL_SEMAPHORE:
+            _wait_for_mistral_slot()
             resp = get_http_session().post(
                 f"{MISTRAL_BASE_URL}/chat/completions",
                 headers={"Authorization": f"Bearer {MISTRAL_API_KEY}", "Content-Type": "application/json"},
@@ -546,14 +599,15 @@ def classify_articles_mistral(pending: list[tuple]) -> tuple[dict[int, bool] | N
             )
         if resp.status_code == 429:
             usage["rate_limited"] = True
-            log.warning("⚠️ Mistral rate limit (429); классификация продолжится через Gemini")
+            _apply_mistral_cooldown(15.0)
+            log.warning("⚠️ Mistral rate limit (429); кулдаун 15 с, классификация продолжится через резерв")
             return None, usage
         if resp.status_code != 200:
-            log.warning("⚠️ Mistral HTTP %d; классификация продолжится через Gemini", resp.status_code)
+            log.warning("⚠️ Mistral HTTP %d; классификация продолжится через резерв", resp.status_code)
             return None, usage
         if not _MISTRAL_SUCCESS_LOGGED:
             log.info("✅ Mistral работает: модель %s, параллельных запросов не более %d",
-                     MISTRAL_MODEL, PROVIDER_MAX_CONCURRENT)
+                     MISTRAL_MODEL, MISTRAL_MAX_CONCURRENT)
             _MISTRAL_SUCCESS_LOGGED = True
         data = resp.json()
         api_usage = data.get("usage") or {}
@@ -1050,17 +1104,35 @@ def summarize_articles_provider(articles: list[tuple], provider_name: str,
             if not config or (provider_name == "cerebras" and _CEREBRAS_DISABLED):
                 return summarize_articles_batch(articles, model, api_key)
             base_url, key, provider_model, semaphore = config
-            payload = {"model": provider_model, "messages": [{"role": "user", "content": prompt}],
-                       "temperature": 0.2, "max_tokens": max(1200, len(articles) * 1000)}
+            batch_system_prompt = (
+                SPAIN_NEWS_SYSTEM_PROMPT +
+                "\n\nREGLA DE SALIDA POR LOTES: responde únicamente con un array JSON válido. "
+                "Cada objeto debe contener el ID recibido, is_spain (bool) y, si is_spain=true, el campo summary."
+            )
+            payload = {
+                "model": provider_model,
+                "messages": [
+                    {"role": "system", "content": batch_system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
+                "temperature": 0.2,
+                "max_tokens": max(1200, len(articles) * 1000),
+            }
             if provider_name == "openrouter":
                 payload["reasoning"] = {"effort": "none", "exclude": True}
             with semaphore:
+                if provider_name == "mistral":
+                    _wait_for_mistral_slot()
                 resp = get_http_session().post(
                     f"{base_url}/chat/completions",
                     headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
                     json=payload, timeout=(5, 40))
             if resp.status_code == 402 and provider_name == "cerebras":
                 globals()["_CEREBRAS_DISABLED"] = True
+            if resp.status_code == 429 and provider_name == "mistral":
+                usage["rate_limited"] = True
+                _apply_mistral_cooldown(15.0)
+                log.warning("⚠️ Mistral rate limit (429) на саммари; кулдаун 15 с, пакет передан AnyModel")
             if resp.status_code == 200:
                 data = resp.json()
                 choices = data.get("choices") or []
@@ -1242,34 +1314,42 @@ def call_anymodel_llm(user_content: str, model: str = ANYMODEL_MODEL,
                     content = "\n".join(lines).strip()
                 return content, usage_info
             elif resp.status_code in (429, 529):
-                # 429 (rate limit) и 529 (upstream temporarily unavailable) —
-                # это ОБЩЕЕ для аккаунта состояние, а не проблема конкретной
-                # модели. Перебор всех 16 бесплатных моделей тут бесполезен:
-                # каждая вернёт тот же 429/529 → шторм одинаковых предупреждений.
-                # Поэтому: НЕ каскадируем по каталогу, а ставим ГЛОБАЛЬНЫЙ
-                # кулдаун (по Retry-After сервера) — чтобы ВСЕ воркеры отступили
-                # синхронно — и отдаём пакет фолбэку на другого провайдера выше.
                 retry_after = resp.headers.get("Retry-After")
                 try:
                     server_wait = float(retry_after) if retry_after else 0.0
                 except ValueError:
                     server_wait = 0.0
-                # Некоторые провайдеры кладут retry_after_seconds в тело.
                 if not server_wait:
                     try:
                         body = resp.json()
                         server_wait = float((body.get("error") or {}).get("retry_after_seconds") or 0)
                     except Exception:
                         server_wait = 0.0
-                # Держим кулдаун в разумных рамках: не меньше 15 с (чтобы реально
-                # переждать окно), не больше 90 с (чтобы фаза не висла бесконечно).
-                cooldown = min(max(server_wait or 30.0, 15.0), 90.0)
+                cooldown = min(max(server_wait or 15.0, 10.0), 60.0)
                 usage_info["rate_limited"] = True
-                log.warning("⚠️ AnyModel %s (HTTP %d): общий лимит аккаунта, "
-                            "глобальный кулдаун %.0f с, пакет уходит другому провайдеру",
-                            "rate limit" if resp.status_code == 429 else "upstream unavailable",
-                            resp.status_code, cooldown)
                 _apply_api_cooldown(cooldown)
+                # Если в ANYMODELS_MODELS есть другие модели — переключаемся на следующую
+                candidates = (ANYMODEL_FREE_MODELS or (ANYMODEL_FALLBACK_MODEL,))
+                next_model = next(
+                    (m for m in candidates if m not in tried_models and m not in _UNAVAILABLE_MODELS),
+                    None
+                )
+                if next_model:
+                    model = next_model
+                    tried_models.add(model)
+                    payload["model"] = model
+                if attempt < MAX_RETRIES:
+                    log.warning(
+                        "⚠️ AnyModel %s (HTTP %d): кулдаун %.0f с, повтор %d/%d (модель: %s)",
+                        "rate limit" if resp.status_code == 429 else "upstream unavailable",
+                        resp.status_code, cooldown, attempt, MAX_RETRIES, model
+                    )
+                    continue
+                log.warning(
+                    "⚠️ AnyModel %s (HTTP %d): исчерпаны попытки (%d/%d) после кулдауна %.0f с",
+                    "rate limit" if resp.status_code == 429 else "upstream unavailable",
+                    resp.status_code, attempt, MAX_RETRIES, cooldown
+                )
                 return None, usage_info
             elif resp.status_code in (500, 502, 503, 504):
                 # Транзиентная ошибка шлюза — короткая пауза и один повтор той же модели.
@@ -1447,8 +1527,14 @@ def summarize_pending_news(conn: sqlite3.Connection,
     init_summary_db(conn)
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA synchronous=FULL")
-    # Five providers with up to five concurrent requests each.
-    workers = min(max(1, workers), PROVIDER_MAX_CONCURRENT * 5)
+    active_capacity = (
+        API_MAX_CONCURRENT
+        + (MISTRAL_MAX_CONCURRENT if MISTRAL_API_KEY else 0)
+        + (GEMINI_MAX_CONCURRENT if GEMINI_API_KEY else 0)
+        + (PROVIDER_MAX_CONCURRENT if OPENROUTER_API_KEY else 0)
+        + (PROVIDER_MAX_CONCURRENT if CEREBRAS_API_KEY and not _CEREBRAS_DISABLED else 0)
+    )
+    workers = min(max(1, workers), max(2, active_capacity * 2))
 
     key = api_key or ANYMODEL_KEY
     if not key:
@@ -1500,8 +1586,11 @@ def summarize_pending_news(conn: sqlite3.Connection,
     log.info("🧠 Начинаем суммаризацию %d статей (модель: %s, потоков: %d, включен Prompt Caching)...",
              total, model, workers)
     log.info("⚡ Независимые очереди: Mistral=%d, Gemini=%d, OpenRouter=%d, Cerebras=%d, AnyModel=%d",
-             PROVIDER_MAX_CONCURRENT, GEMINI_MAX_CONCURRENT, PROVIDER_MAX_CONCURRENT,
-             PROVIDER_MAX_CONCURRENT, API_MAX_CONCURRENT)
+             MISTRAL_MAX_CONCURRENT if MISTRAL_API_KEY else 0,
+             GEMINI_MAX_CONCURRENT if GEMINI_API_KEY else 0,
+             PROVIDER_MAX_CONCURRENT if OPENROUTER_API_KEY else 0,
+             PROVIDER_MAX_CONCURRENT if CEREBRAS_API_KEY and not _CEREBRAS_DISABLED else 0,
+             API_MAX_CONCURRENT)
 
     success_cnt = 0
     skipped_cnt = 0

@@ -262,17 +262,33 @@ def edit_message_reply_markup(chat_id: str, message_id: int,
     return tg_api("editMessageReplyMarkup", **params)
 
 
+def visible_html_length(html_text: str) -> int:
+    """Возвращает реальную видимую длину HTML-сообщения в Telegram (без тегов <a href='...'> и т.д.)."""
+    if not html_text:
+        return 0
+    stripped = re.sub(r'<[^>]+>', '', html_text)
+    stripped = (
+        stripped.replace("&amp;", "&")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&quot;", '"')
+    )
+    return len(stripped)
+
+
 def send_long_message(chat_id: str, text: str, parse_mode: Optional[str] = "HTML",
                       reply_markup: Optional[dict] = None,
                       disable_web_page_preview: bool = True):
     """
     Отправляет сообщение в Telegram, безопасно разбивая на части,
-    если длина превышает лимит Telegram (4096 символов).
+    если видимая длина превышает лимит Telegram (4096 символов).
+    При parse_mode='HTML' учитывает только видимую длину текста (без длины скрытых URL в <a href='...'>).
     При ошибке parse_mode пробует отправить чистым текстом.
     Возвращает dict ответа Telegram API для последнего отправленного сообщения.
     """
-    max_chunk = 3800
-    if len(text) <= max_chunk:
+    max_chunk = 3900
+    eff_len = visible_html_length(text) if parse_mode == "HTML" else len(text)
+    if eff_len <= max_chunk:
         resp = send_message(chat_id, text, parse_mode=parse_mode,
                             reply_markup=reply_markup,
                             disable_web_page_preview=disable_web_page_preview)
@@ -285,18 +301,23 @@ def send_long_message(chat_id: str, text: str, parse_mode: Optional[str] = "HTML
     chunks = []
     lines = text.split("\n")
     current_chunk = ""
+    current_vis_len = 0
     for line in lines:
-        if len(current_chunk) + len(line) + 1 > max_chunk:
+        line_vis_len = visible_html_length(line) if parse_mode == "HTML" else len(line)
+        if current_vis_len + line_vis_len + 1 > max_chunk:
             if current_chunk:
                 chunks.append(current_chunk.strip())
                 current_chunk = ""
-            if len(line) > max_chunk:
+                current_vis_len = 0
+            if line_vis_len > max_chunk:
                 for i in range(0, len(line), max_chunk):
                     chunks.append(line[i:i + max_chunk])
             else:
                 current_chunk = line + "\n"
+                current_vis_len = line_vis_len + 1
         else:
             current_chunk += line + "\n"
+            current_vis_len += line_vis_len + 1
     if current_chunk.strip():
         chunks.append(current_chunk.strip())
 
@@ -598,12 +619,15 @@ def save_post_draft(
     headline_options: Optional[List[Dict[str, Any]]] = None,
     selected_headline_idx: Optional[int] = None,
     post_msg_id: Optional[int] = None,
-    category: Optional[str] = None
+    category: Optional[str] = None,
+    style_key: Optional[str] = None,
+    regen_context: Optional[Dict[str, Any]] = None
 ) -> str:
     """
     Сохраняет сгенерированный пост как черновик для привязки к inline-кнопкам.
     Автоматически извлекает варианты заголовков, синхронизирует активный заголовок
     и определяет категорию публикации (cat1..cat6) для второго канала (@noticia666).
+    Сохраняет regen_context для мгновенной перегенерации поста или смены стиля.
     Очищает старые черновики (>48ч). Возвращает draft_id.
     """
     if not draft_id:
@@ -632,6 +656,15 @@ def save_post_draft(
             or raw_extracted_cat
             or detect_post_category(text, title)
         )
+        resolved_regen = regen_context if regen_context is not None else existing.get("regen_context", {})
+        resolved_style = (
+            style_key
+            or (resolved_regen.get("style_key") if isinstance(resolved_regen, dict) else None)
+            or existing.get("style_key")
+            or "standard"
+        )
+        if isinstance(resolved_regen, dict) and resolved_style:
+            resolved_regen["style_key"] = resolved_style
 
         drafts[draft_id] = {
             "id": draft_id,
@@ -642,7 +675,10 @@ def save_post_draft(
             "headline_options": headline_options if headline_options else existing.get("headline_options", []),
             "selected_headline_idx": sel_idx,
             "category": cat_code,
-            "post_msg_id": p_mid
+            "post_msg_id": p_mid,
+            "style_key": resolved_style,
+            "regen_context": resolved_regen,
+            "regen_count": existing.get("regen_count", 0)
         }
         # Чистим черновики старше 48 часов
         cleaned_drafts = {}
@@ -655,8 +691,8 @@ def save_post_draft(
                 pass
         data["drafts"] = cleaned_drafts
         save_queue_data(data)
-    log.info("📝 Сохранён черновик поста [%s] (заголовков: %d, активный: %d, категория: %s, чат: %s, post_msg_id: %s)",
-             draft_id, len(headline_options or []), sel_idx, cat_code, chat_id, p_mid)
+    log.info("📝 Сохранён черновик поста [%s] (заголовков: %d, активный: %d, категория: %s, стиль: %s, чат: %s, post_msg_id: %s)",
+             draft_id, len(headline_options or []), sel_idx, cat_code, resolved_style, chat_id, p_mid)
     return draft_id
 
 
@@ -762,10 +798,12 @@ def strip_headline_options_block(text: str) -> str:
 
 def _send_post_to_single_channel(channel_id: str, text: str) -> bool:
     """Отправляет отформатированный пост в один указанный Telegram-канал."""
-    log.info("📢 Публикую пост в канал %s (длина: %d симв.)", channel_id, len(text))
     html_text = markdown_to_telegram_html(text)
+    vis_len = visible_html_length(html_text)
+    log.info("📢 Публикую пост в канал %s (видимая длина: %d симв., HTML: %d симв.)",
+             channel_id, vis_len, len(html_text))
 
-    if len(html_text) > 3800:
+    if vis_len > 3950:
         send_long_message(channel_id, html_text, parse_mode="HTML", disable_web_page_preview=False)
         return True
 
@@ -1161,7 +1199,11 @@ def build_publication_menu(draft_id: str) -> tuple[str, dict]:
             row.append({"text": c_label, "callback_data": f"cat:{draft_id}:{c_code}"})
         keyboard.append(row)
 
-    # 3. Кнопки публикации и действий
+    # 3. Кнопки перегенерации и публикации
+    keyboard.append([
+        {"text": "🔄 Перегенерировать", "callback_data": f"pub_regen:{draft_id}"},
+        {"text": "🎨 Сменить стиль", "callback_data": f"pub_regen_menu:{draft_id}"}
+    ])
     keyboard.append([
         {"text": f"📅 В очередь (#dai {selected_cat})", "callback_data": f"pub_q:{draft_id}"},
         {"text": f"⚡ Срочно (#dai breaking {selected_cat})", "callback_data": f"pub_now:{draft_id}"}
@@ -1174,6 +1216,8 @@ def build_publication_menu(draft_id: str) -> tuple[str, dict]:
     channels_html = format_channels_html()
     cat_meta = POST_CATEGORIES.get(selected_cat, POST_CATEGORIES["cat1"])
     cat_title = cat_meta.get("title") or cat_meta.get("label") or selected_cat
+    style_key = draft.get("style_key") or (draft.get("regen_context") or {}).get("style_key") or "standard"
+    style_title = POST_STYLES.get(style_key, {}).get("title", style_key)
 
     # Извлекаем чистый текст поста (без блока вариантов заголовков и без catX)
     clean_primary_post = strip_category_footer(strip_headline_options_block(raw_text)).strip()
@@ -1198,11 +1242,13 @@ def build_publication_menu(draft_id: str) -> tuple[str, dict]:
             else:
                 lines.append(f"{idx}️⃣<b>{cat_badge}:</b> {escape_html(title_text)}")
         lines.append("")
+        lines.append(f"🎨 <b>Стиль подачи:</b> <b>{escape_html(style_title)}</b>")
         lines.append(f"🏷 <b>Рубрика для {TELEGRAM_SECONDARY_CHANNEL}:</b> <b>{escape_html(cat_title)}</b> (<code>#dai {selected_cat}</code>)")
         lines.append(f"📝 <b>Итоговый текст поста для {channels_html}:</b>")
     else:
         if active_headline:
             lines.append(f"📌 <b>Заголовок поста:</b> <b>«{escape_html(active_headline)}»</b>\n")
+        lines.append(f"🎨 <b>Стиль подачи:</b> <b>{escape_html(style_title)}</b>")
         lines.append(f"🏷 <b>Рубрика для {TELEGRAM_SECONDARY_CHANNEL}:</b> <b>{escape_html(cat_title)}</b> (<code>#dai {selected_cat}</code>)")
         lines.append(f"📝 <b>Текст для публикации в каналах {channels_html}:</b>")
     lines.append("─────────────────────────")
@@ -1210,6 +1256,7 @@ def build_publication_menu(draft_id: str) -> tuple[str, dict]:
     footer_text = (
         f"─────────────────────────\n"
         f"📢 <b>Опубликовать этот пост в каналах {channels_html}?</b>\n"
+        f"• 🔄 <b>Перегенерировать</b> — написать пост заново (или 🎨 <b>Сменить стиль</b> из 13 вариантов)\n"
         f"• <b>{TELEGRAM_CHANNEL}:</b> выйдет чистый пост (без <code>cat1..cat6</code> и <code>breaking</code>)\n"
         f"• <b>{TELEGRAM_SECONDARY_CHANNEL}:</b> внизу добавится <code>#dai {selected_cat}</code> (при ⚡ Срочно: <code>#dai breaking {selected_cat}</code>)\n"
         f"• 📅 <b>В очередь:</b> выйдет <i>{time_hint}</i> (шаг {PUBLISH_INTERVAL_HOURS}ч)\n"
@@ -1329,6 +1376,181 @@ def handle_category_selection(callback_query: dict, draft_id: str, cat_code: str
 
     cat_btn_name = POST_CATEGORIES[cat_code]["btn"]
     answer_callback_query(callback_query["id"], f"✅ Категория для {TELEGRAM_SECONDARY_CHANNEL}: {cat_btn_name}")
+
+
+def handle_post_regenerate_menu(callback_query: dict, draft_id: str):
+    """Показывает меню выбора любого из 13 стилей для перегенерации поста прямо в сообщении меню."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    menu_message_id = callback_query["message"]["message_id"]
+
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        draft = data.get("drafts", {}).get(draft_id)
+    if not draft:
+        answer_callback_query(callback_query["id"], "❌ Черновик устарел или не найден.", show_alert=True)
+        return
+
+    answer_callback_query(callback_query["id"], "🎨 Выберите стиль для перегенерации")
+    current_style = draft.get("style_key") or (draft.get("regen_context") or {}).get("style_key") or "standard"
+    cur_style_title = POST_STYLES.get(current_style, {}).get("title", current_style)
+
+    keyboard = build_style_keyboard_rows(f"pub_regen_s:{draft_id}", current_style=current_style)
+    keyboard.append([
+        {"text": f"🔄 Перегенерировать в текущем ({cur_style_title})", "callback_data": f"pub_regen:{draft_id}"}
+    ])
+    keyboard.append([
+        {"text": "🔙 Назад к меню публикации", "callback_data": f"pub_regen_back:{draft_id}"}
+    ])
+
+    title = draft.get("title", "Пост")[:70]
+    text_msg = (
+        f"🎨 <b>Перегенерация поста и смена стиля</b>\n"
+        f"📰 <i>«{escape_html(title)}»</i>\n"
+        f"Текущий стиль: <b>{escape_html(cur_style_title)}</b>\n\n"
+        f"Выберите один из <b>{len(POST_STYLES)} популярных стилей</b> — бот мгновенно перепишет пост с новой подачей и свежими заголовками (без повторного ожидания поиска в RAG):\n\n"
+        f"{format_styles_legend_html()}"
+    )
+    try:
+        edit_message_text(
+            chat_id,
+            menu_message_id,
+            text_msg,
+            reply_markup={"inline_keyboard": keyboard},
+            disable_web_page_preview=True
+        )
+    except Exception as e:
+        log.warning("⚠️ Не удалось показать меню стилей перегенерации: %s", e)
+
+
+def handle_post_regenerate_back(callback_query: dict, draft_id: str):
+    """Возвращает пользователя из меню выбора стиля обратно к меню публикации."""
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    menu_message_id = callback_query["message"]["message_id"]
+    answer_callback_query(callback_query["id"], "🔙 Возвращаю меню публикации")
+    text_msg, reply_markup = build_publication_menu(draft_id)
+    try:
+        edit_message_text(chat_id, menu_message_id, text_msg, reply_markup=reply_markup, disable_web_page_preview=True)
+    except Exception as e:
+        log.warning("⚠️ Не удалось вернуть меню публикации: %s", e)
+
+
+def handle_post_regenerate(callback_query: dict, draft_id: str, new_style_key: Optional[str] = None):
+    """
+    Перегенерирует пост (в том же или новом стиле) без повторного обращения к NotebookLM RAG.
+    Обновляет как само сообщение с текстом для копирования (post_msg_id), так и меню публикации.
+    """
+    chat_id = str(callback_query["message"]["chat"]["id"])
+    menu_message_id = callback_query["message"]["message_id"]
+
+    with QUEUE_LOCK:
+        data = load_queue_data()
+        draft = data.get("drafts", {}).get(draft_id)
+        if not draft:
+            answer_callback_query(callback_query["id"], "❌ Черновик устарел или не найден.", show_alert=True)
+            return
+        draft_copy = dict(draft)
+
+    regen_ctx = dict(draft_copy.get("regen_context") or {})
+    style_key = new_style_key or draft_copy.get("style_key") or regen_ctx.get("style_key") or "standard"
+    if style_key not in POST_STYLES:
+        style_key = "standard"
+    style_title = POST_STYLES[style_key]["title"]
+
+    answer_callback_query(callback_query["id"], f"🔄 Перегенерирую пост ({style_title})...")
+    try:
+        edit_message_text(
+            chat_id,
+            menu_message_id,
+            f"⏳ <b>Перегенерирую пост...</b>\n"
+            f"🎨 Стиль: <b>{escape_html(style_title)}</b>\n"
+            f"<i>Пишу свежий вариант подачи и новые заголовки через AnyModel LLM (5–15 сек)...</i>",
+            disable_web_page_preview=True
+        )
+    except Exception as e:
+        log.warning("⚠️ Не удалось показать статус перегенерации: %s", e)
+
+    def _regen_worker():
+        try:
+            mode = regen_ctx.get("mode")
+            prev_text = draft_copy.get("text", "")
+            title = draft_copy.get("title", "Новости Испании")
+
+            if mode == "article" and regen_ctx.get("raw_rag_text"):
+                new_polished = polish_post_with_llm(
+                    raw_rag_text=regen_ctx["raw_rag_text"],
+                    article_context=regen_ctx.get("article_context") or {"title": title},
+                    style_key=style_key,
+                    chosen_angle=regen_ctx.get("chosen_angle"),
+                    extra_links=regen_ctx.get("extra_links"),
+                    is_regeneration=True
+                )
+            else:
+                raw_source = regen_ctx.get("raw_rag_text") or strip_headline_options_block(prev_text)
+                extra_links = regen_ctx.get("extra_links")
+                if not extra_links:
+                    extra_links = re.findall(r'https?://[^\s)\]"\'>]+', prev_text)
+                topic = regen_ctx.get("topic") or title
+                length_hint = regen_ctx.get("length_hint", "900-1400")
+                max_tokens = int(regen_ctx.get("max_tokens", 1500))
+                item_count = int(regen_ctx.get("item_count", 1))
+                max_chars = int(regen_ctx.get("max_chars", 2200))
+
+                new_polished = polish_custom_topic_post_with_llm(
+                    raw_rag_text=raw_source,
+                    topic=topic,
+                    style_key=style_key,
+                    extra_links=extra_links,
+                    length_hint=length_hint,
+                    max_tokens=max_tokens,
+                    item_count=item_count,
+                    max_chars=max_chars,
+                    is_regeneration=True
+                )
+
+            new_polished, _, _ = sync_initial_headline(new_polished, title_hint=title)
+            regen_ctx["style_key"] = style_key
+
+            post_msg_id = draft_copy.get("post_msg_id")
+            clean_for_copy = strip_category_footer(strip_headline_options_block(new_polished))
+            html_updated = markdown_to_telegram_html(clean_for_copy)
+
+            if post_msg_id:
+                try:
+                    cut_html = html_updated if len(html_updated) <= 4090 else html_updated[:4085] + "…"
+                    edit_message_text(chat_id, post_msg_id, cut_html, parse_mode="HTML", disable_web_page_preview=True)
+                except Exception as e:
+                    log.warning("⚠️ Не удалось обновить сообщение поста %s при перегенерации: %s", post_msg_id, e)
+
+            save_post_draft(
+                new_polished,
+                title=title,
+                chat_id=chat_id,
+                draft_id=draft_id,
+                post_msg_id=post_msg_id,
+                category=draft_copy.get("category"),
+                style_key=style_key,
+                regen_context=regen_ctx
+            )
+
+            with QUEUE_LOCK:
+                q_data = load_queue_data()
+                if draft_id in q_data.get("drafts", {}):
+                    q_data["drafts"][draft_id]["regen_count"] = int(q_data["drafts"][draft_id].get("regen_count", 0)) + 1
+                    save_queue_data(q_data)
+
+            text_msg, reply_markup = build_publication_menu(draft_id)
+            edit_message_text(chat_id, menu_message_id, text_msg, reply_markup=reply_markup, disable_web_page_preview=True)
+            log.info("🔄 Пост [%s] успешно перегенерирован (стиль: %s, длина: %d симв.)", draft_id, style_key, len(new_polished))
+        except Exception as e:
+            log.exception("❌ Ошибка при перегенерации поста [%s]: %s", draft_id, e)
+            try:
+                text_msg, reply_markup = build_publication_menu(draft_id)
+                edit_message_text(chat_id, menu_message_id, text_msg, reply_markup=reply_markup, disable_web_page_preview=True)
+            except Exception:
+                pass
+            send_message(chat_id, f"❌ Ошибка при перегенерации поста: {escape_html(str(e))}")
+
+    threading.Thread(target=_regen_worker, daemon=True, name=f"RegenPost_{draft_id}").start()
 
 
 def handle_publish_queue(callback_query: dict, draft_id: str):
@@ -2304,7 +2526,7 @@ async def _query_rag_async(
 # =================== ПОСТ-ОБРАБОТКА ЧЕРЕЗ ANYMODEL LLM ===================
 
 
-# =================== СТИЛИ НАПИСАНИЯ ПОСТА ===================
+# =================== СТИЛИ НАПИСАНИЯ ПОСТА (13 ПОПУЛЯРНЫХ СТИЛЕЙ) ===================
 
 POST_STYLES = {
     "standard": {
@@ -2313,7 +2535,7 @@ POST_STYLES = {
         "prompt": "Стиль: стандартный редакционный пост для Telegram-канала — чётко, структурированно, без воды, с умеренными эмодзи."
     },
     "click": {
-        "title": "⚡ Цепляющий / Интригующий",
+        "title": "⚡ Цепляющий / Виральный",
         "desc": "Яркий заголовок, фокус на парадоксе или неожиданном факте, сильный крючок.",
         "prompt": "Стиль: цепляющий и виральный — привлекающий внимание заголовок, динамичное повествование, фокус на том, что удивит или возмутит читателя."
     },
@@ -2331,8 +2553,76 @@ POST_STYLES = {
         "title": "☕ Разговорный / Лайфстайл",
         "desc": "Дружеский тон за чашкой кофе, личный опыт, живой диалог с подписчиками.",
         "prompt": "Стиль: разговорный и тёплый, как совет от опытного друга за чашкой кофе в испанском баре — просто о сложном, с лёгким юмором."
+    },
+    "ironic": {
+        "title": "😏 Ироничный / Сарказм",
+        "desc": "Остроумная подача с лёгкой иронией над бюрократией, политиками и испанским «mañana».",
+        "prompt": "Стиль: ироничный и остроумный — тонкая сатира и добрый сарказм над испанской бюрократией, чиновниками или абсурдными правилами, при 100% точности всех цифр и фактов."
+    },
+    "story": {
+        "title": "🎭 Сторителлинг / История",
+        "desc": "Подача через живую историю и драматургию: завязка → конфликт → развязка → вывод.",
+        "prompt": "Стиль: сторителлинг — начни с живой жизненной ситуации или яркой сцены («Представьте…»), проведи читателя через конфликт и детали к практическому выводу."
+    },
+    "tldr": {
+        "title": "🎯 Коротко / Выжимка (TL;DR)",
+        "desc": "Ультра-концентрированный дайджест: только суть, цифры и тезисы в 1 строку без воды.",
+        "prompt": "Стиль: ультра-концентрированная выжимка (TL;DR / Smart Brevity) — 1 короткий лид-абзац и 4–5 сверхчётких буллитов (Что случилось / Цифры / Кого касается / Итог). Никакой воды."
+    },
+    "provocative": {
+        "title": "🔥 Острый / Дискуссионный",
+        "desc": "Фокус на социальном конфликте и полярных мнениях, байт на жаркие комментарии.",
+        "prompt": "Стиль: острый, полемичный и дискуссионный — покажи столкновение интересов (арендаторы vs владельцы, туристы vs местные, налоги vs зарплаты) и закончи провокационным вопросом для спора в комментариях."
+    },
+    "mythbust": {
+        "title": "🕵️ Миф vs Реальность",
+        "desc": "Разбор заблуждений и слухов: «Многие думают, что…, но по закону всё иначе».",
+        "prompt": "Стиль: разоблачение мифов («Миф vs Реальность») — противопоставь популярное заблуждение или слух реальным фактам, законам BOE и цифрам."
+    },
+    "expat_money": {
+        "title": "💶 Кошелёк и выгода",
+        "desc": "Финансовый разбор для резидентов: сколько в евро, штрафы, льготы и как сэкономить.",
+        "prompt": "Стиль: финансовый прагматизм («Кошелёк экспата») — переведи новость на язык денег: кто сколько заплатит или получит в евро, какие штрафы, вычеты, субсидии и как не потерять деньги."
+    },
+    "insider": {
+        "title": "🤫 Инсайдер / Изнутри",
+        "desc": "Взгляд «своего человека в Испании»: изнанка жизни, негласные правила и подводные камни.",
+        "prompt": "Стиль: авторский инсайдерский разбор («взгляд изнутри Испании») — раскрой подводные камни, как закон или событие реально работает на практике в автономных сообществах, о чём молчат официальные пресс-релизы."
+    },
+    "faq": {
+        "title": "❓ Вопрос–Ответ (Q&A)",
+        "desc": "Удобный разбор по карточкам-вопросам: Что случилось? Кого коснётся? Что делать?",
+        "prompt": "Стиль: структурный разбор в формате «Вопрос — Ответ» (Q&A): построй пост вокруг 3–4 главных вопросов читателя (❓ Что произошло? ❓ Кого и когда коснётся? ❓ Что делать / сколько стоит?) с чёткими ответами."
     }
 }
+
+
+def build_style_keyboard_rows(
+    callback_prefix: str,
+    current_style: Optional[str] = None
+) -> List[List[Dict[str, str]]]:
+    """
+    Формирует компактную клавиатуру из всех 13 стилей по 2 кнопки в ряд.
+    callback_data каждой кнопки: f"{callback_prefix}:{style_key}"
+    """
+    rows: List[List[Dict[str, str]]] = []
+    style_items = list(POST_STYLES.items())
+    for i in range(0, len(style_items), 2):
+        row = []
+        for s_key, s_data in style_items[i:i + 2]:
+            title = s_data["title"]
+            label = f"✅ {title}" if (current_style and s_key == current_style) else title
+            row.append({"text": label, "callback_data": f"{callback_prefix}:{s_key}"})
+        rows.append(row)
+    return rows
+
+
+def format_styles_legend_html() -> str:
+    """Возвращает краткую шпаргалку по всем 13 стилям для сообщения выбора."""
+    lines = []
+    for s_data in POST_STYLES.values():
+        lines.append(f"• <b>{escape_html(s_data['title'])}</b> — {escape_html(s_data['desc'])}")
+    return "\n".join(lines)
 
 
 # =================== ПОСТ-ОБРАБОТКА ЧЕРЕЗ ANYMODEL LLM ===================
@@ -2617,20 +2907,34 @@ def prettify_post_links(body_text: str, allowed_urls: Optional[List[str]] = None
     body_text = re.sub(r'(?<!\()(?<!\[)(https?://[^\s)\]"\'>]+)', _replace_bare_url, body_text)
 
     # 4. Приводим в порядок однострочные блоки '🔗 Источник(и): ...' после удаления пустых/корневых ссылок
-    def _clean_inline_sources_line(m: re.Match) -> str:
-        line_content = m.group(1)
-        valid_md_links = re.findall(r'\[[^\]]+\]\(https?://[^\)\s]+\)', line_content)
-        if not valid_md_links:
-            return ""
-        prefix = "🔗 Источник: " if len(valid_md_links) == 1 else "🔗 Источники: "
-        return prefix + " • ".join(valid_md_links)
-
-    body_text = re.sub(
+    #    и убираем из подвала ссылки, которые УЖЕ стоят внутри самих пунктов дайджеста выше
+    sources_line_re = re.compile(
         r'^[ \t]*🔗\s*(?:\*\*)?Источники?(?:\*\*)?[:\s]*(.+)$',
-        _clean_inline_sources_line,
-        body_text,
         flags=re.IGNORECASE | re.MULTILINE
     )
+    body_without_sources_line = sources_line_re.sub('', body_text)
+    inline_urls_in_body = {
+        sanitize_article_url(u)
+        for u in re.findall(r'\[[^\]]+\]\((https?://[^\)\s]+)\)', body_without_sources_line)
+    }
+
+    def _clean_inline_sources_line(m: re.Match) -> str:
+        line_content = m.group(1)
+        md_pairs = re.findall(r'\[([^\]]+)\]\((https?://[^\)\s]+)\)', line_content)
+        kept_links = []
+        seen_urls = set()
+        for anchor, u in md_pairs:
+            cu = sanitize_article_url(u)
+            if not cu or cu in seen_urls or cu in inline_urls_in_body:
+                continue
+            seen_urls.add(cu)
+            kept_links.append(f"[{anchor}]({cu})")
+        if not kept_links:
+            return ""
+        prefix = "🔗 Источник: " if len(kept_links) == 1 else "🔗 Источники: "
+        return prefix + " • ".join(kept_links)
+
+    body_text = sources_line_re.sub(_clean_inline_sources_line, body_text)
 
     # Убираем пустые маркеры списка, если в конце был оборванный URL
     body_text = re.sub(r'\n[ \t]*[•\-]\s*(?=\n|$)', '', body_text)
@@ -2638,7 +2942,7 @@ def prettify_post_links(body_text: str, allowed_urls: Optional[List[str]] = None
     return body_text.strip()
 
 
-def ensure_post_integrity(post_text: str, links: Optional[List[str]] = None, max_chars: int = 2200) -> str:
+def ensure_post_integrity(post_text: str, links: Optional[List[str]] = None, max_chars: int = 3500) -> str:
     """
     1. Очищает одиночные звёздочки (*), оставляя только **жирный шрифт**.
     2. Очищает ссылки от прилипших слов (.htmlTÍTULO: и т.п.) и прячет ВСЕ ссылки под красивые названия СМИ [El País](url).
@@ -2698,10 +3002,9 @@ def ensure_post_integrity(post_text: str, links: Optional[List[str]] = None, max
             else:
                 body_text = body_text.rstrip() + lbl
 
-    # 3. Гарантируем, что пост помещается в 1 стандартное сообщение Telegram (и по видимому тексту, и по HTML)
+    # 3. Гарантируем, что пост помещается в 1 стандартное сообщение Telegram по видимой длине (лимит TG — 4096 видимых символов)
     vis_len = visible_post_length(body_text)
-    html_len = len(markdown_to_telegram_html(body_text))
-    if vis_len > max_chars or html_len > 3650:
+    if vis_len > max_chars:
         # Выделяем подвал (блок 🔗 Источник(и) + хэштеги), чтобы никогда его не обрезать
         footer_match = re.search(
             r'(\n+(?:🔗\s*(?:\*\*)?Источники?(?:\*\*)?[^\n]*\n+)?(?:#[\w\d_]+\s*)+)$',
@@ -2712,10 +3015,10 @@ def ensure_post_integrity(post_text: str, links: Optional[List[str]] = None, max
         main_body = body_text[:len(body_text) - len(footer)].rstrip()
 
         footer_vis = visible_post_length(footer)
-        target_vis = min(max_chars, 2400) - footer_vis - 15
-        if target_vis > 300 and len(main_body) > target_vis:
-            # Пересчитываем пропорциональный срез с учетом спрятанных ссылок в main_body
-            ratio = target_vis / max(1, visible_post_length(main_body))
+        target_vis = min(max_chars, 3600) - footer_vis - 15
+        main_vis = visible_post_length(main_body)
+        if target_vis > 300 and main_vis > target_vis:
+            ratio = target_vis / max(1, main_vis)
             approx_cut_idx = min(len(main_body), int(len(main_body) * min(1.0, ratio)))
             cut = main_body[:approx_cut_idx]
             # Не режем внутри незакрытой Markdown-ссылки [текст](url)
@@ -2742,7 +3045,8 @@ def polish_post_with_llm(
     article_context: Dict[str, Any],
     style_key: str = "standard",
     chosen_angle: Optional[str] = None,
-    extra_links: Optional[List[str]] = None
+    extra_links: Optional[List[str]] = None,
+    is_regeneration: bool = False
 ) -> str:
     """
     Прогоняет сырой RAG-ответ через AnyModel LLM для финальной полировки.
@@ -2774,12 +3078,17 @@ def polish_post_with_llm(
     links_text = "\n".join(pretty_links_list) if pretty_links_list else "(нет ссылок)"
 
     angle_instruction = f"Фокус публикации (выбранная идея): {chosen_angle}" if chosen_angle else ""
+    regen_instruction = (
+        "\n🔄 РЕЖИМ ПЕРЕГЕНЕРАЦИИ: Предыдущий вариант поста не подошёл редактору. "
+        "Напиши СОВЕРШЕННО НОВЫЙ вариант: измени композицию, первый абзац, подачу и предложи 4 свежих нетривиальных заголовка, строго сохранив все факты, цифры и ссылки!"
+        if is_regeneration else ""
+    )
 
     system_prompt = f"""Ты — главный редактор русскоязычного Telegram-канала о жизни и новостях в Испании.
 Твоя задача — взять сырой материал от RAG-системы (NotebookLM) и превратить его в идеальный, готовый к публикации ТГ-пост.
 
 {style_instruction}
-{angle_instruction}
+{angle_instruction}{regen_instruction}
 
 СТРОГИЕ ПРАВИЛА И СТРУКТУРА:
 1. Пиши ТОЛЬКО на русском языке.
@@ -2842,7 +3151,7 @@ def polish_post_with_llm(
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            "temperature": 0.65,
+            "temperature": 0.78 if is_regeneration else 0.65,
             "max_tokens": 2000,
         }
 
@@ -2901,7 +3210,8 @@ def polish_custom_topic_post_with_llm(
     length_hint: str = "900-1400",
     max_tokens: int = 1500,
     item_count: int = 1,
-    max_chars: int = 2200
+    max_chars: int = 2200,
+    is_regeneration: bool = False
 ) -> str:
     """
     Прогоняет сырой RAG-ответ по произвольной теме через AnyModel LLM
@@ -2913,6 +3223,11 @@ def polish_custom_topic_post_with_llm(
 
     style_cfg = POST_STYLES.get(style_key, POST_STYLES["standard"])
     style_instruction = style_cfg["prompt"]
+    regen_instruction = (
+        "\n🔄 РЕЖИМ ПЕРЕГЕНЕРАЦИИ: Предыдущий вариант поста не устроил редактора. "
+        "Напиши СОВЕРШЕННО НОВЫЙ, свежий вариант подачи: измени заход, композицию абзацев, формулировки и предложи 4 новых ярких заголовка, сохранив все факты, цифры и ссылки!"
+        if is_regeneration else ""
+    )
 
     clean_links = []
     if extra_links:
@@ -2928,7 +3243,7 @@ def polish_custom_topic_post_with_llm(
     system_prompt = f"""Ты — главный редактор русскоязычного Telegram-канала о жизни, законах, налогах и новостях в Испании.
 Твоя задача — написать идеальный, готовый к публикации пост для канала на заданную тему, опираясь на факты и материал от RAG-системы.
 
-{style_instruction}
+{style_instruction}{regen_instruction}
 
 СТРОГИЕ ПРАВИЛА И СТРУКТУРА:
 1. Пиши ТОЛЬКО на русском языке.
@@ -3009,7 +3324,7 @@ def polish_custom_topic_post_with_llm(
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            "temperature": 0.65,
+            "temperature": 0.78 if is_regeneration else 0.65,
             "max_tokens": max_tokens + 500,
         }
 
@@ -3145,21 +3460,13 @@ def handle_select_style(callback_query: dict, article_id: str, angle_idx: int):
 
     answer_callback_query(callback_query["id"], "🎨 Выберите стиль")
 
-    keyboard = []
-    for s_key, s_data in POST_STYLES.items():
-        btn_text = f"{s_data['title']}"
-        keyboard.append([{"text": btn_text, "callback_data": f"sty:{article_id}:{angle_idx}:{s_key}"}])
-
+    keyboard = build_style_keyboard_rows(f"sty:{article_id}:{angle_idx}")
     keyboard.append([{"text": "❌ Отмена", "callback_data": "cancel"}])
 
     send_message(
         chat_id,
-        "✍️ <b>Выберите стиль написания поста:</b>\n\n"
-        "• <b>Стандартный</b> — экспертно, структурированно\n"
-        "• <b>Цепляющий</b> — яркий заголовок, фокус на парадоксе\n"
-        "• <b>Инструкция</b> — пошаговый гайд, польза\n"
-        "• <b>Аналитика</b> — больше цифр, законов и фактов\n"
-        "• <b>Разговорный</b> — тёплый тон, личный совет",
+        f"✍️ <b>Выберите стиль написания поста ({len(POST_STYLES)} стилей):</b>\n\n"
+        f"{format_styles_legend_html()}",
         reply_markup={"inline_keyboard": keyboard}
     )
 
@@ -3328,7 +3635,21 @@ def handle_rag_generate(
              title, len(polished_post), style_key)
 
     # Предлагаем публикацию в канал @iberia_news (в очередь 8ч или срочно)
-    draft_id = save_post_draft(polished_post, title=title, chat_id=chat_id, post_msg_id=post_msg_id)
+    draft_id = save_post_draft(
+        polished_post,
+        title=title,
+        chat_id=chat_id,
+        post_msg_id=post_msg_id,
+        style_key=style_key,
+        regen_context={
+            "mode": "article",
+            "raw_rag_text": raw_answer,
+            "article_context": article,
+            "style_key": style_key,
+            "chosen_angle": chosen_angle,
+            "extra_links": extra_links
+        }
+    )
     offer_channel_publication(chat_id, draft_id)
 
 
@@ -3514,6 +3835,29 @@ def process_callback_query(callback_query: dict):
                 handle_category_selection(callback_query, draft_id, cat_code)
             except Exception as e:
                 log.error("❌ Ошибка handle_category_selection: %s", e)
+        return
+
+    # --- Перегенерация поста и смена стиля в меню публикации ---
+    if data.startswith("pub_regen_menu:"):
+        draft_id = data[15:]
+        handle_post_regenerate_menu(callback_query, draft_id)
+        return
+
+    if data.startswith("pub_regen_back:"):
+        draft_id = data[15:]
+        handle_post_regenerate_back(callback_query, draft_id)
+        return
+
+    if data.startswith("pub_regen_s:"):
+        parts = data[12:].split(":", 1)
+        if len(parts) == 2:
+            draft_id, new_style_key = parts
+            handle_post_regenerate(callback_query, draft_id, new_style_key=new_style_key)
+        return
+
+    if data.startswith("pub_regen:"):
+        draft_id = data[10:]
+        handle_post_regenerate(callback_query, draft_id)
         return
 
     # --- Публикация в канал @iberia_news ---
@@ -4632,16 +4976,15 @@ def handle_basket_single_item_prompt(callback_query: dict, session_id: str, idx:
     title = item.get("title", f"Новость #{idx+1}")[:60]
     answer_callback_query(callback_query["id"], "🎨 Выберите стиль")
 
-    keyboard = []
-    for s_key, s_data in POST_STYLES.items():
-        keyboard.append([{"text": s_data['title'], "callback_data": f"bsk_one_s:{session_id}:{idx}:{s_key}"}])
+    keyboard = build_style_keyboard_rows(f"bsk_one_s:{session_id}:{idx}")
     keyboard.append([{"text": "❌ Отмена", "callback_data": "cancel"}])
 
     send_message(
         chat_id,
         f"📝 <b>Генерация отдельного ТГ-поста:</b>\n"
         f"📰 <i>{title}...</i>\n\n"
-        f"✍️ <b>Выберите стиль написания:</b>",
+        f"✍️ <b>Выберите стиль написания ({len(POST_STYLES)} стилей):</b>\n\n"
+        f"{format_styles_legend_html()}",
         reply_markup={"inline_keyboard": keyboard}
     )
 
@@ -4718,7 +5061,24 @@ def handle_basket_single_item_execute(callback_query: dict, session_id: str, idx
 
             log.info("✅ ТГ-пост по новости '%s' сгенерирован (длина: %d)", title[:40], len(polished))
 
-            draft_id = save_post_draft(polished, title=title[:60], chat_id=chat_id, post_msg_id=post_msg_id)
+            draft_id = save_post_draft(
+                polished,
+                title=title[:60],
+                chat_id=chat_id,
+                post_msg_id=post_msg_id,
+                style_key=style_key,
+                regen_context={
+                    "mode": "custom",
+                    "raw_rag_text": raw_text,
+                    "topic": title,
+                    "style_key": style_key,
+                    "extra_links": links,
+                    "length_hint": "800-1400",
+                    "max_tokens": 1500,
+                    "item_count": 1,
+                    "max_chars": 2200
+                }
+            )
             offer_channel_publication(chat_id, draft_id)
         except Exception as e:
             log.exception("❌ Ошибка генерации отдельного ТГ-поста: %s", e)
@@ -4742,15 +5102,14 @@ def handle_basket_generate_prompt(callback_query: dict, session_id: str):
 
     answer_callback_query(callback_query["id"], "🎨 Выберите стиль")
 
-    keyboard = []
-    for s_key, s_data in POST_STYLES.items():
-        keyboard.append([{"text": s_data['title'], "callback_data": f"bsk_s:{session_id}:{s_key}"}])
+    keyboard = build_style_keyboard_rows(f"bsk_s:{session_id}")
     keyboard.append([{"text": "❌ Отмена", "callback_data": "cancel"}])
 
     send_message(
         chat_id,
         f"📝 <b>Генерация общего ТГ-поста из {len(selected)} выбранных новостей</b>\n\n"
-        f"✍️ <b>Выберите стиль написания:</b>",
+        f"✍️ <b>Выберите стиль написания ({len(POST_STYLES)} стилей):</b>\n\n"
+        f"{format_styles_legend_html()}",
         reply_markup={"inline_keyboard": keyboard}
     )
 
@@ -4883,7 +5242,19 @@ def _run_basket_post_generation(
         polished_post,
         title=f"{basket_title} ({item_count} сюжетов)",
         chat_id=chat_id,
-        post_msg_id=post_msg_id
+        post_msg_id=post_msg_id,
+        style_key=style_key,
+        regen_context={
+            "mode": "custom",
+            "raw_rag_text": raw_rag_text,
+            "topic": topic,
+            "style_key": style_key,
+            "extra_links": extra_links,
+            "length_hint": length_hint,
+            "max_tokens": max_tokens,
+            "item_count": item_count,
+            "max_chars": max_chars
+        }
     )
     offer_channel_publication(chat_id, draft_id)
 
@@ -5152,16 +5523,15 @@ def handle_post_topic_input(chat_id: str, topic: str):
         "chat_id": chat_id
     })
 
-    keyboard = []
-    for s_key, s_data in POST_STYLES.items():
-        keyboard.append([{"text": s_data['title'], "callback_data": f"p_sty:{session_id}:{s_key}"}])
+    keyboard = build_style_keyboard_rows(f"p_sty:{session_id}")
     keyboard.append([{"text": "❌ Отмена", "callback_data": "cancel"}])
 
     t_preview = topic[:100] + ("..." if len(topic) > 100 else "")
     send_message(
         chat_id,
         f"📝 <b>Тема будущего поста:</b>\n<i>«{t_preview}»</i>\n\n"
-        f"✍️ <b>Выберите стиль написания:</b>",
+        f"✍️ <b>Выберите стиль написания ({len(POST_STYLES)} стилей):</b>\n\n"
+        f"{format_styles_legend_html()}",
         reply_markup={"inline_keyboard": keyboard}
     )
 
@@ -5315,7 +5685,20 @@ def handle_post_execute(
              topic[:40], style_key, len(polished_post))
 
     # Предлагаем публикацию в канал @iberia_news (в очередь 8ч или срочно)
-    draft_id = save_post_draft(polished_post, title=topic[:60], chat_id=chat_id, post_msg_id=post_msg_id)
+    draft_id = save_post_draft(
+        polished_post,
+        title=topic[:60],
+        chat_id=chat_id,
+        post_msg_id=post_msg_id,
+        style_key=style_key,
+        regen_context={
+            "mode": "custom",
+            "raw_rag_text": raw_answer or "",
+            "topic": topic,
+            "style_key": style_key,
+            "extra_links": extra_links
+        }
+    )
     offer_channel_publication(chat_id, draft_id)
 
 
